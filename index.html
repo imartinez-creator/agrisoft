@@ -1,0 +1,3323 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRISOFT - Gestió de Finques Fruiteres</title>
+    <style>
+        /* === CONFIGURACIÓ BÀSICA === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Colors del sistema */
+        :root {
+            --verd-fosc: #2d5016;
+            --verd-clar: #4a7c2c;
+            --marró: #8b6f47;
+            --beix: #d4a574;
+            --fons: #fafaf9;
+            --blanc: #ffffff;
+            --gris-clar: #e7e5e4;
+            --text: #1c1917;
+            --text-gris: #78716c;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--fons);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* === CAPÇALERA === */
+        header {
+            background-color: var(--verd-fosc);
+            color: white;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* === NAVEGACIÓ === */
+        nav {
+            background-color: var(--blanc);
+            border-bottom: 1px solid var(--gris-clar);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            color: var(--text-gris);
+        }
+
+        .nav-tab:hover {
+            color: var(--verd-fosc);
+            background-color: var(--fons);
+        }
+
+        .nav-tab.active {
+            color: var(--verd-fosc);
+            border-bottom-color: var(--verd-fosc);
+            font-weight: 600;
+        }
+
+        /* === CONTINGUT PRINCIPAL === */
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* === TARGETES === */
+        .card {
+            background: var(--blanc);
+            border: 1px solid var(--gris-clar);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* === ESTADÍSTIQUES === */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--blanc);
+            border: 1px solid var(--gris-clar);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-gris);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--verd-fosc);
+        }
+
+        /* === GRAELLA D'ELEMENTS === */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .item-card {
+            background: var(--blanc);
+            border: 1px solid var(--gris-clar);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .item-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .item-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-gris);
+        }
+
+        .item-info {
+            margin-top: 1rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .info-label {
+            color: var(--text-gris);
+        }
+
+        /* === BOTONS === */
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--verd-fosc);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--verd-clar);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--gris-clar);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--fons);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        /* === ETIQUETES === */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge-warning {
+            background-color: #fef9c3;
+            color: #a16207;
+        }
+
+        .badge-info {
+            background-color: #dbeafe;
+            color: #3b82f6;
+        }
+
+        /* === FORMULARIS === */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--gris-clar);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--verd-fosc);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* === MODAL === */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--blanc);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gris-clar);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-gris);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gris-clar);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* === MAPA === */
+        .map-svg {
+            width: 100%;
+            height: 500px;
+            border: 1px solid var(--gris-clar);
+            border-radius: 4px;
+        }
+
+        .plot-polygon {
+            stroke: var(--text);
+            stroke-width: 2;
+            cursor: pointer;
+        }
+
+        .plot-polygon:hover {
+            opacity: 0.7;
+            stroke-width: 3;
+        }
+
+        .map-legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid var(--gris-clar);
+        }
+
+        /* === GRÀFIC === */
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            height: 200px;
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--verd-fosc);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .chart-bar:hover {
+            background: var(--verd-clar);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            top: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .chart-labels {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-label {
+            flex: 1;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-gris);
+        }
+
+        /* === TAULA === */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: var(--fons);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--gris-clar);
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gris-clar);
+        }
+
+        tr:hover {
+            background-color: var(--fons);
+        }
+
+        /* === BARRA D'EINES === */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .search-input {
+            width: 300px;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--gris-clar);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        /* === ALERTA === */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .alert-warning {
+            background-color: #fef9c3;
+            border: 1px solid #fde047;
+            color: #854d0e;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            border: 1px solid #93c5fd;
+            color: #1e40af;
+        }
+
+        /* === ESTAT BUIT === */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-gris);
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .stats-grid,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Capçalera -->
+    <header>
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="logo">🌱 AGRISOFT</div>
+                    <div style="font-size: 0.875rem;">Sistema de Gestió de Finques Fruiteres</div>
+                </div>
+                <!-- Afegim botons per guardar i carregar arxius JSON -->
+                <div style="display: flex; gap: 1rem;">
+                    <!-- Removed download and upload buttons -->
+                </div>
+                <!-- Fi dels botons de guardar/carregar -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegació -->
+    <nav>
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="mostrarSeccio('tauler')">📊 Tauler</button>
+                <button class="nav-tab" onclick="mostrarSeccio('parcel·les')">🗺️ Parcel·les</button>
+                <!-- Added new Sectors tab -->
+                <button class="nav-tab" onclick="mostrarSeccio('sectors')">🌳 Sectors</button>
+                <button class="nav-tab" onclick="mostrarSeccio('cultius')">🌳 Cultius</button>
+                <button class="nav-tab" onclick="mostrarSeccio('historic')">📈 Històric</button>
+                <button class="nav-tab" onclick="mostrarSeccio('mapa')">🗺️ Mapa</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contingut Principal -->
+    <main>
+        <div class="container">
+            <!-- Secció Tauler -->
+            <section id="tauler" class="section active">
+                <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Tauler Principal</h1>
+                
+                <div class="stats-grid" id="estadistiquesTauler"></div>
+
+                <div class="card">
+                    <h2 class="card-title">Properes Collites</h2>
+                    <div id="properesCollites"></div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Resum de Parcel·les</h2>
+                    <div class="grid" id="resumParcel·les"></div>
+                </div>
+            </section>
+
+            <!-- Secció Parcel·les -->
+            <section id="parcel·les" class="section">
+                <div class="toolbar">
+                    <h1 style="font-size: 2rem;">Gestió de Parcel·les Cadastrals</h1>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="obrirModalParcel·la()">+ Nova Parcel·la</button>
+                        <!-- Added button to import GeoJSON/KML -->
+                        <button class="btn btn-outline" onclick="obrirModalImportarGeoJSON()">Importar GeoJSON/KML</button>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <input type="text" class="search-input" placeholder="Cercar parcel·les..." id="cercaParcel·les" oninput="filtrarParcel·les()">
+                </div>
+
+                <!-- Added map for drawing parcels with polygon tools -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin: 0;">Mapa Cadastral</h2>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm" onclick="iniciarDibuixParcel·la()" id="btnDibuixarParcel·la">
+                                ✏️ Dibuixar Parcel·la
+                            </button>
+                            <!-- Removed Export GeoJSON button -->
+                        </div>
+                    </div>
+                    <svg class="map-svg" id="svgMapaParcel·les" viewBox="0 0 1000 700" style="cursor: crosshair;">
+                        <defs>
+                            <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e7e5e4" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="1000" height="700" fill="url(#grid)" />
+                        <g id="capaParcel·les"></g>
+                        <g id="capaSectors"></g>
+                        <g id="capaFiles"></g>
+                        <g id="capaDibuix"></g>
+                    </svg>
+                    <div style="margin-top: 1rem; padding: 1rem; background: var(--fons); border-radius: 6px;">
+                        <div style="font-size: 0.875rem; color: var(--text-gris);">
+                            <strong>Mode d'ús:</strong> Fes clic a "Dibuixar Parcel·la" i després clica al mapa per definir els vèrtexs del polígon. Doble clic per finalitzar.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid" id="graellaParcel·les"></div>
+            </section>
+
+            <!-- Added new Sectors section -->
+            <section id="sectors" class="section">
+                <div class="toolbar">
+                    <h1 style="font-size: 2rem;">Gestió de Sectors de Cultiu</h1>
+                    <button class="btn btn-primary" onclick="obrirModalSector()">+ Nou Sector</button>
+                </div>
+
+                <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                    <div>ℹ️</div>
+                    <div>
+                        <strong>Sectors de Cultiu:</strong> Un sector és una unitat agronòmica que pot ocupar part d'una parcel·la cadastral o estendre's per múltiples parcel·les. 
+                        Cada sector té un cultiu i varietat específics.
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin: 0;">Mapa de Sectors</h2>
+                        <button class="btn btn-sm" onclick="iniciarDibuixSector()" id="btnDibuixarSector">
+                            ✏️ Dibuixar Sector
+                        </button>
+                    </div>
+                    <svg class="map-svg" id="svgMapaSectors" viewBox="0 0 1000 700" style="cursor: crosshair;">
+                        <rect width="1000" height="700" fill="url(#grid)" />
+                        <g id="capaParcel·lesSectors"></g>
+                        <g id="capaSectorsLlista"></g>
+                        <g id="capaDibuixSector"></g>
+                    </svg>
+                </div>
+
+                <div class="grid" id="graellaSectors"></div>
+            </section>
+
+            <!-- Secció Cultius -->
+            <section id="cultius" class="section">
+                <div class="toolbar">
+                    <h1 style="font-size: 2rem;">Gestió de Cultius</h1>
+                    <button class="btn btn-primary" onclick="obrirModalCultiu()">+ Nou Cultiu</button>
+                </div>
+
+                <div class="toolbar">
+                    <input type="text" class="search-input" placeholder="Cercar cultius..." id="cercaCultius" oninput="filtrarCultius()">
+                    <select class="form-select" style="width: 200px;" id="filtreEstatCultius" onchange="filtrarCultius()">
+                        <option value="">Tots els estats</option>
+                        <option value="actiu">Actiu</option>
+                        <option value="collita">En collita</option>
+                        <option value="completat">Completat</option>
+                    </select>
+                </div>
+
+                <div class="grid" id="graellaCultius"></div>
+            </section>
+
+            <!-- Secció Històric -->
+            <section id="historic" class="section">
+                <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Històric i Anàlisi</h1>
+
+                <div class="stats-grid" id="estadistiquesHistoric"></div>
+
+                <div class="card">
+                    <h2 class="card-title">Producció per Mes</h2>
+                    <div id="graficProducció"></div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin: 0;">Registres de Collita</h2>
+                        <button class="btn btn-primary btn-sm" onclick="obrirModalCollita()">+ Nou Registre</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Parcel·la</th>
+                                <th>Cultiu</th>
+                                <th>Quantitat (kg)</th>
+                                <th>Qualitat</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taulaCollites"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Secció Mapa -->
+            <section id="mapa" class="section">
+                <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Mapa General de l'Explotació</h1>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin: 0;">Vista Completa</h2>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <select class="form-select" style="width: 200px;" id="vistaCapaMapa" onchange="canviarCapaMapa()">
+                                <option value="parcel·les">Parcel·les Cadastrals</option>
+                                <option value="sectors">Sectors de Cultiu</option>
+                                <option value="files">Files d'Arbres</option>
+                            </select>
+                        </div>
+                    </div>
+                    <svg class="map-svg" id="svgMapa" viewBox="0 0 1000 700">
+                        <rect width="1000" height="700" fill="url(#grid)" />
+                        <g id="capaMapaGeneral"></g>
+                    </svg>
+                    <div class="map-legend" id="llegendaMapa"></div>
+                </div>
+
+                <div class="card" id="infoParcel·laSeleccionada" style="display: none; margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 class="card-title" style="margin: 0;">Informació de Parcel·la</h2>
+                        <button class="btn btn-outline btn-sm" onclick="netejarSeleccioParcel·la()">Tancar</button>
+                    </div>
+                    <div id="detallsParcel·laSeleccionada"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Added Modal for importing GeoJSON/KML -->
+    <div id="modalImportarGeoJSON" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Importar Parcel·les (GeoJSON/KML)</h3>
+                <button class="modal-close" onclick="tancarModalImportarGeoJSON()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Selecciona arxiu GeoJSON o KML</label>
+                    <input type="file" class="form-input" id="arxiuGeoJSON" accept=".geojson,.json,.kml">
+                </div>
+                <div class="alert alert-info">
+                    <div>ℹ️</div>
+                    <div>
+                        <strong>Format suportat:</strong> GeoJSON amb geometries de tipus Polygon o MultiPolygon. 
+                        Les propietats seran importades com a dades de la parcel·la.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="tancarModalImportarGeoJSON()">Cancel·lar</button>
+                <button class="btn btn-primary" onclick="processarImportGeoJSON()">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Added Modal for Sector management -->
+    <div id="modalSector" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="titolModalSector">Nou Sector de Cultiu</h3>
+                <button class="modal-close" onclick="tancarModalSector()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formulariSector">
+                    <input type="hidden" id="idSector">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nom del Sector *</label>
+                        <input type="text" class="form-input" id="nomSector" required placeholder="Ex: Sector A - Pomeres Golden">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Varietat de Fruita *</label>
+                            <select class="form-select" id="varietatSector" required onchange="actualitzarInfoVarietatSector()">
+                                <option value="">Seleccionar varietat</option>
+                                <option value="poma-golden">Poma Golden Delicious</option>
+                                <option value="poma-fuji">Poma Fuji</option>
+                                <option value="pera-conference">Pera Conference</option>
+                                <option value="pera-blanquilla">Pera Blanquilla</option>
+                                <option value="préssec-groc">Préssec Groc</option>
+                                <option value="cirera-picota">Cirera Picota</option>
+                                <option value="pruna-claudia">Pruna Claudia</option>
+                            </select>
+                            <div id="infoVarietatSector" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Superfície (ha) *</label>
+                            <input type="number" class="form-input" id="superficieSector" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Data de Plantació</label>
+                            <input type="date" class="form-input" id="dataPlantacioSector">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nombre de Files *</label>
+                            <input type="number" class="form-input" id="nombreFilesSector" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Arbres per Fila (mitjana)</label>
+                            <input type="number" class="form-input" id="arbresPerFilaSector">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estat</label>
+                            <select class="form-select" id="estatSector">
+                                <option value="actiu">Actiu</option>
+                                <option value="collita">En collita</option>
+                                <option value="completat">Completat</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Parcel·les que ocupa (informació)</label>
+                        <input type="text" class="form-input" id="parcel·lesSector" placeholder="Es calcularà automàticament segons el polígon" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-textarea" id="notesSector"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="tancarModalSector()">Cancel·lar</button>
+                <button class="btn btn-primary" onclick="desarSector()">Desar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Added Modal for Tree Row management -->
+    <div id="modalFiles" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="titolModalFiles">Gestió de Files d'Arbres</h3>
+                <button class="modal-close" onclick="tancarModalFiles()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="infoSectorFiles" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--fons); border-radius: 6px;"></div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <button class="btn btn-primary btn-sm" onclick="iniciarDibuixFila()" id="btnDibuixarFila">
+                        ✏️ Dibuixar Fila
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="generarFilesAutomatiques()">
+                        🤖 Generar Files Automàtiques
+                    </button>
+                </div>
+
+                <svg class="map-svg" id="svgMapaFiles" viewBox="0 0 800 600" style="cursor: crosshair; height: 400px;">
+                    <rect width="800" height="600" fill="url(#grid)" />
+                    <g id="capaPoligonSectorFiles"></g>
+                    <g id="capaFilesLlista"></g>
+                    <g id="capaDibuixFila"></g>
+                </svg>
+
+                <div style="margin-top: 1rem;">
+                    <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Files Registrades</h4>
+                    <table style="font-size: 0.875rem;">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Arbres</th>
+                                <th>Longitud (m)</th>
+                                <th>Accions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taulaFiles"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="tancarModalFiles()">Tancar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Parcel·la -->
+    <div id="modalParcel·la" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="titolModalParcel·la">Nova Parcel·la Cadastral</h3>
+                <button class="modal-close" onclick="tancarModalParcel·la()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formulariParcel·la">
+                    <input type="hidden" id="idParcel·la">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nom de la Parcel·la *</label>
+                        <input type="text" class="form-input" id="nomParcel·la" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Referència Cadastral *</label>
+                            <input type="text" class="form-input" id="refCadastralParcel·la" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Superfície (ha) *</label>
+                            <input type="number" class="form-input" id="areaParcel·la" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Added GPS coordinates input -->
+                    <div class="form-group">
+                        <label class="form-label">Coordenades GPS del Polígon</label>
+                        <textarea class="form-textarea" id="coordenadesParcel·la" placeholder="Format: lat1,lon1; lat2,lon2; lat3,lon3; ..." style="min-height: 80px;"></textarea>
+                        <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);">
+                            Introdueix coordenades GPS separades per punt i coma, o dibuixa al mapa
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ubicació</label>
+                        <input type="text" class="form-input" id="ubicacióParcel·la" placeholder="Ex: Zona Nord, Sector A">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Tipus de Sòl</label>
+                            <select class="form-select" id="tipusSòlParcel·la">
+                                <option value="argilós">Argilós</option>
+                                <option value="arenós">Arenós</option>
+                                <option value="llimós">Llimós</option>
+                                <option value="franc">Franc</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sistema de Reg</label>
+                            <select class="form-select" id="regParcel·la">
+                                <option value="goteig">Goteig</option>
+                                <option value="aspersió">Aspersió</option>
+                                <option value="inundació">Inundació</option>
+                                <option value="cap">Cap</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-textarea" id="notesParcel·la"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="tancarModalParcel·la()">Cancel·lar</button>
+                <button class="btn btn-primary" onclick="desarParcel·la()">Desar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cultiu -->
+    <div id="modalCultiu" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="titolModalCultiu">Nou Cultiu</h3>
+                <button class="modal-close" onclick="tancarModalCultiu()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formulariCultiu">
+                    <input type="hidden" id="idCultiu">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Parcel·la *</label>
+                        <select class="form-select" id="idParcel·laCultiu" required onchange="actualitzarInfoParcel·laCultiu()">
+                            <option value="">Seleccionar parcel·la</option>
+                        </select>
+                        <div id="infoParcel·laCultiu" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Varietat de Fruita *</label>
+                        <select class="form-select" id="varietatCultiu" required onchange="actualitzarInfoVarietat()">
+                            <option value="">Seleccionar varietat</option>
+                            <option value="poma-golden">Poma Golden Delicious</option>
+                            <option value="poma-fuji">Poma Fuji</option>
+                            <option value="pera-conference">Pera Conference</option>
+                            <option value="pera-blanquilla">Pera Blanquilla</option>
+                            <option value="préssec-groc">Préssec Groc</option>
+                            <option value="cirera-picota">Cirera Picota</option>
+                            <option value="pruna-claudia">Pruna Claudia</option>
+                        </select>
+                        <div id="infoVarietat" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Data de Plantació *</label>
+                            <input type="date" class="form-input" id="dataPlantació" required onchange="calcularDataCollita()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Data Estimada de Collita</label>
+                            <input type="date" class="form-input" id="dataCollita" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nombre d'Arbres</label>
+                            <input type="number" class="form-input" id="nombreArbres" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Densitat (arbres/ha)</label>
+                            <input type="number" class="form-input" id="densitat" value="400" onchange="calcularNombreArbres()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Estat</label>
+                        <select class="form-select" id="estatCultiu">
+                            <option value="actiu">Actiu</option>
+                            <option value="collita">En collita</option>
+                            <option value="completat">Completat</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-textarea" id="notesCultiu"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="tancarModalCultiu()">Cancel·lar</button>
+                <button class="btn btn-primary" onclick="desarCultiu()">Desar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Collita -->
+    <div id="modalCollita" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nou Registre de Collita</h3>
+                <button class="modal-close" onclick="tancarModalCollita()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formulariCollita">
+                    <div class="form-group">
+                        <label class="form-label">Cultiu *</label>
+                        <select class="form-select" id="idCultiuCollita" required>
+                            <option value="">Seleccionar cultiu</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Data de Collita *</label>
+                            <input type="date" class="form-input" id="dataCollitaRegistre" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Quantitat (kg) *</label>
+                            <input type="number" class="form-input" id="quantitatCollita" step="0.1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Qualitat</label>
+                        <select class="form-select" id="qualitatCollita">
+                            <option value="excel·lent">Excel·lent</option>
+                            <option value="bona">Bona</option>
+                            <option value="mitjana">Mitjana</option>
+                            <option value="baixa">Baixa</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-textarea" id="notesCollita"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="tancarModalCollita()">Cancel·lar</button>
+                <button class="btn btn-primary" onclick="desarCollita()">Desar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input ocult per a l'arxiu -->
+    <!-- Removed file input for loading archives -->
+
+    <script>
+        // ============================================
+        // VARIABLES GLOBALS - Emmagatzemen totes les dades
+        // ============================================
+        
+        let parcel·les = [];  // Array amb totes les parcel·les
+        let cultius = [];     // Array amb tots els cultius
+        let collites = [];    // Array amb totes les collites
+        let sectors = [];     // Array amb tots els sectors
+        let filesArbres = []; // Array amb totes les files d'arbres
+
+        // Informació de les varietats de fruita
+        let varietatsFruita = {
+            'poma-golden': { nom: 'Poma Golden Delicious', tipus: 'Poma', diesMaduració: 150, rendimentPerArbre: 45 },
+            'poma-fuji': { nom: 'Poma Fuji', tipus: 'Poma', diesMaduració: 165, rendimentPerArbre: 50 },
+            'pera-conference': { nom: 'Pera Conference', tipus: 'Pera', diesMaduració: 140, rendimentPerArbre: 40 },
+            'pera-blanquilla': { nom: 'Pera Blanquilla', tipus: 'Pera', diesMaduració: 130, rendimentPerArbre: 38 },
+            'préssec-groc': { nom: 'Préssec Groc', tipus: 'Préssec', diesMaduració: 120, rendimentPerArbre: 35 },
+            'cirera-picota': { nom: 'Cirera Picota', tipus: 'Cirera', diesMaduració: 90, rendimentPerArbre: 25 },
+            'pruna-claudia': { nom: 'Pruna Claudia', tipus: 'Pruna', diesMaduració: 110, rendimentPerArbre: 30 }
+        };
+
+        // Variables per al dibuix al mapa
+        let modeDibuix = null; // 'parcel·la', 'sector', 'fila'
+        let vèrtexsActuals = [];
+        let polygonActual = null;
+        let puntIntermediActual = null;
+        let llistaCoordsActual = null;
+        let idParcel·laSeleccionada = null;
+        let idSectorSeleccionat = null;
+        let idFilaSeleccionada = null;
+        let rectFonsMapa = null; // Rect de fons per a totes les capes del mapa
+        
+        // Mapeig de colors per a diferents elements
+        const colors = {
+            parcel·la: {
+                default: 'rgba(45, 80, 22, 0.5)', // Verd fosc semitransparent
+                hover: 'rgba(74, 124, 44, 0.7)',  // Verd clar semitransparent
+                selected: 'rgba(212, 175, 55, 0.7)', // Dorat semitransparent
+                dibuix: 'rgba(139, 111, 71, 0.7)' // Marró semitransparent
+            },
+            sector: {
+                default: 'rgba(139, 111, 71, 0.5)', // Marró semitransparent
+                hover: 'rgba(212, 175, 55, 0.7)',   // Dorat semitransparent
+                selected: 'rgba(45, 80, 22, 0.7)',  // Verd fosc semitransparent
+                dibuix: 'rgba(212, 175, 55, 0.7)'  // Dorat semitransparent
+            },
+            fila: {
+                default: 'rgba(212, 175, 55, 0.6)', // Dorat semitransparent
+                hover: 'rgba(45, 80, 22, 0.7)',    // Verd fosc semitransparent
+                selected: 'rgba(139, 111, 71, 0.7)',// Marró semitransparent
+                dibuix: 'rgba(45, 80, 22, 0.7)'   // Verd fosc semitransparent
+            },
+            grid: '#e7e5e4' // Gris clar per a la reixeta
+        };
+
+        // ============================================
+        // INICIALITZACIÓ - S'executa quan es carrega la pàgina
+        // ============================================
+        
+        function inicialitzar() {
+            carregarDades();      // Carreguem les dades del localStorage
+            renderitzarTauler();  // Mostrem el tauler principal
+            renderitzarParcel·les();
+            renderitzarSectors();
+            renderitzarCultius();
+            renderitzarHistoric();
+            renderitzarMapaGeneral();
+            inicialitzarMapaDibuix();
+
+            // Actualitzem els selectors de parcel·la/cultiu/sector quan canviem de secció
+            document.querySelectorAll('nav .nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const idSeccio = tab.getAttribute('onclick').split("'")[1];
+                    if (idSeccio === 'tauler') renderitzarTauler();
+                    else if (idSeccio === 'parcel·les') renderitzarParcel·les();
+                    else if (idSeccio === 'sectors') renderitzarSectors();
+                    else if (idSeccio === 'cultius') {
+                        actualitzarSelectorParcel·lesCultiu();
+                        renderitzarCultius();
+                    } else if (idSeccio === 'historic') renderitzarHistoric();
+                    else if (idSeccio === 'mapa') renderitzarMapaGeneral();
+                });
+            });
+        }
+
+        // ============================================
+        // GESTIÓ DE DADES - Carregar i desar al localStorage
+        // ============================================
+        
+        function carregarDades() {
+            // Intentem carregar les dades del localStorage
+            const parcel·lesDesades = localStorage.getItem('agrisoft_parcel·les');
+            const cultiusDesats = localStorage.getItem('agrisoft_cultius');
+            const collitesDesades = localStorage.getItem('agrisoft_collites');
+            const sectorsDesats = localStorage.getItem('agrisoft_sectors');
+            const filesArbresDesades = localStorage.getItem('agrisoft_filesArbres');
+
+            // Si hi ha dades desades, les carreguem
+            if (parcel·lesDesades) parcel·les = JSON.parse(parcel·lesDesades);
+            if (cultiusDesats) cultius = JSON.parse(cultiusDesats);
+            if (collitesDesades) collites = JSON.parse(collitesDesades);
+            if (sectorsDesats) sectors = JSON.parse(sectorsDesats);
+            if (filesArbresDesades) filesArbres = JSON.parse(filesArbresDesades);
+
+            // Si no hi ha dades, creem dades d'exemple
+            if (parcel·les.length === 0) {
+                crearDadesExemple();
+            }
+        }
+
+        function desarDades() {
+            // Desem totes les dades al localStorage
+            localStorage.setItem('agrisoft_parcel·les', JSON.stringify(parcel·les));
+            localStorage.setItem('agrisoft_cultius', JSON.stringify(cultius));
+            localStorage.setItem('agrisoft_collites', JSON.stringify(collites));
+            localStorage.setItem('agrisoft_sectors', JSON.stringify(sectors));
+            localStorage.setItem('agrisoft_filesArbres', JSON.stringify(filesArbres));
+        }
+
+        function crearDadesExemple() {
+            // Creem 3 parcel·les d'exemple
+            parcel·les = [
+                {
+                    id: '1',
+                    nom: 'Parcel·la Nord',
+                    refCadastral: 'CAT-001-2024',
+                    area: 2.5,
+                    ubicació: 'Zona Nord',
+                    tipusSòl: 'franc',
+                    reg: 'goteig',
+                    notes: '',
+                    coordenades: [[100, 100], [300, 100], [300, 250], [100, 250]]
+                },
+                {
+                    id: '2',
+                    nom: 'Parcel·la Sud',
+                    refCadastral: 'CAT-002-2024',
+                    area: 3.2,
+                    ubicació: 'Zona Sud',
+                    tipusSòl: 'argilós',
+                    reg: 'aspersió',
+                    notes: '',
+                    coordenades: [[350, 150], [550, 150], [550, 350], [350, 350]]
+                },
+                {
+                    id: '3',
+                    nom: 'Parcel·la Est',
+                    refCadastral: 'CAT-003-2024',
+                    area: 1.8,
+                    ubicació: 'Zona Est',
+                    tipusSòl: 'llimós',
+                    reg: 'goteig',
+                    notes: '',
+                    coordenades: [[600, 100], [750, 100], [750, 280], [600, 280]]
+                }
+            ];
+
+            // Creem 2 cultius d'exemple
+            cultius = [
+                {
+                    id: '1',
+                    idParcel·la: '1',
+                    varietat: 'poma-golden',
+                    dataPlantació: '2024-03-15',
+                    dataCollita: '2024-08-12',
+                    nombreArbres: 1000,
+                    densitat: 400,
+                    estat: 'actiu',
+                    notes: ''
+                },
+                {
+                    id: '2',
+                    idParcel·la: '2',
+                    varietat: 'pera-conference',
+                    dataPlantació: '2024-02-20',
+                    dataCollita: '2024-07-10',
+                    nombreArbres: 1280,
+                    densitat: 400,
+                    estat: 'collita',
+                    notes: ''
+                }
+            ];
+
+            // Creem 1 collita d'exemple
+            collites = [
+                {
+                    id: '1',
+                    idCultiu: '2',
+                    data: '2024-07-15',
+                    quantitat: 15000,
+                    qualitat: 'excel·lent',
+                    notes: 'Primera collita de la temporada'
+                }
+            ];
+
+            // Creem 1 sector d'exemple
+            sectors = [
+                {
+                    id: '1',
+                    nom: 'Sector A - Pomeres Golden',
+                    varietat: 'poma-golden',
+                    superficie: 1.0,
+                    dataPlantacio: '2023-03-10',
+                    nombreFiles: 50,
+                    arbresPerFila: 20,
+                    estat: 'actiu',
+                    notes: '',
+                    coordenades: [[110, 110], [290, 110], [290, 180], [110, 180]]
+                }
+            ];
+            
+            // Creem 2 files d'arbres d'exemple
+            filesArbres = [
+                {
+                    id: '1',
+                    idSector: '1',
+                    numero: 1,
+                    arbres: 20,
+                    longitud: 180, // metres
+                    coordenades: [[110, 115], [290, 115]]
+                },
+                {
+                    id: '2',
+                    idSector: '1',
+                    numero: 2,
+                    arbres: 20,
+                    longitud: 180,
+                    coordenades: [[110, 135], [290, 135]]
+                }
+            ];
+
+            desarDades();
+        }
+
+        // ============================================
+        // GESTIÓ DE DADES JSON - Descarregar i carregar
+        // ============================================
+        
+        // Removed functions: descarregarDades, carregarArxiu, processarArxiu
+
+        function exportarGeoJSON() {
+            // This function would be implemented here to export selected data as GeoJSON
+            // For now, it's a placeholder.
+            alert('Funcionalitat d\'exportació GeoJSON no implementada encara.');
+        }
+
+        // ============================================
+        // NAVEGACIÓ - Canviar entre seccions
+        // ============================================
+        
+        function mostrarSeccio(idSeccio) {
+            // Amaguem totes les seccions
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            // Mostrem la secció seleccionada
+            document.getElementById(idSeccio).classList.add('active');
+            // event.target refers to the button clicked
+            document.querySelector(`.nav-tab[onclick="mostrarSeccio('${idSeccio}')"]`).classList.add('active');
+
+
+            // Actualitzem el contingut de la secció
+            if (idSeccio === 'tauler') renderitzarTauler();
+            else if (idSeccio === 'parcel·les') renderitzarParcel·les();
+            else if (idSeccio === 'sectors') renderitzarSectors();
+            else if (idSeccio === 'cultius') {
+                actualitzarSelectorParcel·lesCultiu();
+                renderitzarCultius();
+            } else if (idSeccio === 'historic') renderitzarHistoric();
+            else if (idSeccio === 'mapa') renderitzarMapaGeneral();
+        }
+
+        // ============================================
+        // TAULER PRINCIPAL
+        // ============================================
+        
+        function renderitzarTauler() {
+            // Calculem les estadístiques
+            const areaTotal = parcel·les.reduce((suma, p) => suma + parseFloat(p.area), 0);
+            const cultiusActius = cultius.filter(c => c.estat === 'actiu' || c.estat === 'collita').length;
+            const produccióTotal = collites.reduce((suma, c) => suma + c.quantitat, 0);
+            const sectorsActius = sectors.filter(s => s.estat === 'actiu' || s.estat === 'collita').length;
+
+            // Mostrem les estadístiques
+            document.getElementById('estadistiquesTauler').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Parcel·les</div>
+                    <div class="stat-value">${parcel·les.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Superfície Total</div>
+                    <div class="stat-value">${areaTotal.toFixed(1)} <span style="font-size: 1rem; color: var(--text-gris);">ha</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sectors Actius</div>
+                    <div class="stat-value">${sectorsActius}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cultius Actius</div>
+                    <div class="stat-value">${cultiusActius}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Producció Total (registrada)</div>
+                    <div class="stat-value">${(produccióTotal / 1000).toFixed(1)} <span style="font-size: 1rem; color: var(--text-gris);">t</span></div>
+                </div>
+            `;
+
+            // Mostrem les properes collites
+            const avui = new Date();
+            const properes = cultius.filter(c => {
+                const dataCollita = new Date(c.dataCollita);
+                const diesFins = Math.ceil((dataCollita - avui) / (1000 * 60 * 60 * 24));
+                return diesFins >= 0 && diesFins <= 30 && c.estat !== 'completat';
+            }).sort((a, b) => new Date(a.dataCollita) - new Date(b.dataCollita));
+
+            if (properes.length > 0) {
+                document.getElementById('properesCollites').innerHTML = properes.map(c => {
+                    const parcel·la = parcel·les.find(p => p.id === c.idParcel·la);
+                    const varietat = varietatsFruita[c.varietat];
+                    const dataCollita = new Date(c.dataCollita);
+                    const diesFins = Math.ceil((dataCollita - avui) / (1000 * 60 * 60 * 24));
+                    
+                    return `
+                        <div class="alert alert-warning">
+                            <div>⚠️</div>
+                            <div>
+                                <strong>${varietat.nom}</strong> a ${parcel·la.nom} - 
+                                Collita estimada: ${formatarData(c.dataCollita)} 
+                                (${diesFins} dies)
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                document.getElementById('properesCollites').innerHTML = `
+                    <div class="alert alert-info">
+                        <div>ℹ️</div>
+                        <div>No hi ha collites programades per als propers 30 dies</div>
+                    </div>
+                `;
+            }
+
+            // Mostrem el resum de parcel·les
+            document.getElementById('resumParcel·les').innerHTML = parcel·les.slice(0, 6).map(p => {
+                const cultiusParcel·la = cultius.filter(c => c.idParcel·la === p.id && c.estat !== 'completat');
+                return `
+                    <div class="item-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <div class="item-title">${p.nom}</div>
+                                <div class="item-subtitle">${p.refCadastral}</div>
+                            </div>
+                            <span class="badge badge-info">${p.area} ha</span>
+                        </div>
+                        <div class="item-info">
+                            <div class="info-row">
+                                <span class="info-label">Cultius actius:</span>
+                                <span>${cultiusParcel·la.length}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Reg:</span>
+                                <span>${p.reg}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // GESTIÓ DE PARCEL·LES
+        // ============================================
+        
+        function renderitzarParcel·les() {
+            const cerca = document.getElementById('cercaParcel·les')?.value.toLowerCase() || '';
+            const filtrades = parcel·les.filter(p => 
+                p.nom.toLowerCase().includes(cerca) ||
+                p.refCadastral.toLowerCase().includes(cerca) ||
+                p.ubicació.toLowerCase().includes(cerca)
+            );
+
+            if (filtrades.length === 0) {
+                document.getElementById('graellaParcel·les').innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+                        <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">No hi ha parcel·les</div>
+                        <p>Comença afegint la teva primera parcel·la</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('graellaParcel·les').innerHTML = filtrades.map(p => {
+                const cultiusParcel·la = cultius.filter(c => c.idParcel·la === p.id && c.estat !== 'completat');
+                return `
+                    <div class="item-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <div class="item-title">${p.nom}</div>
+                                <div class="item-subtitle">${p.refCadastral}</div>
+                            </div>
+                            <span class="badge badge-info">${p.area} ha</span>
+                        </div>
+                        <div class="item-info">
+                            <div class="info-row">
+                                <span class="info-label">Ubicació:</span>
+                                <span>${p.ubicació || '-'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Tipus de sòl:</span>
+                                <span>${p.tipusSòl}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Reg:</span>
+                                <span>${p.reg}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Cultius actius:</span>
+                                <span>${cultiusParcel·la.length}</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-outline btn-sm" onclick="editarParcel·la('${p.id}')">Editar</button>
+                            <button class="btn btn-outline btn-sm" onclick="eliminarParcel·la('${p.id}')">Eliminar</button>
+                            <button class="btn btn-outline btn-sm" onclick="associarSectorsAParcel·la('${p.id}')">Assignar Sectors</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filtrarParcel·les() {
+            renderitzarParcel·les();
+        }
+
+        function obrirModalParcel·la(idParcel·la = null) {
+            const modal = document.getElementById('modalParcel·la');
+            const formulari = document.getElementById('formulariParcel·la');
+            formulari.reset();
+            document.getElementById('coordenadesParcel·la').value = ''; // Netegem les coordenades
+
+            if (idParcel·la) {
+                // Editar parcel·la existent
+                const parcel·la = parcel·les.find(p => p.id === idParcel·la);
+                document.getElementById('titolModalParcel·la').textContent = 'Editar Parcel·la Cadastral';
+                document.getElementById('idParcel·la').value = parcel·la.id;
+                document.getElementById('nomParcel·la').value = parcel·la.nom;
+                document.getElementById('refCadastralParcel·la').value = parcel·la.refCadastral;
+                document.getElementById('areaParcel·la').value = parcel·la.area;
+                document.getElementById('coordenadesParcel·la').value = parcel·la.coordenades ? parcel·la.coordenades.map(c => c.join(',')).join('; ') : '';
+                document.getElementById('ubicacióParcel·la').value = parcel·la.ubicació || '';
+                document.getElementById('tipusSòlParcel·la').value = parcel·la.tipusSòl;
+                document.getElementById('regParcel·la').value = parcel·la.reg;
+                document.getElementById('notesParcel·la').value = parcel·la.notes || '';
+            } else {
+                // Nova parcel·la
+                document.getElementById('titolModalParcel·la').textContent = 'Nova Parcel·la Cadastral';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function tancarModalParcel·la() {
+            document.getElementById('modalParcel·la').classList.remove('active');
+            netejarDibuix('capaDibuix'); // Netejem qualsevol dibuix pendent
+            netejarSeleccio('parcel·la');
+        }
+
+        function editarParcel·la(id) {
+            obrirModalParcel·la(id);
+        }
+
+        function eliminarParcel·la(id) {
+            if (confirm('Estàs segur que vols eliminar aquesta parcel·la? Això també eliminarà els sectors i files associades.')) {
+                // Eliminar sectors associats
+                sectors = sectors.filter(s => s.coordenades.length === 0 || !s.coordenades.some(coord => pointInPolygon(coord, parcel·les.find(p => p.id === id).coordenades)));
+                // Eliminar files d'arbres associades
+                filesArbres = filesArbres.filter(f => !sectors.some(s => s.id === f.idSector));
+                
+                parcel·les = parcel·les.filter(p => p.id !== id);
+                desarDades();
+                renderitzarParcel·les();
+                renderitzarSectors(); // Potser cal actualitzar la visualització dels sectors
+                renderitzarMapaGeneral();
+            }
+        }
+
+        function desarParcel·la() {
+            const id = document.getElementById('idParcel·la').value;
+            let coordenadesText = document.getElementById('coordenadesParcel·la').value.trim();
+            let coordenades = [];
+
+            if (coordenadesText) {
+                try {
+                    coordenades = coordenadesText.split(';').map(pair => pair.trim().split(',').map(coord => parseFloat(coord.trim())));
+                    if (coordenades.some(pair => pair.length !== 2 || pair.some(isNaN))) {
+                        throw new Error("Format de coordenades incorrecte.");
+                    }
+                } catch (e) {
+                    alert('❌ Error al parsejar les coordenades: ' + e.message);
+                    return;
+                }
+            } else if (modeDibuix === 'parcel·la' && vèrtexsActuals.length >= 3) {
+                coordenades = vèrtexsActuals;
+            } else if (!id && !coordenadesText && modeDibuix !== 'parcel·la') {
+                 alert('Cal introduir les coordenades o dibuixar la parcel·la al mapa.');
+                 return;
+            }
+
+            const areaCalculada = calcularAreaPoligon(coordenades);
+
+            const parcel·la = {
+                id: id || Date.now().toString(),
+                nom: document.getElementById('nomParcel·la').value,
+                refCadastral: document.getElementById('refCadastralParcel·la').value,
+                area: areaCalculada,
+                coordenades: coordenades,
+                ubicació: document.getElementById('ubicacióParcel·la').value,
+                tipusSòl: document.getElementById('tipusSòlParcel·la').value,
+                reg: document.getElementById('regParcel·la').value,
+                notes: document.getElementById('notesParcel·la').value
+            };
+
+            if (id) {
+                // Actualitzar parcel·la existent
+                const index = parcel·les.findIndex(p => p.id === id);
+                // Si les coordenades han canviat, actualitzar els sectors associats
+                if (index !== -1 && JSON.stringify(parcel·les[index].coordenades) !== JSON.stringify(coordenades)) {
+                    actualitzarSectorsPerParcel·la(id, coordenades);
+                }
+                parcel·les[index] = parcel·la;
+            } else {
+                // Afegir nova parcel·la
+                parcel·les.push(parcel·la);
+            }
+
+            desarDades();
+            tancarModalParcel·la();
+            renderitzarParcel·les();
+            renderitzarTauler();
+            renderitzarMapaGeneral();
+            renderitzarMapaDibuix(); // Refresca el mapa de dibuix per si s'ha creat una nova parcel·la
+        }
+
+        function associarSectorsAParcel·la(idParcel·la) {
+            const parcel·la = parcel·les.find(p => p.id === idParcel·la);
+            if (!parcel·la) return;
+
+            obrirModalSector(null, idParcel·la); // Obro el modal de sector per crear-ne un de nou i associar-lo
+            const selectorParcel·laSector = document.getElementById('parcel·lesSectorModal');
+            if (selectorParcel·laSector) {
+                selectorParcel·laSector.value = idParcel·la;
+                selectorParcel·laSector.dispatchEvent(new Event('change')); // Dispara l'event per actualitzar la informació
+            }
+            
+            // Si ja hi ha un sector dibuixat, el deselecciono
+            netejarSeleccio('sector');
+        }
+
+        // ============================================
+        // GESTIÓ DE SECTORS
+        // ============================================
+
+        function renderitzarSectors() {
+            const graella = document.getElementById('graellaSectors');
+            if (!graella) return;
+
+            if (sectors.length === 0) {
+                graella.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🌳</div>
+                        <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">No hi ha sectors de cultiu</div>
+                        <p>Comença afegint el teu primer sector</p>
+                    </div>
+                `;
+                return;
+            }
+
+            graella.innerHTML = sectors.map(s => {
+                const varietat = varietatsFruita[s.varietat];
+                const nomVarietat = varietat ? varietat.nom : 'Desconeguda';
+                const parcel·lesOcupades = s.coordenades.map(coord => 
+                    parcel·les.find(p => pointInPolygon(coord, p.coordenades))
+                ).filter((p, index, self) => p && index === self.findIndex(t => t.id === p.id));
+
+                let etiquetaEstat = '';
+                if (s.estat === 'actiu') etiquetaEstat = '<span class="badge badge-success">Actiu</span>';
+                else if (s.estat === 'collita') etiquetaEstat = '<span class="badge badge-warning">En collita</span>';
+                else etiquetaEstat = '<span class="badge badge-info">Completat</span>';
+
+                return `
+                    <div class="item-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <div class="item-title">${s.nom}</div>
+                                <div class="item-subtitle">${nomVarietat}</div>
+                            </div>
+                            ${etiquetaEstat}
+                        </div>
+                        <div class="item-info">
+                            <div class="info-row">
+                                <span class="info-label">Superfície:</span>
+                                <span>${s.superficie.toFixed(2)} ha</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Files:</span>
+                                <span>${s.nombreFiles}</span>
+                            </div>
+                             <div class="info-row">
+                                <span class="info-label">Parcel·les:</span>
+                                <span>${parcel·lesOcupades.map(p => p.nom).join(', ') || '-'}</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-outline btn-sm" onclick="editarSector('${s.id}')">Editar</button>
+                            <button class="btn btn-outline btn-sm" onclick="eliminarSector('${s.id}')">Eliminar</button>
+                            <button class="btn btn-outline btn-sm" onclick="gestionarFilesSector('${s.id}')">Files</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function obrirModalSector(idSector = null, idParcel·laPerDefecte = null) {
+            const modal = document.getElementById('modalSector');
+            const formulari = document.getElementById('formulariSector');
+            formulari.reset();
+            document.getElementById('parcel·lesSector').value = ''; // Netejem el camp de parcel·les
+
+            // Omplir selector de parcel·les
+            const selectorParcel·la = document.createElement('select');
+            selectorParcel·la.id = 'parcel·lesSectorModal';
+            selectorParcel·la.className = 'form-select';
+            selectorParcel·la.innerHTML = '<option value="">Seleccionar parcel·la</option>' +
+                parcel·les.map(p => `<option value="${p.id}">${p.nom}</option>`).join('');
+            
+            // Substituir el input de parcel·les per el select dinàmic
+            const inputParcel·lesSector = document.getElementById('parcel·lesSector');
+            inputParcel·lesSector.replaceWith(selectorParcel·la);
+
+            // Definir el event listener per actualitzar el camp "parcel·lesSector"
+            selectorParcel·la.addEventListener('change', function() {
+                const selectedParcelId = this.value;
+                const displayParcelNames = [];
+                // Afegim la parcel·la seleccionada
+                if (selectedParcelId) {
+                    const selectedParcel = parcel·les.find(p => p.id === selectedParcelId);
+                    if (selectedParcel) displayParcelNames.push(selectedParcel.nom);
+                }
+                // Si estem editant, afegim les parcel·les ja associades al sector
+                if (idSector) {
+                    const sectorActual = sectors.find(s => s.id === idSector);
+                    if (sectorActual && sectorActual.coordenades.length > 0) {
+                        sectorActual.coordenades.forEach(coord => {
+                            const p = parcel·les.find(par => pointInPolygon(coord, par.coordenades));
+                            if (p && !displayParcelNames.includes(p.nom)) {
+                                displayParcelNames.push(p.nom);
+                            }
+                        });
+                    }
+                }
+                document.getElementById('parcel·lesSector').value = displayParcelNames.join(', ');
+            });
+
+            if (idSector) {
+                const sector = sectors.find(s => s.id === idSector);
+                document.getElementById('titolModalSector').textContent = 'Editar Sector de Cultiu';
+                document.getElementById('idSector').value = sector.id;
+                document.getElementById('nomSector').value = sector.nom;
+                document.getElementById('varietatSector').value = sector.varietat;
+                document.getElementById('superficieSector').value = sector.superficie;
+                document.getElementById('dataPlantacioSector').value = sector.dataPlantacio || '';
+                document.getElementById('nombreFilesSector').value = sector.nombreFiles;
+                document.getElementById('arbresPerFilaSector').value = sector.arbresPerFila || '';
+                document.getElementById('estatSector').value = sector.estat;
+                document.getElementById('notesSector').value = sector.notes || '';
+                
+                // Seleccionar la parcel·la per defecte si s'ha passat
+                if (idParcel·laPerDefecte) {
+                    selectorParcel·la.value = idParcel·laPerDefecte;
+                } else if (sector.coordenades && sector.coordenades.length > 0) {
+                    // Intentar pre-seleccionar la primera parcel·la que conté el primer punt del sector
+                    const primerPunt = sector.coordenades[0];
+                    const par = parcel·les.find(p => pointInPolygon(primerPunt, p.coordenades));
+                    if (par) {
+                        selectorParcel·la.value = par.id;
+                    }
+                }
+                selectorParcel·la.dispatchEvent(new Event('change')); // Dispara l'event per actualitzar la informació
+
+                actualitzarInfoVarietatSector(); // Actualitza informació de la varietat seleccionada
+            } else {
+                document.getElementById('titolModalSector').textContent = 'Nou Sector de Cultiu';
+                // Seleccionar la parcel·la per defecte si s'ha passat
+                if (idParcel·laPerDefecte) {
+                    selectorParcel·la.value = idParcel·laPerDefecte;
+                    selectorParcel·la.dispatchEvent(new Event('change'));
+                }
+            }
+
+            modal.classList.add('active');
+        }
+
+        function tancarModalSector() {
+            document.getElementById('modalSector').classList.remove('active');
+            netejarDibuix('capaDibuixSector');
+            netejarSeleccio('sector');
+        }
+
+        function editarSector(id) {
+            obrirModalSector(id);
+        }
+
+        function eliminarSector(id) {
+            if (confirm('Estàs segur que vols eliminar aquest sector? Això també eliminarà les files d\'arbres associades.')) {
+                filesArbres = filesArbres.filter(f => f.idSector !== id); // Elimina les files associades
+                sectors = sectors.filter(s => s.id !== id);
+                desarDades();
+                renderitzarSectors();
+                renderitzarMapaGeneral();
+            }
+        }
+
+        function desarSector() {
+            const id = document.getElementById('idSector').value;
+            const idParcel·laSeleccionada = document.getElementById('parcel·lesSectorModal').value;
+            const nomSector = document.getElementById('nomSector').value;
+            const varietatSector = document.getElementById('varietatSector').value;
+            const superficieSector = parseFloat(document.getElementById('superficieSector').value);
+            const dataPlantacioSector = document.getElementById('dataPlantacioSector').value;
+            const nombreFilesSector = parseInt(document.getElementById('nombreFilesSector').value);
+            const arbresPerFilaSector = document.getElementById('arbresPerFilaSector').value ? parseInt(document.getElementById('arbresPerFilaSector').value) : null;
+            const estatSector = document.getElementById('estatSector').value;
+            const notesSector = document.getElementById('notesSector').value;
+            
+            let coordenadesSector = [];
+            if (modeDibuix === 'sector' && vèrtexsActuals.length >= 3) {
+                coordenadesSector = vèrtexsActuals;
+            } else if (id) {
+                // Si estem editant i no hem dibuixat, agafem les coordenades existents
+                const sectorExistent = sectors.find(s => s.id === id);
+                coordenadesSector = sectorExistent.coordenades;
+            }
+
+            // Validació bàsica
+            if (!nomSector || !varietatSector || isNaN(superficieSector) || isNaN(nombreFilesSector) || coordenadesSector.length < 3) {
+                alert('Si us plau, omple tots els camps obligatoris i dibuixa el sector al mapa.');
+                return;
+            }
+
+            const sector = {
+                id: id || Date.now().toString(),
+                nom: nomSector,
+                varietat: varietatSector,
+                superficie: superficieSector,
+                dataPlantacio: dataPlantacioSector,
+                nombreFiles: nombreFilesSector,
+                arbresPerFila: arbresPerFilaSector,
+                estat: estatSector,
+                notes: notesSector,
+                coordenades: coordenadesSector
+            };
+
+            if (id) {
+                // Actualitzar sector existent
+                const index = sectors.findIndex(s => s.id === id);
+                sectors[index] = sector;
+            } else {
+                // Afegir nou sector
+                sectors.push(sector);
+            }
+
+            desarDades();
+            tancarModalSector();
+            renderitzarSectors();
+            renderitzarMapaGeneral();
+        }
+
+        function actualitzarInfoVarietatSector() {
+            const idVarietat = document.getElementById('varietatSector').value;
+            const divInfo = document.getElementById('infoVarietatSector');
+            
+            if (idVarietat) {
+                const varietat = varietatsFruita[idVarietat];
+                divInfo.textContent = `Maduració: ${varietat.diesMaduració} dies | Rendiment estimat: ${varietat.rendimentPerArbre} kg/arbre`;
+            } else {
+                divInfo.textContent = '';
+            }
+        }
+
+        function actualitzarSectorsPerParcel·la(idParcel·la, novesCoordenadesParcel·la) {
+            sectors.forEach(s => {
+                // Comprova si algun punt del sector està dins la parcel·la actualitzada
+                const sectorDinsParcel·la = s.coordenades.some(coord => pointInPolygon(coord, novesCoordenadesParcel·la));
+                
+                // Comprova si la parcel·la conté algun punt del sector
+                const parcel·laContéSector = novesCoordenadesParcel·la.some(coord => pointInPolygon(coord, s.coordenades));
+                
+                // Si el sector ja no s'associa a aquesta parcel·la, la eliminem de la llista de parcel·les del sector (implícitament)
+                // En aquest cas, no fem res automàticament, però es podria afegir una notificació o opció
+            });
+        }
+
+        // ============================================
+        // GESTIÓ DE FILES D'Arbres
+        // ============================================
+
+        function renderitzarFiles(idSector) {
+            const taulaFiles = document.getElementById('taulaFiles');
+            taulaFiles.innerHTML = ''; // Netejar taula
+
+            const filesDelSector = filesArbres.filter(f => f.idSector === idSector);
+
+            if (filesDelSector.length === 0) {
+                taulaFiles.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-gris);">Cap fila d\'arbres registrat.</td></tr>';
+                return;
+            }
+
+            filesDelSector.sort((a, b) => a.numero - b.numero).forEach(f => {
+                const filaHtml = `
+                    <tr>
+                        <td>${f.numero}</td>
+                        <td>${f.arbres || '-'}</td>
+                        <td>${f.longitud.toFixed(1)} m</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="editarFila('${f.id}')">✏️</button>
+                            <button class="btn btn-outline btn-sm" onclick="eliminarFila('${f.id}')">❌</button>
+                        </td>
+                    </tr>
+                `;
+                taulaFiles.innerHTML += filaHtml;
+            });
+        }
+
+        function obrirModalFiles(idSector) {
+            const modal = document.getElementById('modalFiles');
+            modal.classList.add('active');
+            idSectorSeleccionat = idSector; // Guardem l'ID del sector seleccionat
+
+            const sector = sectors.find(s => s.id === idSector);
+            const varietat = varietatsFruita[sector.varietat];
+            
+            document.getElementById('infoSectorFiles').innerHTML = `
+                <div><strong>Sector:</strong> ${sector.nom}</div>
+                <div><strong>Varietat:</strong> ${varietat ? varietat.nom : 'Desconeguda'}</div>
+                <div><strong>Superfície:</strong> ${sector.superficie.toFixed(2)} ha</div>
+                <div><strong>Files previstes:</strong> ${sector.nombreFiles}</div>
+                <div><strong>Arbres per fila (mitjana):</strong> ${sector.arbresPerFila || '-'}</div>
+            `;
+
+            // Renderitzar el polígon del sector al mapa
+            renderitzarPoligonSectorFiles(sector);
+            renderitzarFiles(idSector);
+            actualitzarLlegendaMapa(); // Actualitza llegenda general
+        }
+
+        function tancarModalFiles() {
+            document.getElementById('modalFiles').classList.remove('active');
+            idSectorSeleccionat = null;
+            netejarDibuix('capaDibuixFila');
+            netejarDibuix('capaFilesLlista');
+            netejarDibuix('capaPoligonSectorFiles');
+            netejarSeleccio('fila');
+        }
+
+        function editarFila(idFila) {
+            const fila = filesArbres.find(f => f.id === idFila);
+            if (!fila) return;
+
+            // Mode dibuix per editar la fila
+            modeDibuix = 'fila';
+            vèrtexsActuals = fila.coordenades; // Carregar les coordenades existents
+            idFilaSeleccionada = idFila;
+
+            const svg = document.getElementById('svgMapaFiles');
+            netejarDibuix('capaDibuixFila'); // Netejar dibuix anterior
+            
+            // Dibuixar la fila a editar
+            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', vèrtexsActuals.map(p => p.join(',')).join(' '));
+            polygon.setAttribute('fill', colors.fila.dibuix);
+            polygon.setAttribute('stroke', colors.fila.dibuix);
+            polygon.setAttribute('stroke-width', '2');
+            polygon.setAttribute('class', 'plot-polygon');
+            polygon.dataset.id = fila.id; // Assignem l'ID per a poder-lo identificar
+            polygon.dataset.tipus = 'fila';
+            document.getElementById('capaDibuixFila').appendChild(polygon);
+
+            // Afegir punts per moure vèrtexs
+            vèrtexsActuals.forEach((p, index) => {
+                const punt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                punt.setAttribute('cx', p[0]);
+                punt.setAttribute('cy', p[1]);
+                punt.setAttribute('r', '5');
+                punt.setAttribute('fill', colors.fila.dibuix);
+                punt.setAttribute('stroke', 'white');
+                punt.setAttribute('stroke-width', '1');
+                punt.setAttribute('class', 'editable-point');
+                punt.dataset.index = index;
+                document.getElementById('capaDibuixFila').appendChild(punt);
+            });
+            
+            alert('Mode dibuix activat per editar la fila. Clica i arrossega els punts per moure\'ls, o doble clic per finalitzar.');
+        }
+
+        function eliminarFila(idFila) {
+            if (confirm('Estàs segur que vols eliminar aquesta fila d\'arbres?')) {
+                filesArbres = filesArbres.filter(f => f.id !== idFila);
+                desarDades();
+                renderitzarFiles(idSectorSeleccionat);
+                renderitzarMapaGeneral();
+            }
+        }
+
+        function generarFilesAutomatiques() {
+            const sector = sectors.find(s => s.id === idSectorSeleccionat);
+            if (!sector || !sector.coordenades || sector.coordenades.length < 3) {
+                alert('Cal definir el polígon del sector abans de generar les files.');
+                return;
+            }
+
+            const nombreFiles = parseInt(document.getElementById('nombreFilesSector').value); // Agafa el valor del modal del sector
+            if (isNaN(nombreFiles) || nombreFiles <= 0) {
+                alert('Cal especificar un nombre vàlid de files.');
+                return;
+            }
+
+            const filesGenerades = generarFiles(sector.coordenades, nombreFiles);
+            
+            // Actualitzar les dades de filesArbres
+            filesArbres = filesArbres.filter(f => f.idSector !== idSectorSeleccionat); // Netejar files antigues d'aquest sector
+            
+            filesGenerades.forEach((fila, index) => {
+                filesArbres.push({
+                    id: `fila_${Date.now()}_${index}`,
+                    idSector: idSectorSeleccionat,
+                    numero: index + 1,
+                    arbres: sector.arbresPerFila || null, // Utilitzar valor del sector si existeix
+                    longitud: calcularDistanciaEntrePunts(fila[0], fila[1]), // Longitud estimada
+                    coordenades: fila
+                });
+            });
+
+            desarDades();
+            renderitzarFiles(idSectorSeleccionat);
+            renderitzarMapaGeneral(); // Actualitzar mapa general
+            alert(`✅ S'han generat ${filesGenerades.length} files automàtiques.`);
+        }
+
+        // ============================================
+        // GESTIÓ DE CULTIUS
+        // ============================================
+        
+        function renderitzarCultius() {
+            const cerca = document.getElementById('cercaCultius')?.value.toLowerCase() || '';
+            const filtreEstat = document.getElementById('filtreEstatCultius')?.value || '';
+            
+            const filtrats = cultius.filter(c => {
+                const parcel·la = parcel·les.find(p => p.id === c.idParcel·la);
+                const varietat = varietatsFruita[c.varietat];
+                const coincideixCerca = parcel·la.nom.toLowerCase().includes(cerca) || 
+                                    varietat.nom.toLowerCase().includes(cerca);
+                const coincideixEstat = !filtreEstat || c.estat === filtreEstat;
+                return coincideixCerca && coincideixEstat;
+            });
+
+            if (filtrats.length === 0) {
+                document.getElementById('graellaCultius').innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🌳</div>
+                        <div style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text);">No hi ha cultius</div>
+                        <p>Comença afegint el teu primer cultiu</p>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('graellaCultius').innerHTML = filtrats.map(c => {
+                const parcel·la = parcel·les.find(p => p.id === c.idParcel·la);
+                const varietat = varietatsFruita[c.varietat];
+                const produccióEstimada = c.nombreArbres * varietat.rendimentPerArbre;
+                
+                let etiquetaEstat = '';
+                if (c.estat === 'actiu') etiquetaEstat = '<span class="badge badge-success">Actiu</span>';
+                else if (c.estat === 'collita') etiquetaEstat = '<span class="badge badge-warning">En collita</span>';
+                else etiquetaEstat = '<span class="badge badge-info">Completat</span>';
+
+                return `
+                    <div class="item-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <div class="item-title">${varietat.nom}</div>
+                                <div class="item-subtitle">${parcel·la.nom}</div>
+                            </div>
+                            ${etiquetaEstat}
+                        </div>
+                        <div class="item-info">
+                            <div class="info-row">
+                                <span class="info-label">Plantació:</span>
+                                <span>${formatarData(c.dataPlantació)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Collita estimada:</span>
+                                <span>${formatarData(c.dataCollita)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Arbres:</span>
+                                <span>${c.nombreArbres}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Producció estimada:</span>
+                                <span>${(produccióEstimada / 1000).toFixed(1)} t</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-outline btn-sm" onclick="editarCultiu('${c.id}')">Editar</button>
+                            <button class="btn btn-outline btn-sm" onclick="eliminarCultiu('${c.id}')">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filtrarCultius() {
+            renderitzarCultius();
+        }
+
+        function obrirModalCultiu(idCultiu = null) {
+            const modal = document.getElementById('modalCultiu');
+            const formulari = document.getElementById('formulariCultiu');
+            formulari.reset();
+
+            actualitzarSelectorParcel·lesCultiu(); // Refresca el selector de parcel·les
+            document.getElementById('infoParcel·laCultiu').textContent = ''; // Neteja info parcel·la
+            document.getElementById('infoVarietat').textContent = ''; // Neteja info varietat
+
+            if (idCultiu) {
+                // Editar cultiu existent
+                const cultiu = cultius.find(c => c.id === idCultiu);
+                document.getElementById('titolModalCultiu').textContent = 'Editar Cultiu';
+                document.getElementById('idCultiu').value = cultiu.id;
+                document.getElementById('idParcel·laCultiu').value = cultiu.idParcel·la;
+                document.getElementById('varietatCultiu').value = cultiu.varietat;
+                document.getElementById('dataPlantació').value = cultiu.dataPlantació;
+                document.getElementById('dataCollita').value = cultiu.dataCollita;
+                document.getElementById('nombreArbres').value = cultiu.nombreArbres;
+                document.getElementById('densitat').value = cultiu.densitat;
+                document.getElementById('estatCultiu').value = cultiu.estat;
+                document.getElementById('notesCultiu').value = cultiu.notes || '';
+                actualitzarInfoParcel·laCultiu();
+                actualitzarInfoVarietat();
+            } else {
+                // Nou cultiu
+                document.getElementById('titolModalCultiu').textContent = 'Nou Cultiu';
+                document.getElementById('densitat').value = 400;
+            }
+
+            modal.classList.add('active');
+        }
+
+        function tancarModalCultiu() {
+            document.getElementById('modalCultiu').classList.remove('active');
+        }
+
+        function editarCultiu(id) {
+            obrirModalCultiu(id);
+        }
+
+        function eliminarCultiu(id) {
+            if (confirm('Estàs segur que vols eliminar aquest cultiu?')) {
+                cultius = cultius.filter(c => c.id !== id);
+                collites = collites.filter(h => h.idCultiu !== id);
+                desarDades();
+                renderitzarCultius();
+                renderitzarTauler();
+            }
+        }
+
+        function actualitzarSelectorParcel·lesCultiu() {
+            const selectorParcel·la = document.getElementById('idParcel·laCultiu');
+            const currentSelectedId = selectorParcel·la.value;
+            selectorParcel·la.innerHTML = '<option value="">Seleccionar parcel·la</option>' +
+                parcel·les.map(p => `<option value="${p.id}" ${p.id === currentSelectedId ? 'selected' : ''}>${p.nom} (${p.area} ha)</option>`).join('');
+        }
+
+        function actualitzarInfoParcel·laCultiu() {
+            const idParcel·la = document.getElementById('idParcel·laCultiu').value;
+            const divInfo = document.getElementById('infoParcel·laCultiu');
+            
+            if (idParcel·la) {
+                const parcel·la = parcel·les.find(p => p.id === idParcel·la);
+                divInfo.textContent = `Superfície: ${parcel·la.area} ha | Reg: ${parcel·la.reg}`;
+                calcularNombreArbres();
+            } else {
+                divInfo.textContent = '';
+                document.getElementById('nombreArbres').value = ''; // Netejar si no hi ha parcel·la
+            }
+        }
+
+        function actualitzarInfoVarietat() {
+            const idVarietat = document.getElementById('varietatCultiu').value;
+            const divInfo = document.getElementById('infoVarietat');
+            
+            if (idVarietat) {
+                const varietat = varietatsFruita[idVarietat];
+                divInfo.textContent = `Maduració: ${varietat.diesMaduració} dies | Rendiment: ${varietat.rendimentPerArbre} kg/arbre`;
+                calcularDataCollita();
+            } else {
+                divInfo.textContent = '';
+                document.getElementById('dataCollita').value = ''; // Netejar data si no hi ha varietat
+            }
+        }
+
+        function calcularNombreArbres() {
+            const idParcel·la = document.getElementById('idParcel·laCultiu').value;
+            const densitat = parseFloat(document.getElementById('densitat').value);
+            
+            if (idParcel·la && !isNaN(densitat)) {
+                const parcel·la = parcel·les.find(p => p.id === idParcel·la);
+                if (parcel·la) {
+                    const nombreArbres = Math.round(parcel·la.area * densitat);
+                    document.getElementById('nombreArbres').value = nombreArbres;
+                }
+            }
+        }
+
+        function calcularDataCollita() {
+            const dataPlantació = document.getElementById('dataPlantació').value;
+            const idVarietat = document.getElementById('varietatCultiu').value;
+            
+            if (dataPlantació && idVarietat) {
+                const varietat = varietatsFruita[idVarietat];
+                const plantació = new Date(dataPlantació);
+                const collita = new Date(plantació);
+                collita.setDate(collita.getDate() + varietat.diesMaduració);
+                document.getElementById('dataCollita').value = collita.toISOString().split('T')[0];
+            }
+        }
+
+        function desarCultiu() {
+            const id = document.getElementById('idCultiu').value;
+            const idParcel·la = document.getElementById('idParcel·laCultiu').value;
+            const varietat = document.getElementById('varietatCultiu').value;
+            const dataPlantació = document.getElementById('dataPlantació').value;
+            const dataCollita = document.getElementById('dataCollita').value;
+            const nombreArbres = parseInt(document.getElementById('nombreArbres').value);
+            const densitat = parseInt(document.getElementById('densitat').value);
+            const estat = document.getElementById('estatCultiu').value;
+            const notes = document.getElementById('notesCultiu').value;
+
+            // Validació bàsica
+            if (!idParcel·la || !varietat || !dataPlantació) {
+                alert('Si us plau, selecciona una parcel·la, una varietat i una data de plantació.');
+                return;
+            }
+
+            const cultiu = {
+                id: id || Date.now().toString(),
+                idParcel·la: idParcel·la,
+                varietat: varietat,
+                dataPlantació: dataPlantació,
+                dataCollita: dataCollita,
+                nombreArbres: isNaN(nombreArbres) ? 0 : nombreArbres,
+                densitat: isNaN(densitat) ? 0 : densitat,
+                estat: estat,
+                notes: notes
+            };
+
+            if (id) {
+                // Actualitzar cultiu existent
+                const index = cultius.findIndex(c => c.id === id);
+                cultius[index] = cultiu;
+            } else {
+                // Afegir nou cultiu
+                cultius.push(cultiu);
+            }
+
+            desarDades();
+            tancarModalCultiu();
+            renderitzarCultius();
+            renderitzarTauler();
+        }
+
+        // ============================================
+        // HISTÒRIC I ANÀLISI
+        // ============================================
+        
+        function renderitzarHistoric() {
+            // Calculem estadístiques
+            const totalCollit = collites.reduce((suma, h) => suma + h.quantitat, 0);
+            const qualitatMitjana = collites.length > 0 ? 
+                collites.filter(h => h.qualitat === 'excel·lent' || h.qualitat === 'bona').length / collites.length * 100 : 0;
+
+            document.getElementById('estadistiquesHistoric').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Collit</div>
+                    <div class="stat-value">${(totalCollit / 1000).toFixed(1)} <span style="font-size: 1rem; color: var(--text-gris);">t</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Registres de Collita</div>
+                    <div class="stat-value">${collites.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Qualitat Mitjana</div>
+                    <div class="stat-value">${qualitatMitjana.toFixed(0)} <span style="font-size: 1rem; color: var(--text-gris);">%</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Parcel·les Productives</div>
+                    <div class="stat-value">${new Set(collites.map(h => {
+                        const cultiu = cultius.find(c => c.id === h.idCultiu);
+                        return cultiu ? cultiu.idParcel·la : null;
+                    })).size}</div>
+                </div>
+            `;
+
+            // Renderitzem el gràfic de producció
+            renderitzarGraficProducció();
+
+            // Omplim la taula de collites
+            const tbody = document.getElementById('taulaCollites');
+            if (collites.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-gris);">No hi ha registres de collita</td></tr>';
+            } else {
+                tbody.innerHTML = collites.map(h => {
+                    const cultiu = cultius.find(c => c.id === h.idCultiu);
+                    const parcel·la = cultiu ? parcel·les.find(p => p.id === cultiu.idParcel·la) : null;
+                    const varietat = cultiu ? varietatsFruita[cultiu.varietat] : null;
+                    
+                    let etiquetaQualitat = '';
+                    if (h.qualitat === 'excel·lent') etiquetaQualitat = '<span class="badge badge-success">Excel·lent</span>';
+                    else if (h.qualitat === 'bona') etiquetaQualitat = '<span class="badge badge-info">Bona</span>';
+                    else if (h.qualitat === 'mitjana') etiquetaQualitat = '<span class="badge badge-warning">Mitjana</span>';
+                    else etiquetaQualitat = '<span class="badge badge-danger">Baixa</span>'; // Afegit per si de cas
+
+                    return `
+                        <tr>
+                            <td>${formatarData(h.data)}</td>
+                            <td>${parcel·la ? parcel·la.nom : '-'}</td>
+                            <td>${varietat ? varietat.nom : '-'}</td>
+                            <td>${h.quantitat.toLocaleString()} kg</td>
+                            <td>${etiquetaQualitat}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderitzarGraficProducció() {
+            // Agrupem les collites per mes
+            const dadesMensuals = {};
+            
+            collites.forEach(h => {
+                const mes = h.data.substring(0, 7); // Format: YYYY-MM
+                dadesMensuals[mes] = (dadesMensuals[mes] || 0) + h.quantitat;
+            });
+
+            const mesos = Object.keys(dadesMensuals).sort();
+            const valorMaxim = Math.max(0, ...Object.values(dadesMensuals)); // Evita error si no hi ha dades
+
+            if (mesos.length === 0) {
+                document.getElementById('graficProducció').innerHTML = '<p style="text-align: center; color: var(--text-gris); padding: 2rem;">No hi ha dades de producció</p>';
+                return;
+            }
+
+            // Creem les barres del gràfic
+            const barresHtml = mesos.map(mes => {
+                const valor = dadesMensuals[mes];
+                const alçada = valorMaxim > 0 ? (valor / valorMaxim) * 100 : 0;
+                return `
+                    <div class="chart-bar" style="height: ${alçada}%">
+                        <div class="chart-bar-label">${(valor / 1000).toFixed(1)}t</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Creem les etiquetes dels mesos
+            const etiquetesHtml = mesos.map(mes => {
+                const [any, m] = mes.split('-');
+                const nomsMesos = ['Gen', 'Feb', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des'];
+                return `<div class="chart-label">${nomsMesos[parseInt(m) - 1]} ${any}</div>`;
+            }).join('');
+
+            document.getElementById('graficProducció').innerHTML = `
+                <div class="chart-bars">${barresHtml}</div>
+                <div class="chart-labels">${etiquetesHtml}</div>
+            `;
+        }
+
+        function obrirModalCollita() {
+            const modal = document.getElementById('modalCollita');
+            document.getElementById('formulariCollita').reset();
+            document.getElementById('dataCollitaRegistre').valueAsDate = new Date();
+            actualitzarSelectorCultiuCollita(); // Assegura que el selector estigui actualitzat
+            modal.classList.add('active');
+        }
+
+        function tancarModalCollita() {
+            document.getElementById('modalCollita').classList.remove('active');
+        }
+
+        function desarCollita() {
+            const idCultiu = document.getElementById('idCultiuCollita').value;
+            const data = document.getElementById('dataCollitaRegistre').value;
+            const quantitat = parseFloat(document.getElementById('quantitatCollita').value);
+            const qualitat = document.getElementById('qualitatCollita').value;
+            const notes = document.getElementById('notesCollita').value;
+
+            // Validació bàsica
+            if (!idCultiu || !data || isNaN(quantitat) || quantitat <= 0) {
+                alert('Si us plau, selecciona un cultiu, una data i una quantitat vàlida.');
+                return;
+            }
+
+            const collita = {
+                id: Date.now().toString(),
+                idCultiu: idCultiu,
+                data: data,
+                quantitat: quantitat,
+                qualitat: qualitat,
+                notes: notes
+            };
+
+            collites.push(collita);
+            desarDades();
+            tancarModalCollita();
+            renderitzarHistoric();
+            renderitzarTauler();
+        }
+
+        function actualitzarSelectorCultiuCollita() {
+            const selector = document.getElementById('idCultiuCollita');
+            const currentSelectedId = selector.value;
+            const cultiusActius = cultius.filter(c => c.estat !== 'completat');
+
+            selector.innerHTML = '<option value="">Seleccionar cultiu</option>' +
+                cultiusActius.map(c => {
+                    const parcel·la = parcel·les.find(p => p.id === c.idParcel·la);
+                    const varietat = varietatsFruita[c.varietat];
+                    return `<option value="${c.id}" ${c.id === currentSelectedId ? 'selected' : ''}>${varietat.nom} - ${parcel·la.nom}</option>`;
+                }).join('');
+        }
+
+        // ============================================
+        // MAPA GENERAL
+        // ============================================
+        
+        function renderitzarMapaGeneral() {
+            const svg = document.getElementById('svgMapa');
+            const capaGeneral = document.getElementById('capaMapaGeneral');
+            capaGeneral.innerHTML = ''; // Netejar capa
+
+            const vistaCapa = document.getElementById('vistaCapaMapa').value;
+
+            // Configurar el fons (grid)
+            if (!rectFonsMapa) {
+                rectFonsMapa = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rectFonsMapa.setAttribute('width', '100%');
+                rectFonsMapa.setAttribute('height', '100%');
+                rectFonsMapa.setAttribute('fill', `url(#grid)`);
+                svg.prepend(rectFonsMapa); // Afegir al principi per estar darrere de tot
+            }
+
+            if (vistaCapa === 'parcel·les') {
+                renderitzarParcel·lesMapa(capaGeneral);
+            } else if (vistaCapa === 'sectors') {
+                renderitzarSectorsMapa(capaGeneral);
+            } else if (vistaCapa === 'files') {
+                renderitzarFilesMapa(capaGeneral);
+            }
+
+            // Actualitzar llegenda
+            renderitzarLlegendaMapa(vistaCapa);
+        }
+
+        function renderitzarParcel·lesMapa(capa) {
+            parcel·les.forEach(p => {
+                if (!p.coordenades || p.coordenades.length < 3) return;
+
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                polygon.setAttribute('points', p.coordenades.map(c => c.join(',')).join(' '));
+                polygon.setAttribute('fill', colors.parcel·la.default);
+                polygon.setAttribute('stroke', colors.parcel·la.default);
+                polygon.setAttribute('stroke-width', '1');
+                polygon.setAttribute('class', 'plot-polygon');
+                polygon.dataset.id = p.id;
+                polygon.dataset.tipus = 'parcel·la';
+
+                polygon.addEventListener('mouseover', () => {
+                    if (modeDibuix !== 'parcel·la' && idParcel·laSeleccionada !== p.id) {
+                        polygon.setAttribute('fill', colors.parcel·la.hover);
+                        polygon.setAttribute('stroke', colors.parcel·la.hover);
+                    }
+                });
+                polygon.addEventListener('mouseout', () => {
+                    if (modeDibuix !== 'parcel·la' && idParcel·laSeleccionada !== p.id) {
+                        polygon.setAttribute('fill', colors.parcel·la.default);
+                        polygon.setAttribute('stroke', colors.parcel·la.default);
+                    }
+                });
+                polygon.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Evita que el click es propagui
+                    seleccionarElementMapa(p.id, 'parcel·la');
+                });
+
+                capa.appendChild(polygon);
+
+                // Afegir text amb nom de la parcel·la
+                const centre = calcularCentrePoligon(p.coordenades);
+                const textNode = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                textNode.setAttribute('x', centre[0]);
+                textNode.setAttribute('y', centre[1]);
+                textNode.setAttribute('text-anchor', 'middle');
+                textNode.setAttribute('font-size', '12');
+                textNode.setAttribute('font-weight', 'bold');
+                textNode.setAttribute('fill', '#1c1917');
+                textNode.textContent = p.nom;
+                capa.appendChild(textNode);
+            });
+        }
+        
+        function renderitzarSectorsMapa(capa) {
+            sectors.forEach(s => {
+                if (!s.coordenades || s.coordenades.length < 3) return;
+
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                polygon.setAttribute('points', s.coordenades.map(c => c.join(',')).join(' '));
+                polygon.setAttribute('fill', colors.sector.default);
+                polygon.setAttribute('stroke', colors.sector.default);
+                polygon.setAttribute('stroke-width', '1');
+                polygon.setAttribute('class', 'plot-polygon');
+                polygon.dataset.id = s.id;
+                polygon.dataset.tipus = 'sector';
+
+                polygon.addEventListener('mouseover', () => {
+                    if (modeDibuix !== 'sector' && idSectorSeleccionat !== s.id) {
+                        polygon.setAttribute('fill', colors.sector.hover);
+                        polygon.setAttribute('stroke', colors.sector.hover);
+                    }
+                });
+                polygon.addEventListener('mouseout', () => {
+                    if (modeDibuix !== 'sector' && idSectorSeleccionat !== s.id) {
+                        polygon.setAttribute('fill', colors.sector.default);
+                        polygon.setAttribute('stroke', colors.sector.default);
+                    }
+                });
+                polygon.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    seleccionarElementMapa(s.id, 'sector');
+                });
+
+                capa.appendChild(polygon);
+
+                // Afegir text amb nom del sector
+                const centre = calcularCentrePoligon(s.coordenades);
+                const textNode = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                textNode.setAttribute('x', centre[0]);
+                textNode.setAttribute('y', centre[1]);
+                textNode.setAttribute('text-anchor', 'middle');
+                textNode.setAttribute('font-size', '12');
+                textNode.setAttribute('font-weight', 'bold');
+                textNode.setAttribute('fill', '#1c1917');
+                textNode.textContent = s.nom;
+                capa.appendChild(textNode);
+            });
+        }
+
+        function renderitzarFilesMapa(capa) {
+            filesArbres.forEach(f => {
+                if (!f.coordenades || f.coordenades.length < 2) return;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', f.coordenades[0][0]);
+                line.setAttribute('y1', f.coordenades[0][1]);
+                line.setAttribute('x2', f.coordenades[1][0]);
+                line.setAttribute('y2', f.coordenades[1][1]);
+                line.setAttribute('stroke', colors.fila.default);
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke-linecap', 'round');
+                line.dataset.id = f.id;
+                line.dataset.tipus = 'fila';
+
+                line.addEventListener('mouseover', () => {
+                    if (modeDibuix !== 'fila' && idFilaSeleccionada !== f.id) {
+                        line.setAttribute('stroke', colors.fila.hover);
+                        line.setAttribute('stroke-width', '5');
+                    }
+                });
+                line.addEventListener('mouseout', () => {
+                    if (modeDibuix !== 'fila' && idFilaSeleccionada !== f.id) {
+                        line.setAttribute('stroke', colors.fila.default);
+                        line.setAttribute('stroke-width', '3');
+                    }
+                });
+                line.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    seleccionarElementMapa(f.id, 'fila');
+                });
+
+                capa.appendChild(line);
+            });
+        }
+
+        function renderitzarLlegendaMapa(vista) {
+            const llegendaDiv = document.getElementById('llegendaMapa');
+            llegendaDiv.innerHTML = ''; // Netejar llegenda anterior
+
+            let itemsLlegenda = [];
+            if (vista === 'parcel·les') {
+                itemsLlegenda = [
+                    { color: colors.parcel·la.default, text: 'Parcel·la' },
+                    { color: colors.parcel·la.selected, text: 'Parcel·la Seleccionada' },
+                    { color: colors.parcel·la.hover, text: 'Hover' }
+                ];
+            } else if (vista === 'sectors') {
+                itemsLlegenda = [
+                    { color: colors.sector.default, text: 'Sector' },
+                    { color: colors.sector.selected, text: 'Sector Seleccionat' },
+                    { color: colors.sector.hover, text: 'Hover' }
+                ];
+            } else if (vista === 'files') {
+                itemsLlegenda = [
+                    { color: colors.fila.default, text: 'Fila d\'Arbres' },
+                    { color: colors.fila.selected, text: 'Fila Seleccionada' },
+                    { color: colors.fila.hover, text: 'Hover' }
+                ];
+            }
+
+            itemsLlegenda.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'legend-item';
+                div.innerHTML = `
+                    <div class="legend-color" style="background: ${item.color}"></div>
+                    <span>${item.text}</span>
+                `;
+                llegendaDiv.appendChild(div);
+            });
+        }
+
+        function canviarCapaMapa() {
+            renderitzarMapaGeneral();
+        }
+
+        function seleccionarElementMapa(id, tipus) {
+            // Netejar selecció anterior
+            netejarSeleccio('parcel·la');
+            netejarSeleccio('sector');
+            netejarSeleccio('fila');
+
+            // Resaltar l'element seleccionat
+            const elementSVG = document.querySelector(`#capaMapaGeneral [data-id="${id}"][data-tipus="${tipus}"]`);
+            if (elementSVG) {
+                if (tipus === 'parcel·la') {
+                    elementSVG.setAttribute('fill', colors.parcel·la.selected);
+                    elementSVG.setAttribute('stroke', colors.parcel·la.selected);
+                    idParcel·laSeleccionada = id;
+                } else if (tipus === 'sector') {
+                    elementSVG.setAttribute('fill', colors.sector.selected);
+                    elementSVG.setAttribute('stroke', colors.sector.selected);
+                    idSectorSeleccionat = id;
+                    // Obro modal de gestió de files si es fa clic a un sector
+                    obrirModalFiles(id);
+                } else if (tipus === 'fila') {
+                    elementSVG.setAttribute('stroke', colors.fila.selected);
+                    elementSVG.setAttribute('stroke-width', '5');
+                    idFilaSeleccionada = id;
+                }
+            }
+
+            // Mostrar informació detallada
+            if (tipus === 'parcel·la') {
+                const parcel·la = parcel·les.find(p => p.id === id);
+                const cultiusParcel·la = cultius.filter(c => c.idParcel·la === id);
+                const sectorsParcel·la = sectors.filter(s => s.coordenades.some(coord => pointInPolygon(coord, parcel·la.coordenades)));
+
+                const cultiusHtml = cultiusParcel·la.length > 0 ? cultiusParcel·la.map(c => {
+                    const varietat = varietatsFruita[c.varietat];
+                    let etiquetaEstat = '';
+                    if (c.estat === 'actiu') etiquetaEstat = '<span class="badge badge-success">Actiu</span>';
+                    else if (c.estat === 'collita') etiquetaEstat = '<span class="badge badge-warning">En collita</span>';
+                    else etiquetaEstat = '<span class="badge badge-info">Completat</span>';
+
+                    return `
+                        <div style="padding: 0.75rem; background: var(--fons); border-radius: 6px; margin-bottom: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <strong>${varietat.nom}</strong>
+                                ${etiquetaEstat}
+                            </div>
+                            <div style="font-size: 0.875rem; color: var(--text-gris);">
+                                ${c.nombreArbres} arbres | Collita: ${formatarData(c.dataCollita)}
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '<p style="color: var(--text-gris);">No hi ha cultius en aquesta parcel·la</p>';
+
+                 const sectorsHtml = sectorsParcel·la.length > 0 ? sectorsParcel·la.map(s => {
+                    const varietat = varietatsFruita[s.varietat];
+                    return `
+                        <div style="padding: 0.75rem; background: var(--fons); border-radius: 6px; margin-bottom: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <strong>${s.nom}</strong>
+                                <span class="badge badge-${s.estat === 'actiu' ? 'success' : s.estat === 'collita' ? 'warning' : 'info'}">${s.estat}</span>
+                            </div>
+                            <div style="font-size: 0.875rem; color: var(--text-gris);">
+                                ${varietat.nom} | ${s.superficie.toFixed(2)} ha
+                            </div>
+                        </div>
+                    `;
+                 }).join('') : '<p style="color: var(--text-gris);">No hi ha sectors associats a aquesta parcel·la</p>';
+
+                document.getElementById('detallsParcel·laSeleccionada').innerHTML = `
+                    <div class="item-info">
+                        <div class="info-row">
+                            <span class="info-label">Referència cadastral:</span>
+                            <span>${parcel·la.refCadastral}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Superfície:</span>
+                            <span>${parcel·la.area} ha</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ubicació:</span>
+                            <span>${parcel·la.ubicació || '-'}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Tipus de sòl:</span>
+                            <span>${parcel·la.tipusSòl}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Reg:</span>
+                            <span>${parcel·la.reg}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Cultius</h3>
+                        ${cultiusHtml}
+                    </div>
+                     <div style="margin-top: 1rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Sectors Associats</h3>
+                        ${sectorsHtml}
+                    </div>
+                `;
+                document.getElementById('infoParcel·laSeleccionada').style.display = 'block';
+            }
+        }
+
+        function netejarSeleccioParcel·la() {
+             netejarSeleccio('parcel·la');
+        }
+
+        function netejarSeleccio(tipus) {
+            if (tipus === 'parcel·la') {
+                idParcel·laSeleccionada = null;
+                document.getElementById('infoParcel·laSeleccionada').style.display = 'none';
+                // Restaurar color de totes les parcel·les
+                document.querySelectorAll('#capaMapaGeneral .plot-polygon[data-tipus="parcel·la"]').forEach(p => {
+                    p.setAttribute('fill', colors.parcel·la.default);
+                    p.setAttribute('stroke', colors.parcel·la.default);
+                });
+            } else if (tipus === 'sector') {
+                idSectorSeleccionat = null;
+                // Restaurar color de tots els sectors
+                 document.querySelectorAll('#capaMapaGeneral .plot-polygon[data-tipus="sector"]').forEach(s => {
+                    s.setAttribute('fill', colors.sector.default);
+                    s.setAttribute('stroke', colors.sector.default);
+                });
+            } else if (tipus === 'fila') {
+                idFilaSeleccionada = null;
+                // Restaurar estil de totes les files
+                 document.querySelectorAll('#capaMapaGeneral line[data-tipus="fila"]').forEach(f => {
+                    f.setAttribute('stroke', colors.fila.default);
+                    f.setAttribute('stroke-width', '3');
+                });
+            }
+        }
+
+        function netejarDibuix(idCapa) {
+            const capa = document.getElementById(idCapa);
+            if (capa) capa.innerHTML = '';
+            vèrtexsActuals = [];
+            polygonActual = null;
+            puntIntermediActual = null;
+            idFilaSeleccionada = null; // Netejar si s'està dibuixant una fila
+            idSectorSeleccionat = null; // Netejar si s'està dibuixant un sector
+            idParcel·laSeleccionada = null; // Netejar si s'està dibuixant una parcel·la
+        }
+
+        // ============================================
+        // FUNCIONS PER A DIBUIXAR AL MAPA
+        // ============================================
+        
+        function inicialitzarMapaDibuix() {
+            // Parcel·les
+            const svgParcel·les = document.getElementById('svgMapaParcel·les');
+            svgParcel·les.addEventListener('click', handleClickMapa);
+            svgParcel·les.addEventListener('dblclick', handleDblClickMapa);
+            svgParcel·les.addEventListener('mousemove', handleMouseMoveMapa);
+
+            // Sectors
+            const svgSectors = document.getElementById('svgMapaSectors');
+            svgSectors.addEventListener('click', handleClickMapa);
+            svgSectors.addEventListener('dblclick', handleDblClickMapa);
+            svgSectors.addEventListener('mousemove', handleMouseMoveMapa);
+
+            // Files
+            const svgFiles = document.getElementById('svgMapaFiles');
+            svgFiles.addEventListener('click', handleClickMapa);
+            svgFiles.addEventListener('dblclick', handleDblClickMapa);
+            svgFiles.addEventListener('mousemove', handleMouseMoveMapa);
+
+            // Mapa General (només per seleccionar elements)
+            const svgGeneral = document.getElementById('svgMapa');
+            svgGeneral.addEventListener('click', () => netejarSeleccio('parcel·la')); // Clicar fora neteja selecció
+        }
+
+        function handleClickMapa(event) {
+            const svg = event.target.closest('svg');
+            const rect = svg.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            if (modeDibuix === 'parcel·la') {
+                // Si estem dibuixant una parcel·la
+                vèrtexsActuals.push([clickX, clickY]);
+                dibuixarPolygonTemporal();
+            } else if (modeDibuix === 'sector') {
+                // Si estem dibuixant un sector
+                vèrtexsActuals.push([clickX, clickY]);
+                dibuixarPolygonTemporal();
+            } else if (modeDibuix === 'fila') {
+                // Si estem dibuixant una fila
+                if (vèrtexsActuals.length === 0) {
+                    // Primer punt de la fila
+                    vèrtexsActuals.push([clickX, clickY]);
+                    dibuixarLineaTemporal();
+                } else if (vèrtexsActuals.length === 1) {
+                    // Segon punt de la fila (final)
+                    vèrtexsActuals.push([clickX, clickY]);
+                    dibuixarLineaTemporal();
+                    // Finalitzem el dibuix de la fila automàticament en el segon clic
+                    desarFila();
+                }
+            } else {
+                 // Si no estem en mode dibuix, tractem com a selecció (però ja es fa a seleccionarElementMapa)
+            }
+        }
+
+        function handleDblClickMapa(event) {
+            if (vèrtexsActuals.length < 3 && modeDibuix !== 'fila') {
+                alert('Cal definir almenys 3 vèrtexs per crear una forma.');
+                return;
+            }
+
+            if (modeDibuix === 'parcel·la') {
+                desarParcel·la(); // Guarda la parcel·la dibuixada
+            } else if (modeDibuix === 'sector') {
+                // Guardem les coordenades, però el desarSector es fa al modal
+                dibuixarPolygonTemporal(); // Dibuixa el polígon final
+                const sectorModal = document.getElementById('modalSector');
+                const formaActual = sectorModal.querySelector('#formulariSector #idSector').value ? 'edit' : 'new';
+                if(formaActual === 'new') {
+                    // Si és un sector nou, obrim el modal per omplir la informació
+                    obrirModalSector(null, null); // Null per indicar que és un nou sector dibuixat
+                    // El modal ja tindrà les coordenades temporals a vèrtexsActuals
+                } else {
+                    // Si estem editant, actualitzem les coordenades del sector existent
+                    const sectorId = sectorModal.querySelector('#formulariSector #idSector').value;
+                    const sector = sectors.find(s => s.id === sectorId);
+                    if(sector) {
+                        sector.coordenades = vèrtexsActuals;
+                        desarDades();
+                        renderitzarMapaGeneral();
+                        alert('Coordenades del sector actualitzades.');
+                    }
+                }
+                 modeDibuix = null; // Sortim del mode dibuix
+                 document.body.style.cursor = 'default'; // Restaura cursor
+            } else if (modeDibuix === 'fila') {
+                // La fila es desa al segon clic, no cal fer res aquí
+            }
+            
+            // Netejar dibuix temporal després de finalitzar
+            netejarDibuix('capaDibuix');
+            netejarDibuix('capaDibuixSector');
+            netejarDibuix('capaDibuixFila');
+            modeDibuix = null; // Tornar a mode normal
+            document.body.style.cursor = 'default';
+        }
+
+        function handleMouseMoveMapa(event) {
+            const svg = event.target.closest('svg');
+            const rect = svg.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            if (modeDibuix === 'parcel·la' || modeDibuix === 'sector') {
+                if (vèrtexsActuals.length > 0) {
+                    // Dibuixar línia temporal cap al cursor
+                    const capaDibuix = document.getElementById(modeDibuix === 'parcel·la' ? 'capaDibuix' : 'capaDibuixSector');
+                    if (capaDibuix) {
+                        let line = capaDibuix.querySelector('.linea-temporal');
+                        if (!line) {
+                            line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('class', 'linea-temporal');
+                            line.setAttribute('stroke', colors[modeDibuix].dibuix);
+                            line.setAttribute('stroke-width', '2');
+                            line.setAttribute('stroke-dasharray', '5,5');
+                            capaDibuix.appendChild(line);
+                        }
+                        line.setAttribute('x1', vèrtexsActuals[vèrtexsActuals.length - 1][0]);
+                        line.setAttribute('y1', vèrtexsActuals[vèrtexsActuals.length - 1][1]);
+                        line.setAttribute('x2', mouseX);
+                        line.setAttribute('y2', mouseY);
+                    }
+                }
+            } else if (modeDibuix === 'fila') {
+                 if (vèrtexsActuals.length === 1) {
+                    // Dibuixar lnea temporal per la fila
+                    const capaDibuix = document.getElementById('capaDibuixFila');
+                    if (capaDibuix) {
+                        let line = capaDibuix.querySelector('.linea-temporal');
+                        if (!line) {
+                            line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('class', 'linea-temporal');
+                            line.setAttribute('stroke', colors.fila.dibuix);
+                            line.setAttribute('stroke-width', '3');
+                            line.setAttribute('stroke-linecap', 'round');
+                            line.setAttribute('stroke-dasharray', '5,5');
+                            capaDibuix.appendChild(line);
+                        }
+                        line.setAttribute('x1', vèrtexsActuals[0][0]);
+                        line.setAttribute('y1', vèrtexsActuals[0][1]);
+                        line.setAttribute('x2', mouseX);
+                        line.setAttribute('y2', mouseY);
+                    }
+                }
+            }
+        }
+        
+        function dibuixarPolygonTemporal() {
+            const capaDibuix = document.getElementById(modeDibuix === 'parcel·la' ? 'capaDibuix' : 'capaDibuixSector');
+            if (!capaDibuix) return;
+            capaDibuix.innerHTML = ''; // Netejar dibuix anterior
+
+            if (vèrtexsActuals.length >= 2) {
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                polygon.setAttribute('points', vèrtexsActuals.map(p => p.join(',')).join(' '));
+                polygon.setAttribute('fill', colors[modeDibuix].dibuix);
+                polygon.setAttribute('stroke', colors[modeDibuix].dibuix);
+                polygon.setAttribute('stroke-width', '2');
+                polygon.setAttribute('fill-opacity', '0.7');
+                capaDibuix.appendChild(polygon);
+            }
+
+            // Dibuixar els vèrtexs com a cercles
+            vèrtexsActuals.forEach((p, index) => {
+                const punt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                punt.setAttribute('cx', p[0]);
+                punt.setAttribute('cy', p[1]);
+                punt.setAttribute('r', '5');
+                punt.setAttribute('fill', colors[modeDibuix].dibuix);
+                punt.setAttribute('stroke', 'white');
+                punt.setAttribute('stroke-width', '1');
+                punt.setAttribute('class', 'editable-point');
+                punt.dataset.index = index;
+                capaDibuix.appendChild(punt);
+            });
+        }
+
+        function dibuixarLineaTemporal() {
+            const capaDibuix = document.getElementById(modeDibuix === 'fila' ? 'capaDibuixFila' : ''); // Només per files
+            if (!capaDibuix) return;
+            capaDibuix.innerHTML = '';
+
+            if (vèrtexsActuals.length === 2) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', vèrtexsActuals[0][0]);
+                line.setAttribute('y1', vèrtexsActuals[0][1]);
+                line.setAttribute('x2', vèrtexsActuals[1][0]);
+                line.setAttribute('y2', vèrtexsActuals[1][1]);
+                line.setAttribute('stroke', colors.fila.dibuix);
+                line.setAttribute('stroke-width', '3');
+                line.setAttribute('stroke-linecap', 'round');
+                capaDibuix.appendChild(line);
+            }
+        }
+
+        function iniciarDibuixParcel·la() {
+            modeDibuix = 'parcel·la';
+            document.body.style.cursor = 'crosshair';
+            vèrtexsActuals = [];
+            netejarDibuix('capaDibuix'); // Netejar dibuix anterior
+            alert('Mode dibuix activat. Clica al mapa per afegir vèrtexs. Doble clic per finalitzar i desar.');
+        }
+
+        function iniciarDibuixSector() {
+            modeDibuix = 'sector';
+            document.body.style.cursor = 'crosshair';
+            vèrtexsActuals = [];
+            netejarDibuix('capaDibuixSector');
+            alert('Mode dibuix activat. Clica al mapa per afegir vèrtexs. Doble clic per finalitzar.');
+        }
+        
+        function iniciarDibuixFila() {
+            const sector = sectors.find(s => s.id === idSectorSeleccionat);
+            if (!sector) {
+                alert('Cal seleccionar un sector primer per poder dibuixar una fila.');
+                return;
+            }
+
+            modeDibuix = 'fila';
+            document.body.style.cursor = 'crosshair';
+            vèrtexsActuals = [];
+            netejarDibuix('capaDibuixFila'); // Neteja qualsevol dibuix anterior
+            alert('Mode dibuix activat. Clica el punt d\'inici de la fila i després el punt final. La fila es desarà automàticament.');
+        }
+
+        function desarFila() {
+            if (modeDibuix !== 'fila' || vèrtexsActuals.length !== 2) return;
+
+            const fila = {
+                id: `fila_${Date.now()}`,
+                idSector: idSectorSeleccionat,
+                numero: (filesArbres.filter(f => f.idSector === idSectorSeleccionat).length) + 1,
+                arbres: null, // Es pot omplir des del modal del sector
+                longitud: calcularDistanciaEntrePunts(vèrtexsActuals[0], vèrtexsActuals[1]),
+                coordenades: [...vèrtexsActuals] // Copia per assegurar immutabilitat
+            };
+
+            filesArbres.push(fila);
+            desarDades();
+            renderitzarFiles(idSectorSeleccionat); // Actualitzar taula de files
+            renderitzarMapaGeneral(); // Actualitzar mapa general
+
+            // Netejar el dibuix i tornar a mode normal
+            netejarDibuix('capaDibuixFila');
+            modeDibuix = null;
+            document.body.style.cursor = 'default';
+        }
+
+        // ============================================
+        // UTILITATS MATEMÀTIQUES I GEOMÈTRIQUES
+        // ============================================
+
+        // Calcula l'àrea d'un polígon (en unitats del SVG) usant la fórmula del trapezi
+        function calcularAreaPoligon(coordenades) {
+            if (!coordenades || coordenades.length < 3) return 0;
+            let area = 0;
+            const n = coordenades.length;
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                area += coordenades[i][0] * coordenades[j][1];
+                area -= coordenades[j][0] * coordenades[i][1];
+            }
+            return Math.abs(area) / 2;
+        }
+
+        // Converteix l'àrea de píxels del SVG a hectàrees (aproximat)
+        function convertirAreaSVGHa(areaSVG) {
+            // Suposant que el viewBox del mapa és 1000x700 i representa una àrea
+            // Aquesta conversió és una aproximació i depèn de l'escala real del mapa.
+            // En un cas real, es necessitaria una referència geogràfica o una escala definida.
+            const areaTotalSVG = 1000 * 700; // Àrea total del viewBox
+            const areaExplotacioRepresentada = 10; // Suposem que l'explotació total són 10 ha per exemple
+            return (areaSVG / areaTotalSVG) * areaExplotacioRepresentada;
+        }
+
+        // Comprova si un punt està dins d'un polígon (algoritme de ray casting)
+        function pointInPolygon(point, polygon) {
+            if (!polygon || polygon.length < 3) return false;
+            let isInside = false;
+            const x = point[0], y = point[1];
+            let i = 0, j = polygon.length - 1;
+            while (i < polygon.length) {
+                const xi = polygon[i][0], yi = polygon[i][1];
+                const xj = polygon[j][0], yj = polygon[j][1];
+                
+                const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) isInside = !isInside;
+                j = i++;
+            }
+            return isInside;
+        }
+
+        // Calcula la distància entre dos punts (en unitats del SVG)
+        function calcularDistanciaEntrePunts(p1, p2) {
+            const dx = p1[0] - p2[0];
+            const dy = p1[1] - p2[1];
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        // Calcula el centre d'un polígon (centroid)
+        function calcularCentrePoligon(coordenades) {
+            if (!coordenades || coordenades.length === 0) return [0, 0];
+            let cx = 0, cy = 0;
+            for (let i = 0; i < coordenades.length; i++) {
+                cx += coordenades[i][0];
+                cy += coordenades[i][1];
+            }
+            return [cx / coordenades.length, cy / coordenades.length];
+        }
+
+        // Genera un conjunt de files paral·leles dins d'un polígon
+        function generarFiles(polygonCoordenades, numFiles) {
+            if (!polygonCoordenades || polygonCoordenades.length < 3 || numFiles <= 0) return [];
+
+            // Troba els límits del polígon
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            polygonCoordenades.forEach(p => {
+                minX = Math.min(minX, p[0]);
+                maxX = Math.max(maxX, p[0]);
+                minY = Math.min(minY, p[1]);
+                maxY = Math.max(maxY, p[1]);
+            });
+
+            // Calcula una direcció per les files (simplificat: perpendicular a la base més llarga)
+            let baseVector = [0, 0];
+            let maxBaseLength = 0;
+            for (let i = 0; i < polygonCoordenades.length; i++) {
+                const p1 = polygonCoordenades[i];
+                const p2 = polygonCoordenades[(i + 1) % polygonCoordenades.length];
+                const length = calcularDistanciaEntrePunts(p1, p2);
+                if (length > maxBaseLength) {
+                    maxBaseLength = length;
+                    baseVector = [p2[0] - p1[0], p2[1] - p1[1]];
+                }
+            }
+            // Vector perpendicular (rotat 90 graus)
+            const perpendicularVector = [-baseVector[1], baseVector[0]];
+            const magnitude = Math.sqrt(perpendicularVector[0]**2 + perpendicularVector[1]**2);
+            const unitPerpVector = magnitude > 0 ? [perpendicularVector[0] / magnitude, perpendicularVector[1] / magnitude] : [0, 1]; // Default a vertical si no hi ha base clara
+
+            const filesGenerades = [];
+            const separacioFiles = maxBaseLength / (numFiles + 1); // Separa les files equidistantment
+
+            for (let i = 1; i <= numFiles; i++) {
+                const offset = separacioFiles * i;
+                
+                // Calcula els dos extrems de la fila
+                const p1 = [
+                    polygonCoordenades[0][0] + unitPerpVector[0] * offset,
+                    polygonCoordenades[0][1] + unitPerpVector[1] * offset
+                ];
+                 const p2 = [
+                    polygonCoordenades[0][0] + unitPerpVector[0] * offset + baseVector[0], // Afegir el vector base per allargar la fila
+                    polygonCoordenades[0][1] + unitPerpVector[1] * offset + baseVector[1]
+                ];
+
+                 // Trunca els extrems de la fila si surten del polígon (simplificat: assumint rectangle)
+                 // En una implementació real, es calcularia la intersecció de la línia amb el polígon
+                 const finalP1 = [
+                    Math.max(minX, Math.min(maxX, p1[0])),
+                    Math.max(minY, Math.min(maxY, p1[1]))
+                ];
+                 const finalP2 = [
+                    Math.max(minX, Math.min(maxX, p2[0])),
+                    Math.max(minY, Math.min(maxY, p2[1]))
+                ];
+
+                 // Assegura't que els punts estiguin dins del polígon (o molt a prop)
+                 // Aquesta part és simplificada i pot ser inexacta per polígons complexos
+                 const punt1 = finalP1;
+                 const punt2 = finalP2;
+
+                filesGenerades.push([punt1, punt2]);
+            }
+
+            return filesGenerades;
+        }
+
+        // ============================================
+        // IMPORTACIÓ GEOJSON/KML
+        // ============================================
+
+        function obrirModalImportarGeoJSON() {
+            document.getElementById('modalImportarGeoJSON').classList.add('active');
+        }
+
+        function tancarModalImportarGeoJSON() {
+            document.getElementById('modalImportarGeoJSON').classList.remove('active');
+            document.getElementById('arxiuGeoJSON').value = ''; // Netejar input
+        }
+
+        function processarImportGeoJSON() {
+            const inputArxiu = document.getElementById('arxiuGeoJSON');
+            const arxiu = inputArxiu.files[0];
+
+            if (!arxiu) {
+                alert('Si us plau, selecciona un arxiu.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    let jsonData;
+                    if (arxiu.name.toLowerCase().endsWith('.kml')) {
+                        jsonData = parseKML(content); // Funció per parsejar KML
+                    } else {
+                        jsonData = JSON.parse(content);
+                    }
+
+                    if (!jsonData.features) {
+                        throw new Error('El fitxer no sembla un GeoJSON vàlid o no conté "features".');
+                    }
+
+                    let parcel·lesAfegides = 0;
+                    jsonData.features.forEach(feature => {
+                        let coords = [];
+                        let area = 0;
+                        
+                        // Extreure coordenades segons el tipus de geometria
+                        if (feature.geometry.type === 'Polygon') {
+                            coords = feature.geometry.coordinates[0].map(c => [c[1], c[0]]); // GeoJSON és [lon, lat], SVG vol [x, y] -> [lat, lon]
+                            area = calcularAreaPoligon(coords);
+                        } else if (feature.geometry.type === 'MultiPolygon') {
+                            // Agrupem totes les geometries Polygon d'un MultiPolygon
+                            feature.geometry.coordinates.forEach(polyCoords => {
+                                polyCoords[0].forEach(point => { // Iterem sobre cada punt del polígon
+                                    coords.push([point[1], point[0]]); // GeoJSON és [lon, lat], invertim a [lat, lon] per a SVG
+                                });
+                            });
+                            area = calcularAreaPoligon(coords); // Calculem l'àrea total del MultiPolygon
+                        } else {
+                            console.warn(`Geometria no suportada: ${feature.geometry.type}`);
+                            return; // Ignora geometries no suportades
+                        }
+
+                        // Si tenim coordenades vàlides i una àrea estimada
+                        if (coords.length >= 3 && area > 0) {
+                            const novaParcel·la = {
+                                id: `import_${Date.now()}_${parcel·lesAfegides++}`,
+                                nom: feature.properties.name || feature.properties.NOM || `Parcel·la Importada ${parcel·lesAfegides}`,
+                                refCadastral: feature.properties.cadastral || feature.properties.REFERENCIA || '',
+                                area: area, // L'àrea calculada
+                                coordenades: coords,
+                                ubicació: feature.properties.location || '',
+                                tipusSòl: feature.properties.soil_type || 'desconegut',
+                                reg: feature.properties.irrigation || 'cap',
+                                notes: feature.properties.notes || ''
+                            };
+                            parcel·les.push(novaParcel·la);
+                        }
+                    });
+
+                    if (parcel·lesAfegides > 0) {
+                        desarDades();
+                        renderitzarParcel·les();
+                        renderitzarMapaGeneral();
+                        alert(`✅ S'han importat ${parcel·lesAfegides} parcel·les.`);
+                        tancarModalImportarGeoJSON();
+                    } else {
+                        alert('No s\'han trobat parcel·les vàlides per importar en aquest fitxer.');
+                    }
+
+                } catch (error) {
+                    alert('❌ Error en processar el fitxer: ' + error.message);
+                    console.error(error);
+                }
+            };
+            reader.readAsText(arxiu);
+        }
+        
+        // Funció placeholder per parsejar KML (requereix una llibreria o implementació més robusta)
+        function parseKML(kmlContent) {
+            console.warn("Parseig de KML no implementat completament. Utilitzant GeoJSON si és possible.");
+            // Intentar extraure GeometryCollection si KML té elements <coordinates>
+            // En un entorn real, es recomana una llibreria com 'tokml' o 'geoxml3'
+            
+            // Intentem buscar tags de coordenades i convertir-los a un format GeoJSON simple
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(kmlContent, "text/xml");
+            
+            const features = [];
+            const placemarks = xmlDoc.getElementsByTagName('Placemark');
+            
+            for (let i = 0; i < placemarks.length; i++) {
+                const placemark = placemarks[i];
+                const name = placemark.getElementsByTagName('name')[0]?.textContent || '';
+                const coordinatesNode = placemark.getElementsByTagName('coordinates')[0];
+                
+                if (coordinatesNode) {
+                    const coordsText = coordinatesNode.textContent.trim();
+                    const coordsArray = coordsText.split(/\s+/) // Separa per espais o salts de línia
+                                             .map(c => c.split(',').map(parseFloat)); // Separa lon,lat,alt
+                    
+                    // Filtra coordenades no vàlides
+                    const validCoords = coordsArray.filter(c => c.length >= 2 && !isNaN(c[0]) && !isNaN(c[1]));
+
+                    if (validCoords.length > 0) {
+                        features.push({
+                            type: 'Feature',
+                            properties: { name: name },
+                            geometry: {
+                                type: 'Polygon', // Assumim Polygon per simplicitat, KML pot tenir LineString, etc.
+                                coordinates: [[validCoords]] // GeoJSON espera [[points]] per Poligon
+                            }
+                        });
+                    }
+                }
+            }
+            
+            return { type: 'FeatureCollection', features: features };
+        }
+
+
+        // ============================================
+        // UTILITATS
+        // ============================================
+        
+        function formatarData(dataString) {
+            if (!dataString) return '-';
+            try {
+                const data = new Date(dataString);
+                const mesos = ['gen', 'feb', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'des'];
+                return `${data.getDate()} ${mesos[data.getMonth()]} ${data.getFullYear()}`;
+            } catch (e) {
+                return dataString; // Torna la string original si falla el format
+            }
+        }
+
+        // ============================================
+        // INICIAR L'APLICACIÓ
+        // ============================================
+        
+        window.addEventListener('DOMContentLoaded', inicialitzar);
+    </script>
