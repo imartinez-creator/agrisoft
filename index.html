@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-    <!-- Capçalera -->
     <header>
         <div class="container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -15,34 +14,28 @@
                     <div class="logo">🌱 AGRISOFT</div>
                     <div style="font-size: 0.875rem;">Sistema de Gestió de Finques Fruiteres</div>
                 </div>
-                <!-- Afegim botons per guardar i carregar arxius JSON -->
                 <div style="display: flex; gap: 1rem;">
-                    <!-- Removed download and upload buttons -->
+                    </div>
                 </div>
-                <!-- Fi dels botons de guardar/carregar -->
-            </div>
         </div>
     </header>
 
-    <!-- Navegació -->
     <nav>
         <div class="container">
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="mostrarSeccio('tauler')">📊 Tauler</button>
                 <button class="nav-tab" onclick="mostrarSeccio('parcel·les')">🗺️ Parcel·les</button>
-                <!-- Added new Sectors tab -->
                 <button class="nav-tab" onclick="mostrarSeccio('sectors')">🌳 Sectors</button>
                 <button class="nav-tab" onclick="mostrarSeccio('cultius')">🌳 Cultius</button>
+                <button class="nav-tab" onclick="mostrarSeccio('especie')">🌳 Especie</button>
                 <button class="nav-tab" onclick="mostrarSeccio('historic')">📈 Històric</button>
                 <button class="nav-tab" onclick="mostrarSeccio('mapa')">🗺️ Mapa</button>
             </div>
         </div>
     </nav>
 
-    <!-- Contingut Principal -->
     <main>
         <div class="container">
-            <!-- Secció Tauler -->
             <section id="tauler" class="section active">
                 <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Tauler Principal</h1>
                 
@@ -59,13 +52,11 @@
                 </div>
             </section>
 
-            <!-- Secció Parcel·les -->
             <section id="parcel·les" class="section">
                 <div class="toolbar">
                     <h1 style="font-size: 2rem;">Gestió de Parcel·les Cadastrals</h1>
                     <div style="display: flex; gap: 0.5rem;">
                         <button class="btn btn-primary" onclick="obrirModalParcel·la()">+ Nova Parcel·la</button>
-                        <!-- Added button to import GeoJSON/KML -->
                         <button class="btn btn-outline" onclick="obrirModalImportarGeoJSON()">Importar GeoJSON/KML</button>
                     </div>
                 </div>
@@ -74,7 +65,6 @@
                     <input type="text" class="search-input" placeholder="Cercar parcel·les..." id="cercaParcel·les" oninput="filtrarParcel·les()">
                 </div>
 
-                <!-- Added map for drawing parcels with polygon tools -->
                 <div class="card" style="margin-bottom: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h2 class="card-title" style="margin: 0;">Mapa Cadastral</h2>
@@ -82,8 +72,7 @@
                             <button class="btn btn-sm" onclick="iniciarDibuixParcel·la()" id="btnDibuixarParcel·la">
                                 ✏️ Dibuixar Parcel·la
                             </button>
-                            <!-- Removed Export GeoJSON button -->
-                        </div>
+                            </div>
                     </div>
                     <svg class="map-svg" id="svgMapaParcel·les" viewBox="0 0 1000 700" style="cursor: crosshair;">
                         <defs>
@@ -107,7 +96,6 @@
                 <div class="grid" id="graellaParcel·les"></div>
             </section>
 
-            <!-- Added new Sectors section -->
             <section id="sectors" class="section">
                 <div class="toolbar">
                     <h1 style="font-size: 2rem;">Gestió de Sectors de Cultiu</h1>
@@ -118,7 +106,7 @@
                     <div>ℹ️</div>
                     <div>
                         <strong>Sectors de Cultiu:</strong> Un sector és una unitat agronòmica que pot ocupar part d'una parcel·la cadastral o estendre's per múltiples parcel·les. 
-                        Cada sector té un cultiu i varietat específics.
+                        Cada sector té un cultiu i espècie específics.
                     </div>
                 </div>
 
@@ -140,7 +128,6 @@
                 <div class="grid" id="graellaSectors"></div>
             </section>
 
-            <!-- Secció Cultius -->
             <section id="cultius" class="section">
                 <div class="toolbar">
                     <h1 style="font-size: 2rem;">Gestió de Cultius</h1>
@@ -160,7 +147,20 @@
                 <div class="grid" id="graellaCultius"></div>
             </section>
 
-            <!-- Secció Històric -->
+            <section id="especie" class="section">
+                <div class="toolbar">
+                    <h1 style="font-size: 2rem;">Gestió d'Espècies</h1>
+                    <button class="btn btn-primary" onclick="obrirModalEspecie()">+ Nova Espècie</button>
+                </div>
+                <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                    <div>ℹ️</div>
+                    <div>
+                        <strong>Gestió d'Espècies:</strong> Aquí pots definir les diferents espècies (ex: Poma Golden, Pera Conference) que cultives.
+                    </div>
+                </div>
+                <div class="grid" id="graellaEspecies"></div>
+            </section>
+
             <section id="historic" class="section">
                 <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Històric i Anàlisi</h1>
 
@@ -191,7 +191,6 @@
                 </div>
             </section>
 
-            <!-- Secció Mapa -->
             <section id="mapa" class="section">
                 <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Mapa General de l'Explotació</h1>
 
@@ -224,7 +223,6 @@
         </div>
     </main>
 
-    <!-- Added Modal for importing GeoJSON/KML -->
     <div id="modalImportarGeoJSON" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -251,7 +249,6 @@
         </div>
     </div>
 
-    <!-- Added Modal for Sector management -->
     <div id="modalSector" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -269,18 +266,11 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Varietat de Fruita *</label>
-                            <select class="form-select" id="varietatSector" required onchange="actualitzarInfoVarietatSector()">
-                                <option value="">Seleccionar varietat</option>
-                                <option value="poma-golden">Poma Golden Delicious</option>
-                                <option value="poma-fuji">Poma Fuji</option>
-                                <option value="pera-conference">Pera Conference</option>
-                                <option value="pera-blanquilla">Pera Blanquilla</option>
-                                <option value="préssec-groc">Préssec Groc</option>
-                                <option value="cirera-picota">Cirera Picota</option>
-                                <option value="pruna-claudia">Pruna Claudia</option>
-                            </select>
-                            <div id="infoVarietatSector" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                            <label class="form-label">Espècie *</label>
+                            <select class="form-select" id="especieSector" required onchange="actualitzarInfoEspecieSector()">
+                                <option value="">Seleccionar espècie</option>
+                                </select>
+                            <div id="infoEspecieSector" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Superfície (ha) *</label>
@@ -332,7 +322,6 @@
         </div>
     </div>
 
-    <!-- Added Modal for Tree Row management -->
     <div id="modalFiles" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
@@ -360,7 +349,7 @@
 
                 <div style="margin-top: 1rem;">
                     <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Files Registrades</h4>
-                    <table style="font-size: 0.875rem;">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Número</th>
@@ -379,7 +368,6 @@
         </div>
     </div>
 
-    <!-- Modal Parcel·la -->
     <div id="modalParcel·la" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -406,7 +394,6 @@
                         </div>
                     </div>
 
-                    <!-- Added GPS coordinates input -->
                     <div class="form-group">
                         <label class="form-label">Coordenades GPS del Polígon</label>
                         <textarea class="form-textarea" id="coordenadesParcel·la" placeholder="Format: lat1,lon1; lat2,lon2; lat3,lon3; ..." style="min-height: 80px;"></textarea>
@@ -454,7 +441,6 @@
         </div>
     </div>
 
-    <!-- Modal Cultiu -->
     <div id="modalCultiu" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -474,18 +460,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Varietat de Fruita *</label>
-                        <select class="form-select" id="varietatCultiu" required onchange="actualitzarInfoVarietat()">
-                            <option value="">Seleccionar varietat</option>
-                            <option value="poma-golden">Poma Golden Delicious</option>
-                            <option value="poma-fuji">Poma Fuji</option>
-                            <option value="pera-conference">Pera Conference</option>
-                            <option value="pera-blanquilla">Pera Blanquilla</option>
-                            <option value="préssec-groc">Préssec Groc</option>
-                            <option value="cirera-picota">Cirera Picota</option>
-                            <option value="pruna-claudia">Pruna Claudia</option>
-                        </select>
-                        <div id="infoVarietat" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                        <label class="form-label">Espècie *</label>
+                        <select class="form-select" id="especieCultiu" required onchange="actualitzarInfoEspecie()">
+                            <option value="">Seleccionar espècie</option>
+                            </select>
+                        <div id="infoEspecie" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
                     </div>
 
                     <div class="form-row">
@@ -532,7 +511,6 @@
         </div>
     </div>
 
-    <!-- Modal Collita -->
     <div id="modalCollita" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -582,8 +560,50 @@
         </div>
     </div>
 
-    <!-- Input ocult per a l'arxiu -->
-    <!-- Removed file input for loading archives -->
+    <div id="modalEspecie" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="titolModalEspecie">Nova Espècie</h3>
+                <button class="modal-close" onclick="tancarModalEspecie()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formulariEspecie">
+                    <div class="form-group">
+                        <label class="form-label">Identificador (clau) *</label>
+                        <input type="text" class="form-input" id="idEspecie" required placeholder="Ex: poma-golden (sense espais)">
+                        <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);">
+                            Identificador únic per al sistema (ex: poma-golden, pera-conference). No es podrà canviar.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nom Espècie *</label>
+                        <input type="text" class="form-input" id="nomEspecie" required placeholder="Ex: Poma Golden Delicious">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipus *</label>
+                        <input type="text" class="form-input" id="tipusEspecie" required placeholder="Ex: Poma, Pera, Préssec">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Dies de Maduració (aprox.)</label>
+                            <input type="number" class="form-input" id="diesMaduracióEspecie">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rendiment/Arbre (kg aprox.)</label>
+                            <input type="number" class="form-input" id="rendimentEspecie">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="tancarModalEspecie()">Cancel·lar</button>
+                <button class="btn btn-primary" onclick="desarEspecie()">Desar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="assets/script.js"></script>
 </body>
