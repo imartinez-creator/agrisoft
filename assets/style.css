@@ -19,6 +19,9 @@
 }
 
 body {
+    background-image: url('img/fons.png');
+    background-repeat: no-repeat;
+    background-size: cover;
     font-family: Arial, sans-serif;
     background-color: var(--fons);
     color: var(--text);
@@ -33,8 +36,8 @@ body {
 
 /* === CAPÇALERA === */
 header {
-    background-color: var(--verd-fosc);
-    color: white;
+    background-color: transparent;
+    color: rgb(0, 0, 0);
     padding: 1rem 0;
 }
 
@@ -45,8 +48,7 @@ header {
 
 /* === NAVEGACIÓ === */
 nav {
-    background-color: var(--blanc);
-    border-bottom: 1px solid var(--gris-clar);
+    background-color: transparent;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -64,17 +66,17 @@ nav {
     border: none;
     border-bottom: 2px solid transparent;
     cursor: pointer;
-    color: var(--text-gris);
+    color: black;
 }
 
 .nav-tab:hover {
-    color: var(--verd-fosc);
-    background-color: var(--fons);
+    color: black;
+    background-color: rgba(255, 255, 255, 0.281);
 }
 
 .nav-tab.active {
-    color: var(--verd-fosc);
-    border-bottom-color: var(--verd-fosc);
+    color: black;
+    border-bottom-color: black;
     font-weight: 600;
 }
 
@@ -124,14 +126,14 @@ main {
 
 .stat-label {
     font-size: 0.875rem;
-    color: var(--text-gris);
+    color: black;
     margin-bottom: 0.5rem;
 }
 
 .stat-value {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--verd-fosc);
+    color: black;
 }
 
 /* === GRAELLA D'ELEMENTS === */
@@ -160,7 +162,7 @@ main {
 
 .item-subtitle {
     font-size: 0.875rem;
-    color: var(--text-gris);
+    color: black;
 }
 
 .item-info {
@@ -175,7 +177,7 @@ main {
 }
 
 .info-label {
-    color: var(--text-gris);
+    color:black;
 }
 
 /* === BOTONS === */
@@ -189,12 +191,13 @@ main {
 }
 
 .btn-primary {
-    background-color: var(--verd-fosc);
-    color: white;
+    background-color: transparent;
+    color: black;
+    border: 1px solid var(--gris-clar);
 }
 
 .btn-primary:hover {
-    background-color: var(--verd-clar);
+    background-color: rgba(255, 255, 255, 0.281);
 }
 
 .btn-outline {
@@ -262,7 +265,7 @@ main {
 .form-select:focus,
 .form-textarea:focus {
     outline: none;
-    border-color: var(--verd-fosc);
+    border-color: black;
 }
 
 .form-textarea {
@@ -321,7 +324,7 @@ main {
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: var(--text-gris);
+    color: black;
 }
 
 .modal-body {
@@ -385,7 +388,7 @@ main {
 
 .chart-bar {
     flex: 1;
-    background: var(--verd-fosc);
+    background: black;
     border-radius: 4px 4px 0 0;
     position: relative;
     min-height: 20px;
@@ -413,7 +416,7 @@ main {
     flex: 1;
     text-align: center;
     font-size: 0.75rem;
-    color: var(--text-gris);
+    color: black;
 }
 
 /* === TAULA === */
@@ -482,7 +485,7 @@ tr:hover {
 .empty-state {
     text-align: center;
     padding: 3rem 1rem;
-    color: var(--text-gris);
+    color: black;
 }
 
 /* === RESPONSIVE === */

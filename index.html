@@ -573,7 +573,616 @@
                         <input type="text" class="form-input" id="idEspecie" required placeholder="Ex: poma-golden (sense espais)">
                         <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);">
                             Identificador únic per al sistema (ex: poma-golden, pera-conference). No es podrà canviar.
-                        </div>
+                        </div><!DOCTYPE html>
+                        <html lang="ca">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>AGRISOFT - Gestió de Finques Fruiteres</title>
+                            <link rel="stylesheet" href="assets/style.css">
+                        </head>
+                        <body>
+                            <header>
+                                <div class="container">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div class="logo">AGRISOFT</div>
+                                            <div style="font-size: 0.875rem;">Sistema de Gestió de Finques Fruiteres</div>
+                                        </div>
+                                        <div style="display: flex; gap: 1rem;">
+                                            </div>
+                                        </div>
+                                </div>
+                            </header>
+                        
+                            <nav>
+                                <div class="container">
+                                    <div class="nav-tabs">
+                                        <button class="nav-tab active" onclick="mostrarSeccio('tauler')">📊 Tauler</button>
+                                        <button class="nav-tab" onclick="mostrarSeccio('parcel·les')">🗺️ Parcel·les</button>
+                                        <button class="nav-tab" onclick="mostrarSeccio('sectors')">🌳 Sectors</button>
+                                        <button class="nav-tab" onclick="mostrarSeccio('cultius')">🌳 Cultius</button>
+                                        <button class="nav-tab" onclick="mostrarSeccio('especie')">🌳 Especie</button>
+                                        <button class="nav-tab" onclick="mostrarSeccio('historic')">📈 Històric</button>
+                                        <button class="nav-tab" onclick="mostrarSeccio('mapa')">🗺️ Mapa</button>
+                                    </div>
+                                </div>
+                            </nav>
+                        
+                            <main>
+                                <div class="container">
+                                    <section id="tauler" class="section active">
+                                        <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Tauler Principal</h1>
+                                        
+                                        <div class="stats-grid" id="estadistiquesTauler"></div>
+                        
+                                        <div class="card">
+                                            <h2 class="card-title">Properes Collites</h2>
+                                            <div id="properesCollites"></div>
+                                        </div>
+                        
+                                        <div class="card">
+                                            <h2 class="card-title">Resum de Parcel·les</h2>
+                                            <div class="grid" id="resumParcel·les"></div>
+                                        </div>
+                                    </section>
+                        
+                                    <section id="parcel·les" class="section">
+                                        <div class="toolbar">
+                                            <h1 style="font-size: 2rem;">Gestió de Parcel·les Cadastrals</h1>
+                                            <div style="display: flex; gap: 0.5rem;">
+                                                <button class="btn btn-primary" onclick="obrirModalParcel·la()">Nova Parcel·la</button>
+                                                <button class="btn btn-outline" onclick="obrirModalImportarGeoJSON()">Importar GeoJSON/KML</button>
+                                            </div>
+                                        </div>
+                        
+                                        <div class="toolbar">
+                                            <input type="text" class="search-input" placeholder="Cercar parcel·les..." id="cercaParcel·les" oninput="filtrarParcel·les()">
+                                        </div>
+                        
+                                        <div class="card" style="margin-bottom: 1.5rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                                <h2 class="card-title" style="margin: 0;">Mapa Cadastral</h2>
+                                                <div style="display: flex; gap: 0.5rem;">
+                                                    <button class="btn btn-sm" onclick="iniciarDibuixParcel·la()" id="btnDibuixarParcel·la">
+                                                        ✏️ Dibuixar Parcel·la
+                                                    </button>
+                                                    </div>
+                                            </div>
+                                            <svg class="map-svg" id="svgMapaParcel·les" viewBox="0 0 1000 700" style="cursor: crosshair;">
+                                                <defs>
+                                                    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                                                        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e7e5e4" stroke-width="1"/>
+                                                    </pattern>
+                                                </defs>
+                                                <rect width="1000" height="700" fill="url(#grid)" />
+                                                <g id="capaParcel·les"></g>
+                                                <g id="capaSectors"></g>
+                                                <g id="capaFiles"></g>
+                                                <g id="capaDibuix"></g>
+                                            </svg>
+                                            <div style="margin-top: 1rem; padding: 1rem; background: var(--fons); border-radius: 6px;">
+                                                <div style="font-size: 0.875rem; color: var(--text-gris);">
+                                                    <strong>Mode d'ús:</strong> Fes clic a "Dibuixar Parcel·la" i després clica al mapa per definir els vèrtexs del polígon. Doble clic per finalitzar.
+                                                </div>
+                                            </div>
+                                        </div>
+                        
+                                        <div class="grid" id="graellaParcel·les"></div>
+                                    </section>
+                        
+                                    <section id="sectors" class="section">
+                                        <div class="toolbar">
+                                            <h1 style="font-size: 2rem;">Gestió de Sectors de Cultiu</h1>
+                                            <button class="btn btn-primary" onclick="obrirModalSector()">Nou Sector</button>
+                                        </div>
+                        
+                                        <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                                            <div>ℹ️</div>
+                                            <div>
+                                                <strong>Sectors de Cultiu:</strong> Un sector és una unitat agronòmica que pot ocupar part d'una parcel·la cadastral o estendre's per múltiples parcel·les. 
+                                                Cada sector té un cultiu i espècie específics.
+                                            </div>
+                                        </div>
+                        
+                                        <div class="card" style="margin-bottom: 1.5rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                                <h2 class="card-title" style="margin: 0;">Mapa de Sectors</h2>
+                                                <button class="btn btn-sm" onclick="iniciarDibuixSector()" id="btnDibuixarSector">
+                                                    ✏️ Dibuixar Sector
+                                                </button>
+                                            </div>
+                                            <svg class="map-svg" id="svgMapaSectors" viewBox="0 0 1000 700" style="cursor: crosshair;">
+                                                <rect width="1000" height="700" fill="url(#grid)" />
+                                                <g id="capaParcel·lesSectors"></g>
+                                                <g id="capaSectorsLlista"></g>
+                                                <g id="capaDibuixSector"></g>
+                                            </svg>
+                                        </div>
+                        
+                                        <div class="grid" id="graellaSectors"></div>
+                                    </section>
+                        
+                                    <section id="cultius" class="section">
+                                        <div class="toolbar">
+                                            <h1 style="font-size: 2rem;">Gestió de Cultius</h1>
+                                            <button class="btn btn-primary" onclick="obrirModalCultiu()">Nou Cultiu</button>
+                                        </div>
+                        
+                                        <div class="toolbar">
+                                            <input type="text" class="search-input" placeholder="Cercar cultius..." id="cercaCultius" oninput="filtrarCultius()">
+                                            <select class="form-select" style="width: 200px;" id="filtreEstatCultius" onchange="filtrarCultius()">
+                                                <option value="">Tots els estats</option>
+                                                <option value="actiu">Actiu</option>
+                                                <option value="collita">En collita</option>
+                                                <option value="completat">Completat</option>
+                                            </select>
+                                        </div>
+                        
+                                        <div class="grid" id="graellaCultius"></div>
+                                    </section>
+                        
+                                    <section id="especie" class="section">
+                                        <div class="toolbar">
+                                            <h1 style="font-size: 2rem;">Gestió d'Espècies</h1>
+                                            <button class="btn btn-primary" onclick="obrirModalEspecie()">Nova Espècie</button>
+                                        </div>
+                                        <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                                            <div>ℹ️</div>
+                                            <div>
+                                                <strong>Gestió d'Espècies:</strong> Aquí pots definir les diferents espècies (ex: Poma Golden, Pera Conference) que cultives.
+                                            </div>
+                                        </div>
+                                        <div class="grid" id="graellaEspecies"></div>
+                                    </section>
+                        
+                                    <section id="historic" class="section">
+                                        <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Històric i Anàlisi</h1>
+                        
+                                        <div class="stats-grid" id="estadistiquesHistoric"></div>
+                        
+                                        <div class="card">
+                                            <h2 class="card-title">Producció per Mes</h2>
+                                            <div id="graficProducció"></div>
+                                        </div>
+                        
+                                        <div class="card">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                                <h2 class="card-title" style="margin: 0;">Registres de Collita</h2>
+                                                <button class="btn btn-primary btn-sm" onclick="obrirModalCollita()">Nou Registre</button>
+                                            </div>
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Data</th>
+                                                        <th>Parcel·la</th>
+                                                        <th>Cultiu</th>
+                                                        <th>Quantitat (kg)</th>
+                                                        <th>Qualitat</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="taulaCollites"></tbody>
+                                            </table>
+                                        </div>
+                                    </section>
+                        
+                                    <section id="mapa" class="section">
+                                        <h1 style="font-size: 2rem; margin-bottom: 1.5rem;">Mapa General de l'Explotació</h1>
+                        
+                                        <div class="card">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                                <h2 class="card-title" style="margin: 0;">Vista Completa</h2>
+                                                <div style="display: flex; gap: 0.5rem;">
+                                                    <select class="form-select" style="width: 200px;" id="vistaCapaMapa" onchange="canviarCapaMapa()">
+                                                        <option value="parcel·les">Parcel·les Cadastrals</option>
+                                                        <option value="sectors">Sectors de Cultiu</option>
+                                                        <option value="files">Files d'Arbres</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <svg class="map-svg" id="svgMapa" viewBox="0 0 1000 700">
+                                                <rect width="1000" height="700" fill="url(#grid)" />
+                                                <g id="capaMapaGeneral"></g>
+                                            </svg>
+                                            <div class="map-legend" id="llegendaMapa"></div>
+                                        </div>
+                        
+                                        <div class="card" id="infoParcel·laSeleccionada" style="display: none; margin-top: 1.5rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                                <h2 class="card-title" style="margin: 0;">Informació de Parcel·la</h2>
+                                                <button class="btn btn-outline btn-sm" onclick="netejarSeleccioParcel·la()">Tancar</button>
+                                            </div>
+                                            <div id="detallsParcel·laSeleccionada"></div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </main>
+                        
+                            <div id="modalImportarGeoJSON" class="modal">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title">Importar Parcel·les (GeoJSON/KML)</h3>
+                                        <button class="modal-close" onclick="tancarModalImportarGeoJSON()">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label class="form-label">Selecciona arxiu GeoJSON o KML</label>
+                                            <input type="file" class="form-input" id="arxiuGeoJSON" accept=".geojson,.json,.kml">
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <div>ℹ️</div>
+                                            <div>
+                                                <strong>Format suportat:</strong> GeoJSON amb geometries de tipus Polygon o MultiPolygon. 
+                                                Les propietats seran importades com a dades de la parcel·la.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-outline" onclick="tancarModalImportarGeoJSON()">Cancel·lar</button>
+                                        <button class="btn btn-primary" onclick="processarImportGeoJSON()">Importar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div id="modalSector" class="modal">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title" id="titolModalSector">Nou Sector de Cultiu</h3>
+                                        <button class="modal-close" onclick="tancarModalSector()">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="formulariSector">
+                                            <input type="hidden" id="idSector">
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Nom del Sector *</label>
+                                                <input type="text" class="form-input" id="nomSector" required placeholder="Ex: Sector A - Pomeres Golden">
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Espècie *</label>
+                                                    <select class="form-select" id="especieSector" required onchange="actualitzarInfoEspecieSector()">
+                                                        <option value="">Seleccionar espècie</option>
+                                                        </select>
+                                                    <div id="infoEspecieSector" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Superfície (ha) *</label>
+                                                    <input type="number" class="form-input" id="superficieSector" step="0.01" required>
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Data de Plantació</label>
+                                                    <input type="date" class="form-input" id="dataPlantacioSector">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Nombre de Files *</label>
+                                                    <input type="number" class="form-input" id="nombreFilesSector" required>
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Arbres per Fila (mitjana)</label>
+                                                    <input type="number" class="form-input" id="arbresPerFilaSector">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Estat</label>
+                                                    <select class="form-select" id="estatSector">
+                                                        <option value="actiu">Actiu</option>
+                                                        <option value="collita">En collita</option>
+                                                        <option value="completat">Completat</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Parcel·les que ocupa (informació)</label>
+                                                <input type="text" class="form-input" id="parcel·lesSector" placeholder="Es calcularà automàticament segons el polígon" disabled>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Notes</label>
+                                                <textarea class="form-textarea" id="notesSector"></textarea>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-outline" onclick="tancarModalSector()">Cancel·lar</button>
+                                        <button class="btn btn-primary" onclick="desarSector()">Desar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div id="modalFiles" class="modal">
+                                <div class="modal-content" style="max-width: 900px;">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title" id="titolModalFiles">Gestió de Files d'Arbres</h3>
+                                        <button class="modal-close" onclick="tancarModalFiles()">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="infoSectorFiles" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--fons); border-radius: 6px;"></div>
+                                        
+                                        <div style="margin-bottom: 1.5rem;">
+                                            <button class="btn btn-primary btn-sm" onclick="iniciarDibuixFila()" id="btnDibuixarFila">
+                                                ✏️ Dibuixar Fila
+                                            </button>
+                                            <button class="btn btn-outline btn-sm" onclick="generarFilesAutomatiques()">
+                                                🤖 Generar Files Automàtiques
+                                            </button>
+                                        </div>
+                        
+                                        <svg class="map-svg" id="svgMapaFiles" viewBox="0 0 800 600" style="cursor: crosshair; height: 400px;">
+                                            <rect width="800" height="600" fill="url(#grid)" />
+                                            <g id="capaPoligonSectorFiles"></g>
+                                            <g id="capaFilesLlista"></g>
+                                            <g id="capaDibuixFila"></g>
+                                        </svg>
+                        
+                                        <div style="margin-top: 1rem;">
+                                            <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Files Registrades</h4>
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Número</th>
+                                                        <th>Arbres</th>
+                                                        <th>Longitud (m)</th>
+                                                        <th>Accions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="taulaFiles"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-primary" onclick="tancarModalFiles()">Tancar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div id="modalParcel·la" class="modal">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title" id="titolModalParcel·la">Nova Parcel·la Cadastral</h3>
+                                        <button class="modal-close" onclick="tancarModalParcel·la()">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="formulariParcel·la">
+                                            <input type="hidden" id="idParcel·la">
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Nom de la Parcel·la *</label>
+                                                <input type="text" class="form-input" id="nomParcel·la" required>
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Referència Cadastral *</label>
+                                                    <input type="text" class="form-input" id="refCadastralParcel·la" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Superfície (ha) *</label>
+                                                    <input type="number" class="form-input" id="areaParcel·la" step="0.01" required>
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Coordenades GPS del Polígon</label>
+                                                <textarea class="form-textarea" id="coordenadesParcel·la" placeholder="Format: lat1,lon1; lat2,lon2; lat3,lon3; ..." style="min-height: 80px;"></textarea>
+                                                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);">
+                                                    Introdueix coordenades GPS separades per punt i coma, o dibuixa al mapa
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Ubicació</label>
+                                                <input type="text" class="form-input" id="ubicacióParcel·la" placeholder="Ex: Zona Nord, Sector A">
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Tipus de Sòl</label>
+                                                    <select class="form-select" id="tipusSòlParcel·la">
+                                                        <option value="argilós">Argilós</option>
+                                                        <option value="arenós">Arenós</option>
+                                                        <option value="llimós">Llimós</option>
+                                                        <option value="franc">Franc</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Sistema de Reg</label>
+                                                    <select class="form-select" id="regParcel·la">
+                                                        <option value="goteig">Goteig</option>
+                                                        <option value="aspersió">Aspersió</option>
+                                                        <option value="inundació">Inundació</option>
+                                                        <option value="cap">Cap</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Notes</label>
+                                                <textarea class="form-textarea" id="notesParcel·la"></textarea>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-outline" onclick="tancarModalParcel·la()">Cancel·lar</button>
+                                        <button class="btn btn-primary" onclick="desarParcel·la()">Desar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div id="modalCultiu" class="modal">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title" id="titolModalCultiu">Nou Cultiu</h3>
+                                        <button class="modal-close" onclick="tancarModalCultiu()">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="formulariCultiu">
+                                            <input type="hidden" id="idCultiu">
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Parcel·la *</label>
+                                                <select class="form-select" id="idParcel·laCultiu" required onchange="actualitzarInfoParcel·laCultiu()">
+                                                    <option value="">Seleccionar parcel·la</option>
+                                                </select>
+                                                <div id="infoParcel·laCultiu" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Espècie *</label>
+                                                <select class="form-select" id="especieCultiu" required onchange="actualitzarInfoEspecie()">
+                                                    <option value="">Seleccionar espècie</option>
+                                                    </select>
+                                                <div id="infoEspecie" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);"></div>
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Data de Plantació *</label>
+                                                    <input type="date" class="form-input" id="dataPlantació" required onchange="calcularDataCollita()">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Data Estimada de Collita</label>
+                                                    <input type="date" class="form-input" id="dataCollita" readonly>
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Nombre d'Arbres</label>
+                                                    <input type="number" class="form-input" id="nombreArbres" min="1">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Densitat (arbres/ha)</label>
+                                                    <input type="number" class="form-input" id="densitat" value="400" onchange="calcularNombreArbres()">
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Estat</label>
+                                                <select class="form-select" id="estatCultiu">
+                                                    <option value="actiu">Actiu</option>
+                                                    <option value="collita">En collita</option>
+                                                    <option value="completat">Completat</option>
+                                                </select>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Notes</label>
+                                                <textarea class="form-textarea" id="notesCultiu"></textarea>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-outline" onclick="tancarModalCultiu()">Cancel·lar</button>
+                                        <button class="btn btn-primary" onclick="desarCultiu()">Desar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div id="modalCollita" class="modal">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title">Nou Registre de Collita</h3>
+                                        <button class="modal-close" onclick="tancarModalCollita()">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="formulariCollita">
+                                            <div class="form-group">
+                                                <label class="form-label">Cultiu *</label>
+                                                <select class="form-select" id="idCultiuCollita" required>
+                                                    <option value="">Seleccionar cultiu</option>
+                                                </select>
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Data de Collita *</label>
+                                                    <input type="date" class="form-input" id="dataCollitaRegistre" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Quantitat (kg) *</label>
+                                                    <input type="number" class="form-input" id="quantitatCollita" step="0.1" required>
+                                                </div>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Qualitat</label>
+                                                <select class="form-select" id="qualitatCollita">
+                                                    <option value="excel·lent">Excel·lent</option>
+                                                    <option value="bona">Bona</option>
+                                                    <option value="mitjana">Mitjana</option>
+                                                    <option value="baixa">Baixa</option>
+                                                </select>
+                                            </div>
+                        
+                                            <div class="form-group">
+                                                <label class="form-label">Notes</label>
+                                                <textarea class="form-textarea" id="notesCollita"></textarea>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-outline" onclick="tancarModalCollita()">Cancel·lar</button>
+                                        <button class="btn btn-primary" onclick="desarCollita()">Desar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div id="modalEspecie" class="modal">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title" id="titolModalEspecie">Nova Espècie</h3>
+                                        <button class="modal-close" onclick="tancarModalEspecie()">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="formulariEspecie">
+                                            <div class="form-group">
+                                                <label class="form-label">Identificador (clau) *</label>
+                                                <input type="text" class="form-input" id="idEspecie" required placeholder="Ex: poma-golden (sense espais)">
+                                                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-gris);">
+                                                    Identificador únic per al sistema (ex: poma-golden, pera-conference). No es podrà canviar.
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Nom Espècie *</label>
+                                                <input type="text" class="form-input" id="nomEspecie" required placeholder="Ex: Poma Golden Delicious">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label class="form-label">Tipus *</label>
+                                                <input type="text" class="form-input" id="tipusEspecie" required placeholder="Ex: Poma, Pera, Préssec">
+                                            </div>
+                        
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label">Dies de Maduració (aprox.)</label>
+                                                    <input type="number" class="form-input" id="diesMaduracióEspecie">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Rendiment/Arbre (kg aprox.)</label>
+                                                    <input type="number" class="form-input" id="rendimentEspecie">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-outline" onclick="tancarModalEspecie()">Cancel·lar</button>
+                                        <button class="btn btn-primary" onclick="desarEspecie()">Desar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <script src="assets/script.js"></script>
+                        </body>
+                        </html>
                     </div>
                     
                     <div class="form-group">
