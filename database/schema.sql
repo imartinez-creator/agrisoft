@@ -1,8 +1,7 @@
--- =========================
+-- =========================================
 -- MÒDUL 4 — GESTIÓ DE PERSONAL
--- =========================
+-- =========================================
 
--- TREBALLADOR --
 CREATE TABLE TREBALLADOR (
     idTreballador INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(150) NOT NULL,
@@ -29,17 +28,18 @@ CREATE TABLE TREBALLADOR (
     permis_treball VARCHAR(100)
 ) ENGINE=InnoDB;
 
-
-
--- DEPARTAMENTS --
 CREATE TABLE DEPARTAMENTS (
     id_departament INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(150) NOT NULL
 ) ENGINE=InnoDB;
 
+CREATE TABLE EQUIPS (
+    id_equip INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(150) NOT NULL,
+    id_responsable INT,
+    FOREIGN KEY (id_responsable) REFERENCES TREBALLADOR(idTreballador) ON DELETE SET NULL
+) ENGINE=InnoDB;
 
-
--- DOCUMENTS_TREBALLADOR --
 CREATE TABLE DOCUMENTS_TREBALLADOR (
     id_document INT AUTO_INCREMENT PRIMARY KEY,
     idTreballador INT NOT NULL,
@@ -51,9 +51,6 @@ CREATE TABLE DOCUMENTS_TREBALLADOR (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-
-
--- CERTIFICACIONS --
 CREATE TABLE CERTIFICACIONS (
     id_cert INT AUTO_INCREMENT PRIMARY KEY,
     idTreballador INT NOT NULL,
@@ -65,31 +62,6 @@ CREATE TABLE CERTIFICACIONS (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-
-
--- EQUIPS --
-CREATE TABLE EQUIPS (
-    id_equip INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(150) NOT NULL,
-    id_responsable INT,
-    FOREIGN KEY (id_responsable) REFERENCES TREBALLADOR(idTreballador) ON DELETE SET NULL
-) ENGINE=InnoDB;
-
-
-
--- TREBALLADORS_EQUIPS --
-CREATE TABLE TREBALLADORS_EQUIPS (
-    idTreballador INT,
-    idEquip INT,
-    rol VARCHAR(100),
-    PRIMARY KEY (idTreballador, idEquip),
-    FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador) ON DELETE CASCADE,
-    FOREIGN KEY (idEquip) REFERENCES EQUIPS(id_equip) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
-
-
--- TASQUES --
 CREATE TABLE TASQUES (
     id_tasca INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(150) NOT NULL,
@@ -103,9 +75,15 @@ CREATE TABLE TASQUES (
     equipament TEXT
 ) ENGINE=InnoDB;
 
+CREATE TABLE TREBALLADORS_EQUIPS (
+    idTreballador INT,
+    idEquip INT,
+    rol VARCHAR(100),
+    PRIMARY KEY (idTreballador, idEquip),
+    FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador) ON DELETE CASCADE,
+    FOREIGN KEY (idEquip) REFERENCES EQUIPS(id_equip) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
-
--- ASSIGNACIONS_TASCA --
 CREATE TABLE ASSIGNACIONS_TASCA (
     id_assignacio INT AUTO_INCREMENT PRIMARY KEY,
     id_tasca INT NOT NULL,
@@ -115,9 +93,6 @@ CREATE TABLE ASSIGNACIONS_TASCA (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-
-
--- REGISTRE_HORES --
 CREATE TABLE REGISTRE_HORES (
     id_registre INT AUTO_INCREMENT PRIMARY KEY,
     idTreballador INT NOT NULL,
@@ -132,9 +107,6 @@ CREATE TABLE REGISTRE_HORES (
     FOREIGN KEY (id_tasca) REFERENCES TASQUES(id_tasca) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
-
-
--- VACANCES_PERMISOS --
 CREATE TABLE VACANCES_PERMISOS (
     id_perm INT AUTO_INCREMENT PRIMARY KEY,
     idTreballador INT NOT NULL,
@@ -145,13 +117,11 @@ CREATE TABLE VACANCES_PERMISOS (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- =========================
+
+-- =========================================
 -- MÒDUL 1 — Parcel·les i Cultiu
--- =========================
+-- =========================================
 
-
-
--- PARCELA --
 CREATE TABLE PARCELA (
     idParcela INT PRIMARY KEY,
     Nom VARCHAR(100),
@@ -167,9 +137,6 @@ CREATE TABLE PARCELA (
     EstatActual VARCHAR(100)
 ) ENGINE=InnoDB;
 
-
-
--- SECTOR_CULTIU --
 CREATE TABLE SECTOR_CULTIU (
     IdSector INT PRIMARY KEY,
     NomSector VARCHAR(100),
@@ -186,9 +153,6 @@ CREATE TABLE SECTOR_CULTIU (
     FOREIGN KEY (IdCultiu) REFERENCES PARCELA(idParcela)
 ) ENGINE=InnoDB;
 
-
-
--- VARIETAT --
 CREATE TABLE VARIETAT (
     idVarietat INT PRIMARY KEY,
     NomComu VARCHAR(100),
@@ -209,9 +173,6 @@ CREATE TABLE VARIETAT (
     FOREIGN KEY (IdCultiu) REFERENCES SECTOR_CULTIU(IdSector)
 ) ENGINE=InnoDB;
 
-
-
--- PLANTADA --
 CREATE TABLE PLANTADA (
     idPlantada INT PRIMARY KEY,
     CondicionsClimàtiques TEXT,
@@ -226,9 +187,6 @@ CREATE TABLE PLANTADA (
     FOREIGN KEY (idSector) REFERENCES SECTOR_CULTIU(IdSector)
 ) ENGINE=InnoDB;
 
-
-
--- FILA_ARBRES --
 CREATE TABLE FILA_ARBRES (
     idFila INT PRIMARY KEY,
     NumFila INT,
@@ -240,9 +198,6 @@ CREATE TABLE FILA_ARBRES (
     FOREIGN KEY (idSector) REFERENCES SECTOR_CULTIU(IdSector)
 ) ENGINE=InnoDB;
 
-
-
--- FOTO --
 CREATE TABLE FOTO (
     idFoto INT PRIMARY KEY,
     UrlFoto VARCHAR(255),
@@ -252,9 +207,6 @@ CREATE TABLE FOTO (
     FOREIGN KEY (IdSector) REFERENCES SECTOR_CULTIU(IdSector)
 ) ENGINE=InnoDB;
 
-
-
--- SEGUIMENT_SECTOR --
 CREATE TABLE SEGUIMENT_SECTOR (
     idSeguiment INT PRIMARY KEY,
     Data DATE,
@@ -267,12 +219,10 @@ CREATE TABLE SEGUIMENT_SECTOR (
     idSector INT,
     idTreballador INT,
     FOREIGN KEY (idPlantada) REFERENCES PLANTADA(idPlantada),
-    FOREIGN KEY (idSector) REFERENCES SECTOR_CULTIU(IdSector)
+    FOREIGN KEY (idSector) REFERENCES SECTOR_CULTIU(IdSector),
+    FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- CONTE --
 CREATE TABLE CONTE (
     IdParcela INT,
     IdSector INT,
@@ -281,13 +231,11 @@ CREATE TABLE CONTE (
     FOREIGN KEY (IdSector) REFERENCES SECTOR_CULTIU(IdSector)
 ) ENGINE=InnoDB;
 
--- =========================
+
+-- =========================================
 -- MÒDUL 2 — Gestió agrícola
--- =========================
+-- =========================================
 
-
-
--- PRODUCTE --
 CREATE TABLE PRODUCTE (
     idProducte INT PRIMARY KEY,
     nomComercial VARCHAR(100),
@@ -306,9 +254,6 @@ CREATE TABLE PRODUCTE (
     fabricant VARCHAR(100)
 ) ENGINE=InnoDB;
 
-
-
--- ESTOC_PRODUCTE --
 CREATE TABLE ESTOC_PRODUCTE (
     idEstoc INT PRIMARY KEY,
     idProducte INT,
@@ -323,9 +268,6 @@ CREATE TABLE ESTOC_PRODUCTE (
     FOREIGN KEY (idProducte) REFERENCES PRODUCTE(idProducte)
 ) ENGINE=InnoDB;
 
-
-
--- TRACTAMENT --
 CREATE TABLE TRACTAMENT (
     idTractament INT PRIMARY KEY,
     idSector INT,
@@ -339,9 +281,6 @@ CREATE TABLE TRACTAMENT (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- TRACTAMENT_PRODUCTE --
 CREATE TABLE TRACTAMENT_PRODUCTE (
     idTractament INT,
     idProducte INT,
@@ -352,9 +291,6 @@ CREATE TABLE TRACTAMENT_PRODUCTE (
     FOREIGN KEY (idProducte) REFERENCES PRODUCTE(idProducte)
 ) ENGINE=InnoDB;
 
-
-
--- FERTILITZACIO --
 CREATE TABLE FERTILITZACIO (
     idFertilitzacio INT PRIMARY KEY,
     IdSector INT,
@@ -368,9 +304,6 @@ CREATE TABLE FERTILITZACIO (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- FERTILITZACIO_PRODUCTE --
 CREATE TABLE FERTILITZACIO_PRODUCTE (
     idFertilitzacio INT,
     idProducte INT,
@@ -383,9 +316,6 @@ CREATE TABLE FERTILITZACIO_PRODUCTE (
     FOREIGN KEY (idProducte) REFERENCES PRODUCTE(idProducte)
 ) ENGINE=InnoDB;
 
-
-
--- SENSOR --
 CREATE TABLE SENSOR (
     idSensor INT PRIMARY KEY,
     tipus VARCHAR(100),
@@ -397,9 +327,6 @@ CREATE TABLE SENSOR (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- LECTURA_SENSOR --
 CREATE TABLE LECTURA_SENSOR (
     idLectura INT PRIMARY KEY,
     idSensor INT,
@@ -409,9 +336,6 @@ CREATE TABLE LECTURA_SENSOR (
     FOREIGN KEY (idSensor) REFERENCES SENSOR(idSensor)
 ) ENGINE=InnoDB;
 
-
-
--- ANALISI_NUTRICIONAL --
 CREATE TABLE ANALISI_NUTRICIONAL (
     idAnalisi INT PRIMARY KEY,
     IdParcela INT,
@@ -424,9 +348,6 @@ CREATE TABLE ANALISI_NUTRICIONAL (
     FOREIGN KEY (IdParcela) REFERENCES PARCELA(idParcela)
 ) ENGINE=InnoDB;
 
-
-
--- PLANIFICACIO_TRACTAMENT --
 CREATE TABLE PLANIFICACIO_TRACTAMENT (
     idPlanificacio INT PRIMARY KEY,
     idSector INT,
@@ -441,9 +362,6 @@ CREATE TABLE PLANIFICACIO_TRACTAMENT (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- PLANIFICACIO_FERTILITZACIO --
 CREATE TABLE PLANIFICACIO_FERTILITZACIO (
     idPlanificacio INT PRIMARY KEY,
     idSector INT,
@@ -458,9 +376,6 @@ CREATE TABLE PLANIFICACIO_FERTILITZACIO (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- QUADERN_EXPLOTACIO --
 CREATE TABLE QUADERN_EXPLOTACIO (
     idRegistre INT PRIMARY KEY,
     IdParcela INT,
@@ -483,9 +398,6 @@ CREATE TABLE QUADERN_EXPLOTACIO (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- HERBICIDA --
 CREATE TABLE HERBICIDA (
     idHerbicida INT PRIMARY KEY,
     nomComercial VARCHAR(100),
@@ -497,9 +409,6 @@ CREATE TABLE HERBICIDA (
     fabricant VARCHAR(100)
 ) ENGINE=InnoDB;
 
-
-
--- APLICACIO_HERBICIDA --
 CREATE TABLE APLICACIO_HERBICIDA (
     idAplicacio INT PRIMARY KEY,
     idSector INT,
@@ -517,13 +426,10 @@ CREATE TABLE APLICACIO_HERBICIDA (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
--- =========================
+-- =========================================
 -- MÒDUL 3 — Producció i Comercialització
--- =========================
+-- =========================================
 
-
-
--- COLLITA --
 CREATE TABLE COLLITA (
     idCollita INT PRIMARY KEY,
     IdSector INT,
@@ -543,9 +449,6 @@ CREATE TABLE COLLITA (
     FOREIGN KEY (idTreballador) REFERENCES TREBALLADOR(idTreballador)
 ) ENGINE=InnoDB;
 
-
-
--- LOT_PRODUCCIO --
 CREATE TABLE LOT_PRODUCCIO (
     idLot INT PRIMARY KEY,
     codiLot VARCHAR(100),
@@ -558,9 +461,6 @@ CREATE TABLE LOT_PRODUCCIO (
     FOREIGN KEY (idCollita) REFERENCES COLLITA(idCollita)
 ) ENGINE=InnoDB;
 
-
-
--- CONTROL_QUALITAT --
 CREATE TABLE CONTROL_QUALITAT (
     idControl INT PRIMARY KEY,
     idLot INT,
@@ -575,9 +475,35 @@ CREATE TABLE CONTROL_QUALITAT (
     FOREIGN KEY (idLot) REFERENCES LOT_PRODUCCIO(idLot)
 ) ENGINE=InnoDB;
 
-
-
--- CLIENT --
 CREATE TABLE CLIENT (
     idClient INT PRIMARY KEY,
     nom VARCHAR(100),
+    tipus VARCHAR(50),
+    contacte VARCHAR(100),
+    direccio VARCHAR(255),
+    requisits TEXT
+) ENGINE=InnoDB;
+
+CREATE TABLE LOT_CLIENT (
+    idLot INT,
+    idClient INT,
+    dataAssignacio DATE,
+    quantitat DECIMAL(10,2),
+    unitat VARCHAR(20),
+    PRIMARY KEY (idLot, idClient),
+    FOREIGN KEY (idLot) REFERENCES LOT_PRODUCCIO(idLot),
+    FOREIGN KEY (idClient) REFERENCES CLIENT(idClient)
+) ENGINE=InnoDB;
+
+CREATE TABLE PREVISIO_COLLITA (
+    idPrevisio INT PRIMARY KEY,
+    idSector INT,
+    idVarietat INT,
+    campanya VARCHAR(50),
+    dataPrevisio DATE,
+    quantitatPrevista DECIMAL(10,2),
+    unitat VARCHAR(20),
+    observacions TEXT,
+    FOREIGN KEY (idSector) REFERENCES SECTOR_CULTIU(IdSector),
+    FOREIGN KEY (idVarietat) REFERENCES VARIETAT(idVarietat)
+) ENGINE=InnoDB;
