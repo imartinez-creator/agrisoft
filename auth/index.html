@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accés - AGRISOFT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="brand-header">
+            <div class="logo">🌱 AGRISOFT</div>
+            <p>Sistema de Gestió de Finques</p>
+        </div>
+
+        <form id="loginForm" class="auth-form active">
+            <h2>Iniciar Sessió</h2>
+            <div class="form-group">
+                <label>Correu Electrònic</label>
+                <input type="email" id="loginEmail" required placeholder="usuari@agrisoft.com">
+            </div>
+            <div class="form-group">
+                <label>Contrasenya</label>
+                <input type="password" id="loginPass" required placeholder="••••••">
+            </div>
+            <button type="submit" class="btn-primary">Entrar</button>
+            <div class="switch-form">
+                No tens compte? <a href="#" onclick="toggleForms()">Registra't aquí</a>
+            </div>
+        </form>
+
+        <form id="registerForm" class="auth-form">
+            <h2>Crear Compte</h2>
+            <div class="form-group">
+                <label>Nom Complet</label>
+                <input type="text" id="regName" required placeholder="Joan Pagès">
+            </div>
+            <div class="form-group">
+                <label>Correu Electrònic</label>
+                <input type="email" id="regEmail" required placeholder="usuari@agrisoft.com">
+            </div>
+            <div class="form-group">
+                <label>Contrasenya</label>
+                <input type="password" id="regPass" required placeholder="••••••">
+            </div>
+            <button type="submit" class="btn-primary">Registrar-se</button>
+            <div class="switch-form">
+                Ja tens compte? <a href="#" onclick="toggleForms()">Inicia sessió</a>
+            </div>
+        </form>
+
+        <div id="message" class="alert" style="display: none;"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
