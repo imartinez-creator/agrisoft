@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Panell de Control - AGRISOFT</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-container { text-align: center; background: white; padding: 40px; border-radius: 8px; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>🌱 Benvingut a AGRISOFT</h1>
+        <h2 id="userName">Usuari</h2>
+        <p>Has iniciat sessió correctament.</p>
+        <button onclick="logout()" class="btn-primary" style="max-width: 200px;">Tancar Sessió</button>
+    </div>
+
+    <script>
+        // Comprovar sessió
+        const user = JSON.parse(localStorage.getItem('agrisoft_user'));
+        
+        if (!user) {
+            // Si no hi ha usuari guardat, el fem fora
+            window.location.href = 'index.html';
+        } else {
+            // Mostrem el nom
+            document.getElementById('userName').innerText = user.nom;
+        }
+
+        function logout() {
+            localStorage.removeItem('agrisoft_user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

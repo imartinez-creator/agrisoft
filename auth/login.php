@@ -1,40 +1,45 @@
 <?php
-session_start(); // Iniciar manejo de sesiones de PHP
 header('Content-Type: application/json');
+session_start();
+require 'db.php';
 
-$input = json_decode(file_get_contents('php://input'), true);
-$email = $input['email'] ?? '';
-$password = $input['password'] ?? '';
+$data = json_decode(file_get_contents("php://input"));
 
-$file = 'users.json';
-if (!file_exists($file)) {
-    echo json_encode(['success' => false, 'message' => 'No hay usuarios registrados']);
-    exit;
-}
-
-$users = json_decode(file_get_contents($file), true);
-$userFound = null;
-
-// 1. Buscar usuario
-foreach ($users as $user) {
-    if ($user['email'] === $email) {
-        $userFound = $user;
-        break;
-    }
-}
-
-// 2. Verificar contraseña
-if ($userFound && password_verify($password, $userFound['password'])) {
-    // ¡Éxito! Guardamos datos en la sesión del servidor
-    $_SESSION['user_id'] = $userFound['id'];
-    $_SESSION['user_name'] = $userFound['nombre'];
+if(isset($data->email) && isset($data->password)) {
     
-    echo json_encode([
-        'success' => true, 
-        'message' => 'Login correcto',
-        'user' => ['nombre' => $userFound['nombre'], 'email' => $userFound['email']]
-    ]);
+    $email = $data->email;
+    $password = $data->password;
+
+    // Busquem l'usuari pel correu
+    $stmt = $conn->prepare("SELECT id, nom, password FROM usuaris WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if($row = $result->fetch_assoc()){
+        // Verifiquem el hash de la contrasenya
+        if(password_verify($password, $row['password'])){
+            
+            $_SESSION['user_id'] = $row['id'];
+            
+            // Retornem èxit i les dades (sense el password)
+            echo json_encode([
+                'success' => true,
+                'user' => [
+                    'id' => $row['id'],
+                    'nom' => $row['nom'],
+                    'email' => $email
+                ]
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Contrasenya incorrecta.']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Usuari no trobat.']);
+    }
+    $stmt->close();
 } else {
-    echo json_encode(['success' => false, 'message' => 'Credenciales incorrectas']);
+    echo json_encode(['success' => false, 'message' => 'Falten dades.']);
 }
+$conn->close();
 ?>

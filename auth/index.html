@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accés - AGRISOFT</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+    </style>
 </head>
 <body>
     <div class="auth-container">
@@ -13,39 +17,39 @@
             <p>Sistema de Gestió de Finques</p>
         </div>
 
-        <form id="loginForm" class="auth-form active">
+        <form id="loginForm" class="auth-form active" action="login.php" method="POST">
             <h2>Iniciar Sessió</h2>
             <div class="form-group">
                 <label>Correu Electrònic</label>
-                <input type="email" id="loginEmail" required placeholder="usuari@agrisoft.com">
+                <input type="email" id="loginEmail" name="email" required placeholder="usuari@agrisoft.com">
             </div>
             <div class="form-group">
                 <label>Contrasenya</label>
-                <input type="password" id="loginPass" required placeholder="••••••">
+                <input type="password" id="loginPass" name="password" required placeholder="••••••">
             </div>
             <button type="submit" class="btn-primary">Entrar</button>
             <div class="switch-form">
-                No tens compte? <a href="#" onclick="toggleForms()">Registra't aquí</a>
+                No tens compte? <a href="#" onclick="toggleForms(event)">Registra't aquí</a>
             </div>
         </form>
 
-        <form id="registerForm" class="auth-form">
+        <form id="registerForm" class="auth-form" action="registre.php" method="POST">
             <h2>Crear Compte</h2>
             <div class="form-group">
                 <label>Nom Complet</label>
-                <input type="text" id="regName" required placeholder="Joan Pagès">
+                <input type="text" id="regName" name="nom" required placeholder="Joan Pagès">
             </div>
             <div class="form-group">
                 <label>Correu Electrònic</label>
-                <input type="email" id="regEmail" required placeholder="usuari@agrisoft.com">
+                <input type="email" id="regEmail" name="email" required placeholder="usuari@agrisoft.com">
             </div>
             <div class="form-group">
                 <label>Contrasenya</label>
-                <input type="password" id="regPass" required placeholder="••••••">
+                <input type="password" id="regPass" name="password" required placeholder="••••••">
             </div>
             <button type="submit" class="btn-primary">Registrar-se</button>
             <div class="switch-form">
-                Ja tens compte? <a href="#" onclick="toggleForms()">Inicia sessió</a>
+                Ja tens compte? <a href="#" onclick="toggleForms(event)">Inicia sessió</a>
             </div>
         </form>
 

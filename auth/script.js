@@ -1,10 +1,11 @@
 // Alternar entre Login y Registro
-function toggleForms() {
+function toggleForms(e) {
+    if(e) e.preventDefault();
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const msg = document.getElementById('message');
     
-    msg.style.display = 'none'; // Ocultar mensajes previos
+    msg.style.display = 'none'; 
     
     if (loginForm.classList.contains('active')) {
         loginForm.classList.remove('active');
@@ -15,7 +16,6 @@ function toggleForms() {
     }
 }
 
-// Función genérica para mostrar mensajes
 function showMessage(text, isError) {
     const msg = document.getElementById('message');
     msg.textContent = text;
@@ -23,7 +23,7 @@ function showMessage(text, isError) {
     msg.style.display = 'block';
 }
 
-// Lógica de REGISTRO
+// REGISTRE
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -38,22 +38,29 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
             body: JSON.stringify({ nombre, email, password })
         });
         
-        const data = await response.json();
-        
-        if (data.success) {
-            showMessage('Compte creat correctament! Ara inicia sessió.', false);
-            setTimeout(() => toggleForms(), 1500); // Cambiar a login tras 1.5s
-            e.target.reset();
-        } else {
-            showMessage(data.message, true);
+        // Comprovem si la resposta és JSON vàlid
+        const text = await response.text();
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                showMessage('Compte creat! Inicia sessió ara.', false);
+                setTimeout(() => toggleForms(), 1500); 
+                e.target.reset();
+            } else {
+                showMessage(data.message, true);
+            }
+        } catch (err) {
+            console.error('Error parsing JSON:', text);
+            showMessage('Error del servidor (mira la consola)', true);
         }
+
     } catch (error) {
-        showMessage('Error de connexió amb el servidor', true);
+        showMessage('Error de connexió', true);
         console.error(error);
     }
 });
 
-// Lógica de LOGIN
+// LOGIN
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -67,20 +74,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             body: JSON.stringify({ email, password })
         });
         
-        const data = await response.json();
-        
-        if (data.success) {
-            showMessage('Iniciant sessió...', false);
-            // Guardar info básica en localStorage para usarla en el panel
-            localStorage.setItem('agrisoft_user', JSON.stringify(data.user));
-            
-            // Redirigir al panel principal (subimos un nivel ../)
-            setTimeout(() => {
-                window.location.href = '../index.html'; 
-            }, 1000);
-        } else {
-            showMessage(data.message, true);
+        const text = await response.text();
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                showMessage('Iniciant sessió...', false);
+                localStorage.setItem('agrisoft_user', JSON.stringify(data.user));
+                
+                // --- CANVI IMPORTANT AQUÍ ---
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html'; 
+                }, 1000);
+            } else {
+                showMessage(data.message, true);
+            }
+        } catch (err) {
+            console.error('Error parsing JSON:', text);
+            showMessage('Error del servidor', true);
         }
+
     } catch (error) {
         showMessage('Error de connexió', true);
         console.error(error);
