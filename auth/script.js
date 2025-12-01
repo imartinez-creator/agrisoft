@@ -81,7 +81,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 showMessage('Iniciant sessió...', false);
                 localStorage.setItem('agrisoft_user', JSON.stringify(data.user));
                 
-                // --- CANVI IMPORTANT AQUÍ ---
                 setTimeout(() => {
                     window.location.href = 'dashboard.html'; 
                 }, 1000);

@@ -2,7 +2,6 @@
 header('Content-Type: application/json');
 require 'db.php';
 
-// Llegim el JSON que envia el teu script.js
 $data = json_decode(file_get_contents("php://input"));
 
 if(isset($data->nombre) && isset($data->email) && isset($data->password)) {
@@ -11,7 +10,6 @@ if(isset($data->nombre) && isset($data->email) && isset($data->password)) {
     $email = $data->email;
     $password = password_hash($data->password, PASSWORD_DEFAULT); // Encriptem la contrasenya
 
-    // 1. Comprovar si l'email ja existeix
     $check = $conn->prepare("SELECT id FROM usuaris WHERE email = ?");
     $check->bind_param("s", $email);
     $check->execute();
@@ -20,7 +18,6 @@ if(isset($data->nombre) && isset($data->email) && isset($data->password)) {
     if($result->num_rows > 0){
         echo json_encode(['success' => false, 'message' => 'Aquest correu ja està registrat.']);
     } else {
-        // 2. Insertar nou usuari
         $stmt = $conn->prepare("INSERT INTO usuaris (nom, email, password) VALUES (?, ?, ?)");
         $stmt->bind_param("sss", $nom, $email, $password);
         

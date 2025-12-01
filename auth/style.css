@@ -43,11 +43,11 @@ body {
 }
 
 .auth-form {
-    display: none; /* Oculto por defecto */
+    display: none;
 }
 
 .auth-form.active {
-    display: block; /* Solo mostramos el activo */
+    display: block; 
 }
 
 h2 {
@@ -73,7 +73,7 @@ input {
     padding: 0.75rem;
     border: 1px solid var(--gris);
     border-radius: 4px;
-    box-sizing: border-box; /* Importante para padding */
+    box-sizing: border-box;
 }
 
 .btn-primary {

@@ -10,19 +10,16 @@ if(isset($data->email) && isset($data->password)) {
     $email = $data->email;
     $password = $data->password;
 
-    // Busquem l'usuari pel correu
     $stmt = $conn->prepare("SELECT id, nom, password FROM usuaris WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if($row = $result->fetch_assoc()){
-        // Verifiquem el hash de la contrasenya
         if(password_verify($password, $row['password'])){
             
             $_SESSION['user_id'] = $row['id'];
             
-            // Retornem èxit i les dades (sense el password)
             echo json_encode([
                 'success' => true,
                 'user' => [
