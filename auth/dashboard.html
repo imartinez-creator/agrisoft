@@ -17,11 +17,14 @@
     </div>
 
     <script>
+        // Comprovar sessió
         const user = JSON.parse(localStorage.getItem('agrisoft_user'));
         
         if (!user) {
+            // Si no hi ha usuari guardat, el fem fora
             window.location.href = 'index.html';
         } else {
+            // Mostrem el nom
             document.getElementById('userName').innerText = user.nom;
         }
 

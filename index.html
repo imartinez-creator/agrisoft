@@ -379,17 +379,43 @@
                 <h3>🚜 Nova Màquina</h3><span class="modal-close" onclick="tancarModals()">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="formMaquinaria">
-                    <div class="form-group"><label class="form-label">Nom / Model</label><input type="text"
-                            class="form-input" id="nomMaquina"></div>
-                    <div class="form-group"><label class="form-label">Tipus</label><select class="form-select"
-                            id="tipusMaquina">
+                <form id="formMaquinaria" action="assets/php/guardar_maquina.php" method="POST">
+        
+                    <div class="form-group">
+                        <label class="form-label">Nom / Model</label>
+                        <input type="text" class="form-input" id="nomMaquina" name="nom" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="form-label">Tipus</label>
+                        <select class="form-select" id="tipusMaquina" name="tipus">
                             <option value="Tractor">🚜 Tractor</option>
                             <option value="Atomitzador">💨 Atomitzador</option>
                             <option value="Plataforma">🏗️ Plataforma</option>
-                        </select></div>
-                    <div class="form-group"><label class="form-label">Matrícula / ID</label><input type="text"
-                            class="form-input" id="idMaquina"></div>
+                            <option value="Altres">🔧 Altres</option>
+                        </select>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="form-label">Matrícula</label>
+                        <input type="text" class="form-input" id="matriculaMaquina" name="matricula">
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="form-label">Tipus Combustible</label>
+                        <select class="form-select" name="tipusCombustible">
+                            <option value="Dièsel">⛽ Dièsel</option>
+                            <option value="Gasolina">⛽ Gasolina</option>
+                            <option value="Elèctric">⚡ Elèctric</option>
+                        </select>
+                    </div>
+            
+                    <div class="form-group">
+                        <label class="form-label">Cavalls (CV)</label>
+                        <input type="number" class="form-input" name="cavalls" placeholder="Ex: 120">
+                    </div>
+            
+                    <button type="submit">💾 Guardar Màquina</button>
                 </form>
             </div>
             <div class="modal-footer"><button class="btn btn-primary" onclick="desarMaquinaria()">💾 Desar</button>
@@ -427,12 +453,22 @@
                 <h3>🧬 Nova Espècie</h3><span class="modal-close" onclick="tancarModals()">&times;</span>
             </div>
             <div class="modal-body">
-                <div class="form-group"><label class="form-label">ID</label><input type="text" class="form-input"
-                        id="idEspecie"></div>
-                <div class="form-group"><label class="form-label">Nom</label><input type="text" class="form-input"
-                        id="nomEspecie"></div>
-                <div class="form-group"><label class="form-label">Tipus</label><input type="text" class="form-input"
-                        id="tipusEspecie"></div>
+                <form action="assets/php/guardar_especie.php" method="POST">
+    
+                    <div class="form-group">
+                      <label class="form-label" for="nomEspecie">Nom</label>
+                      <input type="text" class="form-input" id="nomEspecie" name="nom" placeholder="Nom de l'espècie" required>
+                    </div>
+              
+                    <div class="form-group">
+                      <label class="form-label" for="tipusEspecie">Tipus</label>
+                      <input type="text" class="form-input" id="tipusEspecie" name="tipus" placeholder="Tipus d'espècie">
+                    </div>
+              
+                    <div class="form-group" style="margin-top: 15px;">
+                      <button type="submit" class="btn btn-primary">Guardar Espècie</button>
+                    </div>
+                  </form>
             </div>
             <div class="modal-footer"><button class="btn btn-primary" onclick="desarEspecie()">💾 Desar</button></div>
         </div>
@@ -585,19 +621,40 @@
                 <h3>🤝 Nou Client</h3><span class="modal-close" onclick="tancarModals()">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="formClient">
-                    <div class="form-group"><label class="form-label">Empresa</label><input type="text"
-                            class="form-input" id="nomClient"></div>
-                    <div class="form-group"><label class="form-label">Tipus</label><select class="form-select"
-                            id="tipusClient">
+                <form id="formClient" action="assets/php/guardar_client.php" method="POST">
+
+                    <div class="form-group">
+                        <label class="form-label">Empresa (Nom)</label>
+                        <input type="text" class="form-input" id="nomClient" name="nom" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tipus</label>
+                        <select class="form-select" id="tipusClient" name="tipus">
                             <option value="Majorista">🏢 Majorista</option>
                             <option value="Supermercat">🛒 Supermercat</option>
-                        </select></div>
-                    <div class="form-group"><label class="form-label">Requisits</label><textarea class="form-textarea"
-                            id="reqClient"></textarea></div>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contacte (Nom persona/Telèfon)</label>
+                        <input type="text" class="form-input" id="contacteClient" name="contacte">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Direcció</label>
+                        <input type="text" class="form-input" id="direccioClient" name="direccio">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Requisits</label>
+                        <textarea class="form-textarea" id="reqClient" name="requisits"></textarea>
+                    </div>
+
+                    <button type="submit">💾 Guardar Client</button>
                 </form>
             </div>
-            <div class="modal-footer"><button class="btn btn-primary" onclick="desarClient()">💾 Desar</button></div>
+            <div class="modal-footer"><button class="btn btn-primary">💾 Desar</button></div>
         </div>
     </div>
 
