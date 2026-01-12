@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AGRISOFT - Gestió Integral</title>
     <link rel="stylesheet" href="assets/css/style.css">
+<<<<<<< HEAD
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css"/>
 <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+=======
+>>>>>>> 1d4b5734e9f172a6b2fbd01a080841babb2c8535
 </head>
 
 <body>
@@ -635,10 +638,16 @@
 
                     <div class="form-group">
                         <label class="form-label">Tipus</label>
+<<<<<<< HEAD
                         <select class="form-input" id="Tipus" name="tipus" required>
                             <option value="Particular">Particular</option>
                             <option value="Empresa">Empresa</option>
                             <option value="Proveïdor">Proveïdor</option>
+=======
+                        <select class="form-select" id="tipusClient" name="tipus">
+                            <option value="Majorista">🏢 Majorista</option>
+                            <option value="Supermercat">🛒 Supermercat</option>
+>>>>>>> 1d4b5734e9f172a6b2fbd01a080841babb2c8535
                         </select>
                     </div>
 
@@ -702,6 +711,7 @@
             </div>
 
             <div class="modal-body">
+<<<<<<< HEAD
                 <form id="formTreballador" action="assets/php/guardar_treballador.php" method="POST">
 
                     <h3>👤 Identitat</h3>
@@ -844,6 +854,55 @@
                             </div>
                         </div>
                         <div class="form-group">
+=======
+                <form id="formTreballador">
+                    <div id="tab-identitat" class="tab-content active">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Nom Complet *</label>
+                                <input type="text" class="form-input" id="nom" required placeholder="Nom i Cognoms">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">DNI / NIE *</label>
+                                <input type="text" class="form-input" id="document_identitat" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Data Naixement</label>
+                                <input type="date" class="form-input" id="data_naixement">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lloc Naixement</label>
+                                <input type="text" class="form-input" id="lloc_naixement">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Nacionalitat</label>
+                                <input type="text" class="form-input" id="nacionalitat">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">URL Fotografia</label>
+                                <input type="text" class="form-input" id="fotografia"
+                                    placeholder="http://exemple.com/foto.jpg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-contacte" class="tab-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Telèfon</label>
+                                <input type="text" class="form-input" id="telefon">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-input" id="email">
+                            </div>
+                        </div>
+                        <div class="form-group">
+>>>>>>> 1d4b5734e9f172a6b2fbd01a080841babb2c8535
                             <label class="form-label">Adreça Completa</label>
                             <input type="text" class="form-input" id="adreca">
                         </div>
