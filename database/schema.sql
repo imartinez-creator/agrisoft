@@ -5,7 +5,7 @@
 -- Servidor: 127.0.0.1
 -- Tiempo de generación: 09-02-2026 a las 22:05:37
 -- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Versión de PHP: 8.2.12 
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -947,7 +947,7 @@ ALTER TABLE `tasques`
 --
 ALTER TABLE `tractaments`
   ADD CONSTRAINT `tractaments_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `tractaments_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `tractaments_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `tractaments_ibfk_3` FOREIGN KEY (`fila_id`) REFERENCES `files_arbres` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `tractaments_ibfk_4` FOREIGN KEY (`producte_id`) REFERENCES `fito_productes` (`id`),
   ADD CONSTRAINT `tractaments_ibfk_5` FOREIGN KEY (`created_by`) REFERENCES `usuaris` (`id`);
