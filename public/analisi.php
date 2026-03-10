@@ -9,7 +9,7 @@ $parceles = db()->query("SELECT id, name, area_ha FROM parcela ORDER BY name")->
 
 $stats = [
   'parceles'      => (int)db()->query("SELECT COUNT(*) FROM parcela")->fetchColumn(),
-  'sectors'       => (int)db()->query("SELECT COUNT(*) FROM sectors")->fetchColumn(),
+  'sectors'       => (int)db()->query("SELECT COUNT(*) FROM sector_cultiu")->fetchColumn(),
   'cultius'       => (int)db()->query("SELECT COUNT(*) FROM cultius")->fetchColumn(),
   'tractaments'   => (int)db()->query("SELECT COUNT(*) FROM tractaments")->fetchColumn(),
   'treballadors'  => (int)db()->query("SELECT COUNT(*) FROM treballadors")->fetchColumn(),

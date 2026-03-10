@@ -16,10 +16,10 @@ $stock_baix = db()->query("
 $plans_retard = db()->query("
   SELECT pt.title, pt.planned_on,
          p.name AS parcela_name,
-         s.name AS sector_name
+         s.nom_sector AS sector_name
   FROM plans_tractament pt
   LEFT JOIN parcela p ON p.id = pt.parcela_id
-  LEFT JOIN sectors s ON s.id = pt.sector_id
+  LEFT JOIN sector_cultiu s ON s.id = pt.sector_id
   WHERE pt.status = 'pendent'
     AND pt.planned_on < CURDATE()
   ORDER BY pt.planned_on ASC

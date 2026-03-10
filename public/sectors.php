@@ -7,6 +7,7 @@ require_login();
 
 $can_manage = can_manage();
 
+
 // Helpers
 function post_float(string $key): ?float {
   $v = trim((string)($_POST[$key] ?? ''));

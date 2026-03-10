@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
 
 // Dades per als selects
 $parceles  = db()->query("SELECT id, name FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$sectors   = db()->query("SELECT id, name, parcela_id FROM sectors ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
+$sectors   = db()->query("SELECT id, nom_sector AS name, parcela_id FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
 $cultius   = db()->query("SELECT id, name FROM cultius ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $varietats = db()->query("SELECT id, name, cultiu_id FROM varietats ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -59,12 +59,12 @@ $varietats = db()->query("SELECT id, name, cultiu_id FROM varietats ORDER BY nam
 $collites = db()->query("
   SELECT co.*,
          p.name  AS parcela_name,
-         s.name  AS sector_name,
+         s.nom_sector  AS sector_name,
          cu.name AS cultiu_name,
          v.name  AS varietat_name
   FROM collites co
   LEFT JOIN parcela p   ON p.id = co.parcela_id
-  LEFT JOIN sectors s   ON s.id = co.sector_id
+  LEFT JOIN sector_cultiu s   ON s.id = co.sector_id
   LEFT JOIN varietats v ON v.id = co.varietat_id
   LEFT JOIN cultius cu  ON cu.id = v.cultiu_id
   ORDER BY co.recollit DESC, co.id DESC
@@ -83,7 +83,7 @@ include __DIR__ . '/../app/views/layout/header.php';
       <input type="hidden" name="action" value="create">
 
       <label>Parcel·la</label>
-      <select name="parcela_id">
+      <select name="parcela_id" id="select_parcela">
         <option value="">—</option>
         <?php foreach ($parceles as $p): ?>
           <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
@@ -91,10 +91,10 @@ include __DIR__ . '/../app/views/layout/header.php';
       </select>
 
       <label>Sector</label>
-      <select name="sector_id">
+      <select name="sector_id" id="select_sector">
         <option value="">—</option>
         <?php foreach ($sectors as $s): ?>
-          <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
+          <option value="<?= $s['id'] ?>" data-parcela="<?= $s['parcela_id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
         <?php endforeach; ?>
       </select>
 
@@ -174,5 +174,27 @@ include __DIR__ . '/../app/views/layout/header.php';
   </div>
 
 </div>
+
+<script>
+document.getElementById('select_parcela').addEventListener('change', function() {
+    const parcelaId = this.value;
+    const sectorSelect = document.getElementById('select_sector');
+    const sectors = sectorSelect.querySelectorAll('option');
+
+    sectors.forEach(opt => {
+        if (opt.value === "") {
+            opt.style.display = "block";
+            return;
+        }
+        if (parcelaId === "" || opt.getAttribute('data-parcela') === parcelaId) {
+            opt.style.display = "block";
+        } else {
+            opt.style.display = "none";
+        }
+    });
+
+    sectorSelect.value = ""; 
+});
+</script>
 
 <?php include __DIR__ . '/../app/views/layout/footer.php'; ?>
