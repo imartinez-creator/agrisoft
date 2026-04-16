@@ -2,7 +2,17 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
+-- Servidor: 127.0.0.1Solucionar el error de dins de plagues concretament en obervacions de plagues que quan deses dona error, surt aixo
+
+Fatal error: Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`agrisoft`.`observacio_plagues`, CONSTRAINT `observacio_plagues_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL) in C:\xampp\htdocs\agrisoft\public\plagues.php:75 Stack trace: #0 C:\xampp\htdocs\agrisoft\public\plagues.php(75): PDOStatement->execute(Array) #1 {main} thrown in C:\xampp\htdocs\agrisoft\public\plagues.php on line 75
+
+A analisi quan fa desar, no es guarda, no dona error pero no es guarda ni a la base de dades ni tampoc surt a pantalla
+
+
+
+A collites dona error quan s’intenta guardar-ho a la base de dades, surt aixo
+
+Fatal error: Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`agrisoft`.`collites`, CONSTRAINT `collites_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL) in C:\xampp\htdocs\agrisoft\public\collites.php:39 Stack trace: #0 C:\xampp\htdocs\agrisoft\public\collites.php(39): PDOStatement->execute(Array) #1 {main} thrown in C:\xampp\htdocs\agrisoft\public\collites.php on line 39
 -- Tiempo de generación: 09-02-2026 a las 22:05:37
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12 
@@ -77,9 +87,10 @@ CREATE TABLE `collites` (
   `parcela_id` int(11) DEFAULT NULL,
   `sector_id` int(11) DEFAULT NULL,
   `varietat_id` int(11) DEFAULT NULL,
-  `any_campanya` int(11) NOT NULL,
+  `varietat_text` varchar(150) DEFAULT NULL,
+  `any_campanya` int(4) NOT NULL,
   `recollit` date NOT NULL,
-  `kg` decimal(12,2) NOT NULL,
+  `kg` decimal(10,2) NOT NULL,
   `grau_qualitat` varchar(50) DEFAULT NULL,
   `protocol_notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -826,7 +837,7 @@ ALTER TABLE `varietats`
 --
 ALTER TABLE `analisis`
   ADD CONSTRAINT `analisis_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `analisis_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `analisis_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `analisis_ibfk_3` FOREIGN KEY (`creat`) REFERENCES `usuaris` (`id`);
 
 --
@@ -838,17 +849,20 @@ ALTER TABLE `certificacions_treballadors`
 --
 -- Filtros para la tabla `collites`
 --
+--
+-- Filtros para la tabla `collites`
+--
 ALTER TABLE `collites`
   ADD CONSTRAINT `collites_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `collites_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `collites_ibfk_3` FOREIGN KEY (`varietat_id`) REFERENCES `varietats` (`id`);
+  ADD CONSTRAINT `collites_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `collites_ibfk_3` FOREIGN KEY (`varietat_id`) REFERENCES `varietats` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `collites_v2`
 --
 ALTER TABLE `collites_v2`
   ADD CONSTRAINT `collites_v2_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `collites_v2_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `collites_v2_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `collites_v2_ibfk_3` FOREIGN KEY (`cultiu_id`) REFERENCES `cultius` (`id`),
   ADD CONSTRAINT `collites_v2_ibfk_4` FOREIGN KEY (`varietat_id`) REFERENCES `varietats` (`id`);
 
@@ -857,7 +871,7 @@ ALTER TABLE `collites_v2`
 --
 ALTER TABLE `cultius_parceles`
   ADD CONSTRAINT `cultius_parceles_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `cultius_parceles_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `cultius_parceles_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `cultius_parceles_ibfk_3` FOREIGN KEY (`cultiu_id`) REFERENCES `cultius` (`id`),
   ADD CONSTRAINT `cultius_parceles_ibfk_4` FOREIGN KEY (`varietat_id`) REFERENCES `varietats` (`id`);
 
@@ -871,7 +885,7 @@ ALTER TABLE `documents_treballadors`
 -- Filtros para la tabla `files_arbres`
 --
 ALTER TABLE `files_arbres`
-  ADD CONSTRAINT `files_arbres_ibfk_1` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `files_arbres_ibfk_1` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `files_parceles`
@@ -890,7 +904,7 @@ ALTER TABLE `lots`
 --
 ALTER TABLE `observacio_plagues`
   ADD CONSTRAINT `observacio_plagues_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `observacio_plagues_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `observacio_plagues_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `observacio_plagues_ibfk_3` FOREIGN KEY (`creat`) REFERENCES `usuaris` (`id`);
 
 --
@@ -902,9 +916,11 @@ ALTER TABLE `parcela_punt`
 --
 -- Filtros para la tabla `plans_tractament`
 --
+-- Filtros para la tabla `plans_tractament`
+--
 ALTER TABLE `plans_tractament`
   ADD CONSTRAINT `plans_tractament_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `plans_tractament_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `plans_tractament_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `plans_tractament_ibfk_3` FOREIGN KEY (`creat`) REFERENCES `usuaris` (`id`);
 
 --
@@ -916,10 +932,16 @@ ALTER TABLE `registre_hores`
 --
 -- Filtros para la tabla `resgistres_treball`
 --
+--
+-- Filtros para la tabla `resgistres_treball`
+--
+--
+-- Filtros para la tabla `resgistres_treball`
+--
 ALTER TABLE `resgistres_treball`
   ADD CONSTRAINT `resgistres_treball_ibfk_1` FOREIGN KEY (`id_treballador`) REFERENCES `treballadors` (`id`),
   ADD CONSTRAINT `resgistres_treball_ibfk_2` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `resgistres_treball_ibfk_3` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `resgistres_treball_ibfk_3` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `sectors`
@@ -940,7 +962,7 @@ ALTER TABLE `sector_cultiu`
 ALTER TABLE `tasques`
   ADD CONSTRAINT `tasques_ibfk_1` FOREIGN KEY (`assigned_to_id_treballador`) REFERENCES `treballadors` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `tasques_ibfk_2` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `tasques_ibfk_3` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `tasques_ibfk_3` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL;
 
 --
 -- Filtros para la tabla `tractaments`

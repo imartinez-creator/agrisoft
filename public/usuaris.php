@@ -1,5 +1,4 @@
 <?php
-//
 require_once __DIR__ . '/../app/config/db.php';
 require_once __DIR__ . '/../app/middleware/auth.php';
 require_once __DIR__ . '/../app/helpers/flash.php';

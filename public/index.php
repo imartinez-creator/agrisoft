@@ -22,8 +22,12 @@ $kpis = [
   'parcel·les'           => count_table('parcela'),
   'tractaments'          => count_table('tractaments'),
   'treballadors'         => count_table('treballadors'),
-  'hores registrades'    => count_table('registres_treball'),
+  'hores registrades'    => count_table('resgistres_treball'),
 ];
+
+// Carregar parcel·les pel mapa
+$st = db()->query("SELECT id, name, gps_lat, gps_lng FROM parcela WHERE gps_lat IS NOT NULL AND gps_lng IS NOT NULL");
+$parcelles = $st->fetchAll(PDO::FETCH_ASSOC);
 
 $titol = "Tauler · AGRISOFT";
 include __DIR__ . '/../app/views/layout/header.php';
@@ -42,20 +46,50 @@ include __DIR__ . '/../app/views/layout/header.php';
   <?php endforeach; ?>
 
   <div class="card span8">
-    <h2>Mapa (placeholder)</h2>
-    <p class="small">Per tenir mapa real: afegeix Leaflet (JS/CSS) i pinta marcadors amb les coordenades GPS.</p>
-    <div style="height:320px;border-radius:14px;border:1px dashed rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6)">
-      Mapa interactiu (pendent d'afegir Leaflet real)
-    </div>
+    <h2>Mapa de parcel·les</h2>
+    <div id="map" style="height:320px;border-radius:14px;border:1px solid var(--border);"></div>
   </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const map = L.map('map').setView([41.5, 1.5], 8);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      const parcelles = <?= json_encode($parcelles) ?>;
+      const markers = [];
+
+      parcelles.forEach(p => {
+        if (p.gps_lat && p.gps_lng) {
+          const m = L.marker([p.gps_lat, p.gps_lng])
+            .bindPopup(`<b>${p.name}</b><br><a href="parcelles.php?id=${p.id}">Veure detalls</a>`)
+            .addTo(map);
+          markers.push(m);
+        }
+      });
+
+      if (markers.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+    });
+  </script>
 
   <div class="card span4">
     <h2>Accions ràpides</h2>
-    <a class="btn" href="parcelles.php">+ Nova parcel·la</a>
-    <a class="btn secondary" href="tractaments.php" style="margin-left:8px">+ Tractament</a>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <a class="btn" href="parcelles.php">+ Nova parcel·la</a>
+      <a class="btn" href="tractaments.php">+ Tractament</a>
+    </div>
     <hr>
-    <a class="btn" href="treballadors.php">Veure treballadors</a>
-    <a class="btn secondary" href="registre_treball.php" style="margin-left:8px">+ Registre treball</a>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <a class="btn" href="personal.php">Veure personal</a>
+      <a class="btn" href="registre_hores.php">+ Registre hores</a>
+    </div>
   </div>
 </div>
 

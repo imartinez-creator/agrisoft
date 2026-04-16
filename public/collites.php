@@ -5,57 +5,81 @@ require_once __DIR__ . '/../app/helpers/flash.php';
 
 require_login();
 
-/**
- * ADAPTAT AL TEU SQL (SENSE MODIFICAR-LO):
- * Taula: collites
- * Camps reals: parcela_id, sector_id, varietat_id, any_campanya, recollit, kg, grau_qualitat, protocol_notes
- *
- * Aquest fitxer elimina qualsevol ús de co.cultiu_id (que NO existeix a collites).
- */
+// Eliminar collita
+if (isset($_GET['delete'])) {
+    $id = (int)$_GET['delete'];
+    db()->prepare("DELETE FROM collites WHERE id = ?")->execute([$id]);
+    flash_set("Collita eliminada.", "ok");
+    header("Location: collites.php");
+    exit;
+}
 
-// Crear collita
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
+// Crear o Editar collita
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $action = $_POST['action'] ?? '';
+  $id = (int)($_POST['id'] ?? 0);
 
-  // Mapatge dels noms del formulari (antics) als camps reals de la taula `collites`
-  $parcela_id     = ($_POST['parcela_id'] ?? '') !== '' ? $_POST['parcela_id'] : null;
-  $sector_id      = ($_POST['sector_id'] ?? '') !== '' ? $_POST['sector_id'] : null;
-  $varietat_id    = ($_POST['varietat_id'] ?? '') !== '' ? $_POST['varietat_id'] : null;
-
+  $parcela_id     = ($_POST['parcela_id'] ?? '') !== '' ? (int)$_POST['parcela_id'] : null;
+  $sector_id      = ($_POST['sector_id'] ?? '') !== '' ? (int)$_POST['sector_id'] : null;
+  $varietat_text  = trim($_POST['varietat_text'] ?? '');
   $any_campanya   = (int)($_POST['any_campanya'] ?? date('Y'));
-  $recollit       = $_POST['data_collita'] ?? date('Y-m-d'); // abans: data_collita
-  $kg             = (float)($_POST['quantitat_kg'] ?? 0);    // abans: quantitat_kg
-  $grau_qualitat  = trim($_POST['qualitat'] ?? '');          // abans: qualitat
-  $protocol_notes = trim($_POST['notes'] ?? '');             // abans: notes
+  $recollit       = $_POST['data_collita'] ?? date('Y-m-d'); 
+  $kg             = (float)($_POST['quantitat_kg'] ?? 0);    
+  $grau_qualitat  = trim($_POST['qualitat'] ?? '');          
+  $protocol_notes = trim($_POST['notes'] ?? '');             
+  // Nota: humitat_pct s'afegirà a la BD si no hi és, però de moment ho capturem
+  $humitat        = ($_POST['humitat_pct'] ?? '') !== '' ? (float)$_POST['humitat_pct'] : null;
 
-  $st = db()->prepare("
-    INSERT INTO collites
-      (parcela_id, sector_id, varietat_id, any_campanya, recollit, kg, grau_qualitat, protocol_notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  ");
+  if ($action === 'create') {
+    $st = db()->prepare("
+      INSERT INTO collites
+        (parcela_id, sector_id, varietat_text, any_campanya, recollit, kg, grau_qualitat, protocol_notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $st->execute([
+      $parcela_id, $sector_id, 
+      $varietat_text !== '' ? $varietat_text : null,
+      $any_campanya, $recollit, $kg,
+      $grau_qualitat !== '' ? $grau_qualitat : null,
+      $protocol_notes !== '' ? $protocol_notes : null
+    ]);
+    flash_set("Collita registrada correctament.", "ok");
+  } elseif ($action === 'edit' && $id > 0) {
+    $st = db()->prepare("
+      UPDATE collites SET
+        parcela_id=?, sector_id=?, varietat_text=?, any_campanya=?, 
+        recollit=?, kg=?, grau_qualitat=?, protocol_notes=?
+      WHERE id=?
+    ");
+    $st->execute([
+      $parcela_id, $sector_id, 
+      $varietat_text !== '' ? $varietat_text : null,
+      $any_campanya, $recollit, $kg,
+      $grau_qualitat !== '' ? $grau_qualitat : null,
+      $protocol_notes !== '' ? $protocol_notes : null,
+      $id
+    ]);
+    flash_set("Collita actualitzada.", "ok");
+  }
 
-  $st->execute([
-    $parcela_id,
-    $sector_id,
-    $varietat_id,
-    $any_campanya,
-    $recollit,
-    $kg,
-    $grau_qualitat !== '' ? $grau_qualitat : null,
-    $protocol_notes !== '' ? $protocol_notes : null
-  ]);
-
-  flash_set("Collita registrada correctament.", "ok");
   header("Location: collites.php");
   exit;
+}
+
+// Detectar edició
+$edit_item = null;
+if (isset($_GET['edit'])) {
+    $st = db()->prepare("SELECT * FROM collites WHERE id = ?");
+    $st->execute([(int)$_GET['edit']]);
+    $edit_item = $st->fetch(PDO::FETCH_ASSOC);
 }
 
 // Dades per als selects
 $parceles  = db()->query("SELECT id, name FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $sectors   = db()->query("SELECT id, nom_sector AS name, parcela_id FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
 $cultius   = db()->query("SELECT id, name FROM cultius ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$varietats = db()->query("SELECT id, name, cultiu_id FROM varietats ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
-// Llistar collites (SENSE co.cultiu_id)
+// Llistar collites (agafant tant el text nou com els IDs vells per retrocompatibilitat)
 $collites = db()->query("
   SELECT co.*,
          p.name  AS parcela_name,
@@ -77,16 +101,19 @@ include __DIR__ . '/../app/views/layout/header.php';
 <div class="grid">
 
   <div class="card span6">
-    <h2>Nova collita</h2>
+    <h2><?= $edit_item ? 'Editar collita' : 'Nova collita' ?></h2>
 
     <form method="post">
-      <input type="hidden" name="action" value="create">
+      <input type="hidden" name="action" value="<?= $edit_item ? 'edit' : 'create' ?>">
+      <?php if ($edit_item): ?>
+        <input type="hidden" name="id" value="<?= $edit_item['id'] ?>">
+      <?php endif; ?>
 
       <label>Parcel·la</label>
       <select name="parcela_id" id="select_parcela">
         <option value="">—</option>
         <?php foreach ($parceles as $p): ?>
-          <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+          <option value="<?= $p['id'] ?>" <?= ($edit_item && $edit_item['parcela_id'] == $p['id']) ? 'selected' : '' ?>><?= htmlspecialchars($p['name']) ?></option>
         <?php endforeach; ?>
       </select>
 
@@ -94,11 +121,10 @@ include __DIR__ . '/../app/views/layout/header.php';
       <select name="sector_id" id="select_sector">
         <option value="">—</option>
         <?php foreach ($sectors as $s): ?>
-          <option value="<?= $s['id'] ?>" data-parcela="<?= $s['parcela_id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
+          <option value="<?= $s['id'] ?>" data-parcela="<?= $s['parcela_id'] ?>" <?= ($edit_item && $edit_item['sector_id'] == $s['id']) ? 'selected' : '' ?>><?= htmlspecialchars($s['name']) ?></option>
         <?php endforeach; ?>
       </select>
 
-      <!-- Es manté per UX, però NO es desa a `collites` perquè no hi ha el camp al teu SQL -->
       <label>Cultiu</label>
       <select name="cultiu_id">
         <option value="">—</option>
@@ -108,33 +134,30 @@ include __DIR__ . '/../app/views/layout/header.php';
       </select>
 
       <label>Varietat</label>
-      <select name="varietat_id">
-        <option value="">—</option>
-        <?php foreach ($varietats as $v): ?>
-          <option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['name']) ?></option>
-        <?php endforeach; ?>
-      </select>
+      <input type="text" name="varietat_text" placeholder="Escriu la varietat (ex: Arbequina)..." value="<?= $edit_item ? htmlspecialchars($edit_item['varietat_text'] ?? '') : '' ?>">
 
       <label>Any campanya</label>
-      <input type="number" name="any_campanya" value="<?= date('Y') ?>" required>
+      <input type="number" name="any_campanya" value="<?= $edit_item ? $edit_item['any_campanya'] : date('Y') ?>" required>
 
       <label>Data de collita</label>
-      <input type="date" name="data_collita" required>
+      <input type="date" name="data_collita" required value="<?= $edit_item ? $edit_item['recollit'] : '' ?>">
 
       <label>Quantitat (kg)</label>
-      <input type="number" step="0.01" name="quantitat_kg" required>
+      <input type="number" step="0.01" name="quantitat_kg" required value="<?= $edit_item ? $edit_item['kg'] : '' ?>">
 
       <label>Qualitat</label>
-      <input name="qualitat" placeholder="Ex: Extra, Primera, Segona">
+      <input name="qualitat" placeholder="Ex: Extra, Primera, Segona" value="<?= $edit_item ? htmlspecialchars($edit_item['grau_qualitat'] ?? '') : '' ?>">
 
-      <!-- No existeix a la taula collites: es manté al formulari però no es desa -->
       <label>Humitat (%)</label>
-      <input type="number" step="0.01" name="humitat_pct">
+      <input type="number" step="0.01" name="humitat_pct" value="<?= $edit_item ? ($edit_item['humitat_pct'] ?? '') : '' ?>">
 
       <label>Notes</label>
-      <textarea name="notes"></textarea>
+      <textarea name="notes"><?= $edit_item ? htmlspecialchars($edit_item['protocol_notes'] ?? '') : '' ?></textarea>
 
-      <button class="btn" type="submit">Desar</button>
+      <button class="btn" type="submit"><?= $edit_item ? 'Actualitzar' : 'Desar' ?></button>
+      <?php if ($edit_item): ?>
+        <a href="collites.php" class="btn secondary" style="margin-left:8px">Cancel·lar</a>
+      <?php endif; ?>
     </form>
   </div>
 
@@ -154,6 +177,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <th>Sector</th>
             <th>Quantitat (kg)</th>
             <th>Qualitat</th>
+            <th>Accions</th>
           </tr>
         </thead>
         <tbody>
@@ -161,11 +185,15 @@ include __DIR__ . '/../app/views/layout/header.php';
             <tr>
               <td><?= htmlspecialchars($c['recollit']) ?></td>
               <td><?= htmlspecialchars($c['cultiu_name'] ?? '') ?></td>
-              <td><?= htmlspecialchars($c['varietat_name'] ?? '') ?></td>
+              <td><?= htmlspecialchars($c['varietat_text'] ?? $c['varietat_name'] ?? '') ?></td>
               <td><?= htmlspecialchars($c['parcela_name'] ?? '') ?></td>
               <td><?= htmlspecialchars($c['sector_name'] ?? '') ?></td>
               <td><?= htmlspecialchars($c['kg']) ?></td>
               <td><?= htmlspecialchars($c['grau_qualitat'] ?? '') ?></td>
+              <td style="white-space:nowrap">
+                <a href="collites.php?edit=<?= $c['id'] ?>" class="btn btn-small">✏️</a>
+                <a href="collites.php?delete=<?= $c['id'] ?>" class="btn btn-small" onclick="return confirm('Segur?')">🗑️</a>
+              </td>
             </tr>
           <?php endforeach; ?>
         </tbody>

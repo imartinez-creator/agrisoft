@@ -121,6 +121,21 @@ textarea{min-height:90px}
   color:#374151;
 }
 
+.btn-red{
+  background: rgba(220,38,38,0.12);
+  color:#991b1b;
+}
+.btn-red:hover{
+  background: rgba(220,38,38,0.18);
+  border-color: rgba(220,38,38,0.6);
+}
+
+.btn-small{
+  padding:4px 8px;
+  font-size:0.85rem;
+  border-radius:8px;
+}
+
 table{
   width:100%;
   border-collapse:separate;
@@ -156,6 +171,17 @@ tr td:last-child{
 }
 
 .small{color:var(--muted);font-size:.9rem}
+.text-muted{color:var(--muted)}
+
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:20px;
+  font-size:0.75rem;
+  font-weight:600;
+  background: rgba(0,0,0,0.05);
+  border:1px solid rgba(0,0,0,0.05);
+}
 
 .kpi{
   display:flex;
@@ -236,6 +262,36 @@ tr td:last-child{
   height:1px;
   background: rgba(0,0,0,.10);
   margin:10px 0;
+}
+
+/* Tabs */
+.tabs-nav{
+  display:flex;
+  gap:10px;
+  margin-bottom:14px;
+  border-bottom:1px solid rgba(0,0,0,.10);
+  padding-bottom:10px;
+}
+.tab-link{
+  padding:8px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  transition:.15s;
+  background: rgba(255,255,255,0.4);
+}
+.tab-link:hover{
+  background: rgba(255,255,255,0.8);
+}
+.tab-link.active{
+  background: var(--accent);
+  color: white;
+}
+.tab-content{
+  display:none;
+}
+.tab-content.active{
+  display:block;
 }
 
 /* Contingut */

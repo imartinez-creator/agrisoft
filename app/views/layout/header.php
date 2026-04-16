@@ -33,6 +33,7 @@ function nav_active(string $file, string $current): string {
         <a class="nav-item<?= nav_active('cultius.php', $current) ?>" href="cultius.php">Cultius</a>
         <a class="nav-item<?= nav_active('productes.php', $current) ?>" href="productes.php">Productes</a>
         <a class="nav-item<?= nav_active('tractaments.php', $current) ?>" href="tractaments.php">Tractaments</a>
+        <a class="nav-item<?= nav_active('calculadora.php', $current) ?>" href="calculadora.php">Calculadora</a>
         <a class="nav-item<?= nav_active('plagues.php', $current) ?>" href="plagues.php">Plagues</a>
         <a class="nav-item<?= nav_active('analisi.php', $current) ?>" href="analisi.php">Anàlisi</a>
         <a class="nav-item<?= nav_active('collites.php', $current) ?>" href="collites.php">Collites</a>

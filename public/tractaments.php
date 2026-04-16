@@ -111,7 +111,7 @@ include __DIR__ . '/../app/views/layout/header.php';
       <select name="parcela_id" id="select_parcela">
         <option value="">— Selecciona la parcela —</option>
         <?php foreach ($parceles as $p): ?>
-          <option value="<?= $p['id'] ?>" <?= ($edit_item && $edit_item['parcela_id'] == $p['id']) ? 'selected' : '' ?>>
+          <option value="<?= $p['id'] ?>" <?= (($edit_item && $edit_item['parcela_id'] == $p['id']) || ($_GET['parcela_id'] ?? '') == $p['id']) ? 'selected' : '' ?>>
             <?= htmlspecialchars($p['name']) ?>
           </option>
         <?php endforeach; ?>
@@ -121,7 +121,7 @@ include __DIR__ . '/../app/views/layout/header.php';
       <select name="sector_id" id="select_sector">
         <option value="">— Selecciona sector —</option>
         <?php foreach ($sectors as $s): ?>
-          <option value="<?= $s['id'] ?>" data-parcela="<?= $s['parcela_id'] ?>" <?= ($edit_item && $edit_item['sector_id'] == $s['id']) ? 'selected' : '' ?>>
+          <option value="<?= $s['id'] ?>" data-parcela="<?= $s['parcela_id'] ?>" <?= (($edit_item && $edit_item['sector_id'] == $s['id']) || ($_GET['sector_id'] ?? '') == $s['id']) ? 'selected' : '' ?>>
             <?= htmlspecialchars($s['name']) ?>
           </option>
         <?php endforeach; ?>
@@ -141,7 +141,7 @@ include __DIR__ . '/../app/views/layout/header.php';
       <select name="producte_id" required>
         <option value="">— Selecciona un producte —</option>
         <?php foreach ($productes as $p): ?>
-          <option value="<?= $p['id'] ?>" <?= ($edit_item && $edit_item['producte_id'] == $p['id']) ? 'selected' : '' ?>>
+          <option value="<?= $p['id'] ?>" <?= (($edit_item && $edit_item['producte_id'] == $p['id']) || ($_GET['producte_id'] ?? '') == $p['id']) ? 'selected' : '' ?>>
             <?= htmlspecialchars($p['name']) ?>
           </option>
         <?php endforeach; ?>
@@ -153,11 +153,11 @@ include __DIR__ . '/../app/views/layout/header.php';
       <div class="grid" style="gap:12px">
         <div class="span3">
           <label>Dosi / ha</label>
-          <input type="number" step="0.01" name="dosis_hectarea" required value="<?= $edit_item ? htmlspecialchars($edit_item['dosis_hectarea']) : '' ?>">
+          <input type="number" step="0.01" name="dosis_hectarea" required value="<?= $edit_item ? htmlspecialchars($edit_item['dosis_hectarea']) : ($_GET['dosi_ha'] ?? '') ?>">
         </div>
         <div class="span3">
           <label>Dosi total</label>
-          <input type="number" step="0.01" name="dosis_total" required value="<?= $edit_item ? htmlspecialchars($edit_item['dosis_total']) : '' ?>">
+          <input type="number" step="0.01" name="dosis_total" required value="<?= $edit_item ? htmlspecialchars($edit_item['dosis_total']) : ($_GET['dosi_tot'] ?? '') ?>">
         </div>
       </div>
 
