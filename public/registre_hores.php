@@ -1,14 +1,16 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
+/* ===== Càrrega de fitxers necessaris ===== */
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
 
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
+// Data d'avui (per filtrar els torns del dia)
 $avui = date('Y-m-d');
 
-/**
- * Retorna l'últim torn ACTIU d'avui (treballant/pausat)
- */
+/* ===== Funció: Obtenir l'últim torn actiu d'avui ===== */
+// Busca si un treballador té un torn 'treballant' o 'pausat' avui
 function get_active_shift_today(int $idTreballador, string $avui) {
   $st = db()->prepare("
     SELECT *
@@ -23,13 +25,14 @@ function get_active_shift_today(int $idTreballador, string $avui) {
   return $st->fetch(PDO::FETCH_ASSOC);
 }
 
-// Accions (iniciar / pausar / reprendre / acabar)
+/* ===== Processar accions del formulari (iniciar/pausar/reprendre/acabar) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $idTreballador = (int)($_POST['idTreballador'] ?? 0);
-  $acc = $_POST['acc'] ?? '';
+  $idTreballador = (int)($_POST['idTreballador'] ?? 0);  // ID del treballador
+  $acc = $_POST['acc'] ?? '';                              // Acció a fer
 
   if ($idTreballador > 0) {
 
+    // INICIAR: crear un nou torn si no n'hi ha cap actiu
     if ($acc === 'inici') {
       $actiu = get_active_shift_today($idTreballador, $avui);
       if (!$actiu) {
@@ -40,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
+    // PAUSAR: canviar l'estat de 'treballant' a 'pausat'
     if ($acc === 'pausa') {
       $actiu = get_active_shift_today($idTreballador, $avui);
       if ($actiu && $actiu['estat'] === 'treballant') {
@@ -51,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
+    // REPRENDRE: tornar de pausa a treballant (incrementem el comptador de pauses)
     if ($acc === 'repren') {
       $actiu = get_active_shift_today($idTreballador, $avui);
       if ($actiu && $actiu['estat'] === 'pausat') {
@@ -63,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
+    // ACABAR: marcar el torn com a finalitzat i registrar l'hora de fi
     if ($acc === 'final') {
       $actiu = get_active_shift_today($idTreballador, $avui);
       if ($actiu) {
@@ -80,9 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   exit;
 }
 
-/**
- * 1 fila per treballador amb l'últim torn d'avui (si existeix)
- */
+/* ===== Obtenir la llista de treballadors amb el seu torn d'avui ===== */
+// Una fila per treballador, amb l'últim torn del dia (si existeix)
 $rows = db()->query("
   SELECT
     t.id,
@@ -107,10 +112,11 @@ $rows = db()->query("
   ORDER BY t.nom_complet
 ")->fetchAll(PDO::FETCH_ASSOC);
 
+/* ===== Títol de la pàgina i capçalera HTML ===== */
 $titol = "Registre d'hores · AGRISOFT";
 include __DIR__ . '/../app/views/layout/header.php';
 
-/** segons -> HH:MM:SS */
+/* ===== Funció: Formatar segons en format HH:MM:SS ===== */
 function fmt_hms(int $sec): string {
   if ($sec < 0) $sec = 0;
   $h = intdiv($sec, 3600);
@@ -119,12 +125,10 @@ function fmt_hms(int $sec): string {
   return sprintf("%02d:%02d:%02d", $h, $m, $s);
 }
 
-/**
- * Calcula segons treballats fins ara:
- * - si està finalitzat: (fi - inici)
- * - si està treballant: (ara - inici)
- * - si està pausat: ho deixem “clavat” al valor que es veu al carregar la pàgina
- */
+/* ===== Funció: Calcular segons treballats ===== */
+// Si finalitzat: diferència entre fi i inici
+// Si treballant: diferència entre ara i inici (comptador en viu)
+// Si pausat: queda fix al carregar la pàgina
 function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): int {
   if (!$hora_inici) return 0;
 
@@ -133,13 +137,14 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
   if ($estat === 'finalitzat' && $hora_fi) {
     $end = strtotime($hora_fi);
   } else {
-    $end = time();
+    $end = time(); // Temps actual
   }
 
   return (int)max(0, $end - $start);
 }
 ?>
 
+<!-- ===== Taula del registre d'hores ===== -->
 <div class="card">
   <h2>Registre d'hores (<?= htmlspecialchars($avui) ?>)</h2>
 
@@ -162,15 +167,18 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
           $estat = $r['estat'] ?? '—';
           $te_actiu = in_array($estat, ['treballant','pausat'], true);
 
+          // Calculem els segons treballats per mostrar el temps
           $initSec = worked_seconds(
             $r['hora_inici'] ?? null,
             $r['hora_fi'] ?? null,
             $estat
           );
 
+          // Timestamps per al comptador JavaScript en viu
           $startTs = !empty($r['hora_inici']) ? strtotime($r['hora_inici']) : null;
           $endTs   = !empty($r['hora_fi']) ? strtotime($r['hora_fi']) : null;
         ?>
+        <!-- Cada fila porta data-attributes pel comptador JS -->
         <tr
           data-start-ts="<?= $startTs ?? '' ?>"
           data-end-ts="<?= $endTs ?? '' ?>"
@@ -180,6 +188,7 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
           <td><?= htmlspecialchars($r['hora_inici_hm'] ?? '') ?></td>
           <td><?= htmlspecialchars($r['hora_fi_hm'] ?? '') ?></td>
 
+          <!-- Comptador de temps (s'actualitza en viu si 'treballant') -->
           <td>
             <span class="work-timer"><?= htmlspecialchars(fmt_hms($initSec)) ?></span>
           </td>
@@ -187,18 +196,22 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
           <td><?= (int)($r['pauses'] ?? 0) ?></td>
           <td><?= htmlspecialchars($estat) ?></td>
 
+          <!-- Botons d'acció segons l'estat actual -->
           <td>
             <form method="post" style="display:flex;gap:6px;flex-wrap:wrap;">
               <input type="hidden" name="idTreballador" value="<?= (int)$r['id'] ?>">
 
               <?php if (!$te_actiu): ?>
+                <!-- Si no té torn actiu, pot iniciar -->
                 <button name="acc" value="inici" class="btn">Iniciar</button>
 
               <?php elseif ($estat === 'treballant'): ?>
+                <!-- Si està treballant, pot pausar o acabar -->
                 <button name="acc" value="pausa" class="btn secondary">Pausar</button>
                 <button name="acc" value="final" class="btn">Acabar</button>
 
               <?php elseif ($estat === 'pausat'): ?>
+                <!-- Si està pausat, pot reprendre o acabar -->
                 <button name="acc" value="repren" class="btn">Reprendre</button>
                 <button name="acc" value="final" class="btn secondary">Acabar</button>
               <?php endif; ?>
@@ -210,12 +223,14 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
   </table>
 
   <p class="small" style="margin-top:10px;opacity:.85">
-    El camp <b>Temps</b> és un comptador en viu quan l’estat és <b>treballant</b>. En <b>pausat</b> queda fix.
+    El camp <b>Temps</b> és un comptador en viu quan l'estat és <b>treballant</b>. En <b>pausat</b> queda fix.
   </p>
 </div>
 
+<!-- JavaScript: comptador en viu per als treballadors actius -->
 <script>
 (function () {
+  // Formata segons a HH:MM:SS
   function fmt(sec) {
     sec = Math.max(0, Math.floor(sec));
     const h = String(Math.floor(sec / 3600)).padStart(2, '0');
@@ -224,6 +239,7 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
     return `${h}:${m}:${s}`;
   }
 
+  // Calcula els segons treballats fins ara
   function computeWorked(row) {
     const startTs = parseInt(row.dataset.startTs || '0', 10);
     const endTs = parseInt(row.dataset.endTs || '0', 10);
@@ -234,13 +250,14 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
     return Math.max(0, end - startTs);
   }
 
+  // Actualitza el comptador cada segon
   function tick() {
     document.querySelectorAll('tr[data-start-ts]').forEach(row => {
       const timer = row.querySelector('.work-timer');
       if (!timer) return;
 
       const estat = row.dataset.estat || '';
-      // actualitzem en viu NOMÉS si està treballant
+      // Només actualitzem en viu si està treballant
       if (estat === 'treballant') {
         timer.textContent = fmt(computeWorked(row));
       }
@@ -248,7 +265,7 @@ function worked_seconds(?string $hora_inici, ?string $hora_fi, string $estat): i
   }
 
   tick();
-  setInterval(tick, 1000);
+  setInterval(tick, 1000); // Cada segon
 })();
 </script>
 

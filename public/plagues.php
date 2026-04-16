@@ -1,11 +1,13 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
-require_once __DIR__ . '/../app/helpers/flash.php';
+/* ===== Càrrega de fitxers necessaris ===== */
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
 
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
-// Eliminar pla o observació
+/* ===== Eliminar un pla de tractament ===== */
 if (isset($_GET['delete_plan'])) {
     $id = (int)$_GET['delete_plan'];
     db()->prepare("DELETE FROM plans_tractament WHERE id = ?")->execute([$id]);
@@ -13,6 +15,8 @@ if (isset($_GET['delete_plan'])) {
     header("Location: plagues.php");
     exit;
 }
+
+/* ===== Eliminar una observació de plaga ===== */
 if (isset($_GET['delete_obs'])) {
     $id = (int)$_GET['delete_obs'];
     db()->prepare("DELETE FROM observacio_plagues WHERE id = ?")->execute([$id]);
@@ -21,19 +25,21 @@ if (isset($_GET['delete_obs'])) {
     exit;
 }
 
-// Crear o Editar pla
+/* ===== Crear o Editar un pla de tractament (formulari POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create_plan', 'edit_plan'])) {
-    $title = trim($_POST['title'] ?? '');
-    $planned_on = $_POST['planned_on'] ?? '';
-    $parcela_id = ($_POST['parcela_id'] ?? '') !== '' ? (int)$_POST['parcela_id'] : null;
-    $sector_id  = ($_POST['sector_id'] ?? '') !== '' ? (int)$_POST['sector_id'] : null;
-    $notes = trim($_POST['notes'] ?? '');
+    // Recollim les dades del formulari
+    $title = trim($_POST['title'] ?? '');                                      // Títol del pla
+    $planned_on = $_POST['planned_on'] ?? '';                                   // Data planificada
+    $parcela_id = ($_POST['parcela_id'] ?? '') !== '' ? (int)$_POST['parcela_id'] : null; // Parcel·la
+    $sector_id  = ($_POST['sector_id'] ?? '') !== '' ? (int)$_POST['sector_id'] : null;   // Sector
+    $notes = trim($_POST['notes'] ?? '');                                       // Notes
     $id = (int)($_POST['id'] ?? 0);
 
     if ($title === '' || $planned_on === '') {
         flash_set("Títol i data són obligatoris.", "bad");
     } else {
         if ($_POST['action'] === 'create_plan') {
+            // Creem un nou pla amb estat 'pendent'
             $st = db()->prepare("
                 INSERT INTO plans_tractament (title, planned_on, parcela_id, sector_id, notes, status, creat)
                 VALUES (?, ?, ?, ?, ?, 'pendent', ?)
@@ -41,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
             $st->execute([$title, $planned_on, $parcela_id, $sector_id, $notes, $_SESSION['user']['id']]);
             flash_set("Pla de tractament creat.", "ok");
         } else {
+            // Actualitzem un pla existent
             $st = db()->prepare("
                 UPDATE plans_tractament 
                 SET title = ?, planned_on = ?, parcela_id = ?, sector_id = ?, notes = ?
@@ -54,13 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
     }
 }
 
-// Crear o Editar observació
+/* ===== Crear o Editar una observació de plaga (formulari POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create_obs', 'edit_obs'])) {
-    $nom_plaga  = trim($_POST['nom_plaga'] ?? '');
-    $observat   = $_POST['observat'] ?? date('Y-m-d');
+    // Recollim les dades del formulari
+    $nom_plaga  = trim($_POST['nom_plaga'] ?? '');       // Nom de la plaga detectada
+    $observat   = $_POST['observat'] ?? date('Y-m-d');   // Data de detecció
     $parcela_id = ($_POST['parcela_id'] ?? '') !== '' ? (int)$_POST['parcela_id'] : null;
     $sector_id  = ($_POST['sector_id'] ?? '') !== '' ? (int)$_POST['sector_id'] : null;
-    $gravetat   = $_POST['gravetat'] ?? 'baixa';
+    $gravetat   = $_POST['gravetat'] ?? 'baixa';         // Nivell de gravetat (baixa/mitjana/alta)
     $notes      = trim($_POST['notes'] ?? '');
     $id = (int)($_POST['id'] ?? 0);
 
@@ -68,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
         flash_set("Cal indicar la plaga i la data.", "bad");
     } else {
         if ($_POST['action'] === 'create_obs') {
+            // Inserim una nova observació
             $st = db()->prepare("
                 INSERT INTO observacio_plagues (nom_plaga, observat, parcela_id, sector_id, gravetat, notes, creat)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -75,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
             $st->execute([$nom_plaga, $observat, $parcela_id, $sector_id, $gravetat, $notes, $_SESSION['user']['id']]);
             flash_set("Observació registrada.", "ok");
         } else {
+            // Actualitzem una observació existent
             $st = db()->prepare("
                 UPDATE observacio_plagues 
                 SET nom_plaga=?, observat=?, parcela_id=?, sector_id=?, gravetat=?, notes=?
@@ -88,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
     }
 }
 
-// Canviar estat ràpid (pendent/fet/cancelat)
+/* ===== Canviar l'estat d'un pla ràpidament (pendent/fet/cancelat) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'set_status') {
     $id = (int)($_POST['id'] ?? 0);
     $status = $_POST['status'] ?? 'pendent';
@@ -100,13 +110,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'set_s
     exit;
 }
 
-// Detectar edició
+/* ===== Carregar dades per editar ===== */
+// Pla en edició
 $edit_plan = null;
 if (isset($_GET['edit_plan'])) {
     $st = db()->prepare("SELECT * FROM plans_tractament WHERE id = ?");
     $st->execute([(int)$_GET['edit_plan']]);
     $edit_plan = $st->fetch(PDO::FETCH_ASSOC);
 }
+
+// Observació en edició
 $edit_obs = null;
 if (isset($_GET['edit_obs'])) {
     $st = db()->prepare("SELECT * FROM observacio_plagues WHERE id = ?");
@@ -114,11 +127,11 @@ if (isset($_GET['edit_obs'])) {
     $edit_obs = $st->fetch(PDO::FETCH_ASSOC);
 }
 
-// Dades per selects
+/* ===== Dades per als selectors del formulari ===== */
 $parceles = db()->query("SELECT id, name FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 $sectors  = db()->query("SELECT id, nom_sector AS name, parcela_id FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
 
-// Llista de plans
+/* ===== Obtenir tots els plans de tractament ===== */
 $plans = db()->query("
   SELECT pt.*, p.name AS parcela_name, s.nom_sector AS sector_name
   FROM plans_tractament pt
@@ -127,7 +140,7 @@ $plans = db()->query("
   ORDER BY pt.planned_on DESC, pt.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// Llista d'observacions
+/* ===== Obtenir totes les observacions de plagues ===== */
 $observacions = db()->query("
   SELECT o.*, p.name AS parcela_name, s.nom_sector AS sector_name
   FROM observacio_plagues o
@@ -136,18 +149,23 @@ $observacions = db()->query("
   ORDER BY o.observat DESC, o.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
+/* ===== Títol de la pàgina i capçalera HTML ===== */
 $titol = "Plagues / Plans · AGRISOFT";
 include __DIR__ . '/../app/views/layout/header.php';
 ?>
 
 
+  <!-- Pestanyes: Plans de tractament / Observacions de plagues -->
   <div class="tabs-nav">
     <div class="tab-link <?= (!$edit_obs) ? 'active' : '' ?>" onclick="switchTab('plans')">🗓️ Plans de tractament</div>
     <div class="tab-link <?= ($edit_obs) ? 'active' : '' ?>" onclick="switchTab('observacions')">🔍 Observacions de plagues</div>
   </div>
 
+  <!-- ===== PESTANYA: PLANS DE TRACTAMENT ===== -->
   <div id="plans" class="tab-content <?= (!$edit_obs) ? 'active' : '' ?>">
     <div class="grid">
+
+      <!-- Formulari per crear o editar un pla -->
       <div class="card span4">
         <h2><?= $edit_plan ? "Editar pla" : "Nou pla" ?></h2>
         <form method="post">
@@ -156,12 +174,15 @@ include __DIR__ . '/../app/views/layout/header.php';
               <input type="hidden" name="id" value="<?= $edit_plan['id'] ?>">
           <?php endif; ?>
 
+          <!-- Títol del pla -->
           <label>Títol</label>
           <input name="title" value="<?= $edit_plan ? htmlspecialchars($edit_plan['title']) : '' ?>" required>
 
+          <!-- Data planificada -->
           <label>Data planificada</label>
           <input type="date" name="planned_on" value="<?= $edit_plan ? $edit_plan['planned_on'] : '' ?>" required>
 
+          <!-- Selector de parcel·la -->
           <label>Parcel·la</label>
           <select name="parcela_id" class="select-parcela">
             <option value="">—</option>
@@ -172,6 +193,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <?php endforeach; ?>
           </select>
 
+          <!-- Selector de sector -->
           <label>Sector</label>
           <select name="sector_id" class="select-sector">
             <option value="">—</option>
@@ -182,6 +204,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <?php endforeach; ?>
           </select>
 
+          <!-- Notes -->
           <label>Notes</label>
           <textarea name="notes" rows="3"><?= $edit_plan ? htmlspecialchars($edit_plan['notes']) : '' ?></textarea>
 
@@ -194,6 +217,7 @@ include __DIR__ . '/../app/views/layout/header.php';
         </form>
       </div>
 
+      <!-- Taula amb els plans de tractament -->
       <div class="card span8">
         <h2>Plans pendents</h2>
         <?php if (!$plans): ?>
@@ -210,6 +234,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             </thead>
             <tbody>
                 <?php foreach ($plans as $pt): ?>
+                <!-- Ressaltem la fila si s'està editant -->
                 <tr style="<?= ($edit_plan && $edit_plan['id'] == $pt['id']) ? 'background: rgba(var(--primary-color-rgb), 0.1);' : '' ?>">
                   <td>
                     <strong><?= date('d/m/Y', strtotime($pt['planned_on'])) ?></strong><br>
@@ -222,6 +247,7 @@ include __DIR__ . '/../app/views/layout/header.php';
                     <?php endif; ?>
                   </td>
                   <td>
+                    <!-- Selector d'estat ràpid (canvia l'estat al seleccionar) -->
                     <form method="post" style="display:flex;gap:4px;">
                       <input type="hidden" name="action" value="set_status">
                       <input type="hidden" name="id" value="<?= (int)$pt['id'] ?>">
@@ -245,8 +271,11 @@ include __DIR__ . '/../app/views/layout/header.php';
     </div>
   </div>
 
+  <!-- ===== PESTANYA: OBSERVACIONS DE PLAGUES ===== -->
   <div id="observacions" class="tab-content <?= ($edit_obs) ? 'active' : '' ?>">
     <div class="grid">
+
+      <!-- Formulari per crear o editar una observació -->
       <div class="card span4">
         <h2><?= $edit_obs ? "Editar observació" : "Nova observació" ?></h2>
         <form method="post">
@@ -255,12 +284,15 @@ include __DIR__ . '/../app/views/layout/header.php';
               <input type="hidden" name="id" value="<?= $edit_obs['id'] ?>">
           <?php endif; ?>
 
+          <!-- Nom de la plaga -->
           <label>Plaga detectada</label>
           <input name="nom_plaga" value="<?= $edit_obs ? htmlspecialchars($edit_obs['nom_plaga']) : '' ?>" required>
 
+          <!-- Data de detecció -->
           <label>Data detecció</label>
           <input type="date" name="observat" value="<?= $edit_obs ? $edit_obs['observat'] : date('Y-m-d') ?>" required>
 
+          <!-- Selector de parcel·la -->
           <label>Parcel·la</label>
           <select name="parcela_id" class="select-parcela">
             <option value="">—</option>
@@ -271,6 +303,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <?php endforeach; ?>
           </select>
 
+          <!-- Selector de sector -->
           <label>Sector</label>
           <select name="sector_id" class="select-sector">
             <option value="">—</option>
@@ -281,6 +314,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <?php endforeach; ?>
           </select>
 
+          <!-- Nivell de gravetat -->
           <label>Gravetat</label>
           <select name="gravetat">
             <option value="baixa" <?= ($edit_obs && $edit_obs['gravetat']=='baixa') ? 'selected' : '' ?>>Baixa</option>
@@ -288,6 +322,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <option value="alta" <?= ($edit_obs && $edit_obs['gravetat']=='alta') ? 'selected' : '' ?>>Alta</option>
           </select>
 
+          <!-- Notes -->
           <label>Notes</label>
           <textarea name="notes" rows="3"><?= $edit_obs ? htmlspecialchars($edit_obs['notes']) : '' ?></textarea>
 
@@ -300,6 +335,7 @@ include __DIR__ . '/../app/views/layout/header.php';
         </form>
       </div>
 
+      <!-- Taula amb l'historial d'observacions -->
       <div class="card span8">
         <h2>Historial d'observacions</h2>
         <?php if (!$observacions): ?>
@@ -328,6 +364,7 @@ include __DIR__ . '/../app/views/layout/header.php';
                     <?php endif; ?>
                   </td>
                   <td>
+                    <!-- Color de la gravetat: vermell=alta, groc=mitjana, verd=baixa -->
                     <span class="badge" style="background:<?= $o['gravetat']==='alta'?'#fee2e2':($o['gravetat']==='mitjana'?'#fef3c7':'#f0fdf4') ?>; color:<?= $o['gravetat']==='alta'?'#991b1b':($o['gravetat']==='mitjana'?'#92400e':'#166534') ?>">
                       <?= ucfirst($o['gravetat']) ?>
                     </span>
@@ -346,7 +383,9 @@ include __DIR__ . '/../app/views/layout/header.php';
   </div>
 </div>
 
+<!-- JavaScript: pestanyes i filtre de sectors per parcel·la -->
 <script>
+// Canvi de pestanyes
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
@@ -355,6 +394,7 @@ function switchTab(tabId) {
     event.currentTarget.classList.add('active');
 }
 
+// Filtre de sectors: per cada selector de parcel·la, filtrem els sectors corresponents
 document.querySelectorAll('.select-parcela').forEach(sel => {
     sel.addEventListener('change', function() {
         const parcelaId = this.value;
@@ -379,6 +419,7 @@ document.querySelectorAll('.select-parcela').forEach(sel => {
             sectorSelect.value = "";
         }
     });
+    // Executem el filtre al carregar la pàgina
     sel.dispatchEvent(new Event('change'));
 });
 </script>

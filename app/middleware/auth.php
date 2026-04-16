@@ -1,26 +1,25 @@
 <?php
+/* ===== Middleware d'autenticació i permisos ===== */
+// Funcions per controlar l'accés dels usuaris a les pàgines
+
+// Obliga a estar autenticat. Si no ho està, redirigeix al login
 function require_login(): void {
   if (empty($_SESSION['user'])) { header('Location: login.php'); exit; }
 }
 
-/**
- * Retorna el rol actual (admin|manager|worker) o '' si no hi ha sessió.
- */
+// Retorna el rol de l'usuari actual (ex: 'admin', 'manager', 'treballador')
 function current_role(): string {
   return $_SESSION['user']['role'] ?? '';
 }
 
-/**
- * Retorna true si l'usuari actual té un dels rols indicats.
- */
+// Comprova si l'usuari té algun dels rols indicats
+// Exemple: has_role(['admin', 'manager']) → true si és admin o manager
 function has_role(array $roles): bool {
   $r = current_role();
   return $r !== '' && in_array($r, $roles, true);
 }
 
-/**
- * Força que l'usuari tingui un dels rols indicats.
- */
+// Obliga a tenir un dels rols indicats. Si no el té, mostra error 403 (accés denegat)
 function require_role(array $roles): void {
   require_login();
   if (!has_role($roles)) {
@@ -30,13 +29,8 @@ function require_role(array $roles): void {
   }
 }
 
-/**
- * Permisos bàsics (RBAC simple)
- * - admin: tot
- * - manager: gestiona dades (crear/editar/eliminar)
- * - worker: només lectura
- */
+// Retorna true si l'usuari pot gestionar (crear/editar/eliminar)
+// Només els rols 'admin' i 'manager' poden gestionar
 function can_manage(): bool {
   return has_role(['admin','manager']);
 }
-

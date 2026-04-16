@@ -2,17 +2,7 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1Solucionar el error de dins de plagues concretament en obervacions de plagues que quan deses dona error, surt aixo
-
-Fatal error: Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`agrisoft`.`observacio_plagues`, CONSTRAINT `observacio_plagues_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL) in C:\xampp\htdocs\agrisoft\public\plagues.php:75 Stack trace: #0 C:\xampp\htdocs\agrisoft\public\plagues.php(75): PDOStatement->execute(Array) #1 {main} thrown in C:\xampp\htdocs\agrisoft\public\plagues.php on line 75
-
-A analisi quan fa desar, no es guarda, no dona error pero no es guarda ni a la base de dades ni tampoc surt a pantalla
-
-
-
-A collites dona error quan s’intenta guardar-ho a la base de dades, surt aixo
-
-Fatal error: Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`agrisoft`.`collites`, CONSTRAINT `collites_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sectors` (`id`) ON DELETE SET NULL) in C:\xampp\htdocs\agrisoft\public\collites.php:39 Stack trace: #0 C:\xampp\htdocs\agrisoft\public\collites.php(39): PDOStatement->execute(Array) #1 {main} thrown in C:\xampp\htdocs\agrisoft\public\collites.php on line 39
+-- Servidor: 127.0.0.1
 -- Tiempo de generación: 09-02-2026 a las 22:05:37
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12 
@@ -916,8 +906,6 @@ ALTER TABLE `parcela_punt`
 --
 -- Filtros para la tabla `plans_tractament`
 --
--- Filtros para la tabla `plans_tractament`
---
 ALTER TABLE `plans_tractament`
   ADD CONSTRAINT `plans_tractament_ibfk_1` FOREIGN KEY (`parcela_id`) REFERENCES `parcela` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `plans_tractament_ibfk_2` FOREIGN KEY (`sector_id`) REFERENCES `sector_cultiu` (`id`) ON DELETE SET NULL,
@@ -929,12 +917,6 @@ ALTER TABLE `plans_tractament`
 ALTER TABLE `registre_hores`
   ADD CONSTRAINT `registre_hores_ibfk_1` FOREIGN KEY (`idTreballador`) REFERENCES `treballadors` (`id`) ON DELETE CASCADE;
 
---
--- Filtros para la tabla `resgistres_treball`
---
---
--- Filtros para la tabla `resgistres_treball`
---
 --
 -- Filtros para la tabla `resgistres_treball`
 --

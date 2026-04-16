@@ -1,45 +1,50 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
-require_once __DIR__ . '/../app/helpers/flash.php';
+/* ===== Càrrega de fitxers necessaris ===== */
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
 
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
-// Eliminar treballador
+/* ===== Eliminar un treballador ===== */
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     try {
         db()->prepare("DELETE FROM treballadors WHERE id = ?")->execute([$id]);
         flash_set("Treballador eliminat.", "ok");
     } catch (Exception $e) {
+        // Si el treballador té dades vinculades (hores, tasques...) no es pot eliminar
         flash_set("No s'ha pogut eliminar (podria tenir dades vinculades).", "bad");
     }
     header("Location: personal.php");
     exit;
 }
 
-// Crear o Editar treballador
+/* ===== Crear o Editar un treballador (formulari POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $action = $_POST['action'] ?? '';
   $id = (int)($_POST['id'] ?? 0);
-  $nom = trim($_POST['nom_complet'] ?? '');
+  $nom = trim($_POST['nom_complet'] ?? '');  // Nom complet (obligatori)
 
   if ($nom === '') {
     flash_set("El nom és obligatori.", "bad");
   } else {
     if ($action === 'create') {
+      // Inserim un nou treballador
       $st = db()->prepare("
         INSERT INTO treballadors (nom_complet, telefon, rol_de_treball, cost_hora)
         VALUES (?, ?, ?, ?)
       ");
       $st->execute([
         $nom,
-        trim($_POST['telefon'] ?? ''),
-        trim($_POST['rol_de_treball'] ?? ''),
-        $_POST['cost_hora'] !== '' ? $_POST['cost_hora'] : null
+        trim($_POST['telefon'] ?? ''),          // Telèfon
+        trim($_POST['rol_de_treball'] ?? ''),   // Rol (podador, tractorista, etc.)
+        $_POST['cost_hora'] !== '' ? $_POST['cost_hora'] : null  // Cost per hora (€)
       ]);
       flash_set("Treballador creat correctament.", "ok");
     } elseif ($action === 'edit' && $id > 0) {
+      // Actualitzem un treballador existent
       $st = db()->prepare("
         UPDATE treballadors SET nom_complet=?, telefon=?, rol_de_treball=?, cost_hora=?
         WHERE id=?
@@ -58,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-// Detectar edició
+/* ===== Carregar dades per editar un treballador ===== */
 $edit_item = null;
 if (isset($_GET['edit'])) {
     $st = db()->prepare("SELECT * FROM treballadors WHERE id = ?");
@@ -66,15 +71,17 @@ if (isset($_GET['edit'])) {
     $edit_item = $st->fetch(PDO::FETCH_ASSOC);
 }
 
-// Llistar treballadors
+/* ===== Obtenir tots els treballadors ===== */
 $treballadors = db()->query("SELECT * FROM treballadors ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
 
+/* ===== Títol de la pàgina i capçalera HTML ===== */
 $titol = "Personal · AGRISOFT";
 include __DIR__ . '/../app/views/layout/header.php';
 ?>
 
 <div class="grid">
 
+  <!-- ===== Formulari per crear o editar un treballador ===== -->
   <div class="card span6">
     <h2><?= $edit_item ? 'Editar treballador' : 'Nou treballador' ?></h2>
 
@@ -84,15 +91,19 @@ include __DIR__ . '/../app/views/layout/header.php';
         <input type="hidden" name="id" value="<?= $edit_item['id'] ?>">
       <?php endif; ?>
 
+      <!-- Nom complet -->
       <label>Nom complet</label>
       <input name="nom_complet" required value="<?= $edit_item ? htmlspecialchars($edit_item['nom_complet']) : '' ?>">
 
+      <!-- Telèfon -->
       <label>Telèfon</label>
       <input name="telefon" value="<?= $edit_item ? htmlspecialchars($edit_item['telefon'] ?? '') : '' ?>">
 
+      <!-- Rol de treball -->
       <label>Rol de treball</label>
       <input name="rol_de_treball" placeholder="Ex: Podador, Tractorista..." value="<?= $edit_item ? htmlspecialchars($edit_item['rol_de_treball'] ?? '') : '' ?>">
 
+      <!-- Cost per hora en euros -->
       <label>Cost per hora (€)</label>
       <input type="number" step="0.01" name="cost_hora" value="<?= $edit_item ? $edit_item['cost_hora'] : '' ?>">
 
@@ -103,6 +114,7 @@ include __DIR__ . '/../app/views/layout/header.php';
     </form>
   </div>
 
+  <!-- ===== Taula amb tots els treballadors ===== -->
   <div class="card span6">
     <h2>Treballadors</h2>
 

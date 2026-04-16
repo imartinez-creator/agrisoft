@@ -1,10 +1,14 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
+/* ===== Càrrega de fitxers necessaris ===== */
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés (autenticació)
 
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
-// Alertes de productes amb stock baix
+
+/* ===== Consulta 1: Productes amb stock baix ===== */
+// Busquem tots els productes on l'stock actual és igual o inferior al mínim definit
 $stock_baix = db()->query("
   SELECT name, stock, stock_baix
   FROM fito_productes
@@ -12,7 +16,9 @@ $stock_baix = db()->query("
   ORDER BY name
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// Alertes de plans pendents amb data passada
+
+/* ===== Consulta 2: Plans de tractament fora de termini ===== */
+// Busquem plans que estan pendents i la seva data prevista ja ha passat
 $plans_retard = db()->query("
   SELECT pt.title, pt.planned_on,
          p.name AS parcela_name,
@@ -25,12 +31,14 @@ $plans_retard = db()->query("
   ORDER BY pt.planned_on ASC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
+/* ===== Títol de la pàgina i capçalera HTML ===== */
 $titol = "Alertes · AGRISOFT";
 include __DIR__ . '/../app/views/layout/header.php';
 ?>
 
 <div class="grid">
 
+  <!-- ===== Targeta: Stock baix ===== -->
   <div class="card span6">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
       <span style="font-size:24px;">📦</span>
@@ -38,10 +46,12 @@ include __DIR__ . '/../app/views/layout/header.php';
     </div>
 
     <?php if (!$stock_baix): ?>
+      <!-- Si no hi ha productes amb stock baix, tot va bé -->
       <div class="status-empty">
         <p>No hi ha productes amb stock baix. Tot correcte.</p>
       </div>
     <?php else: ?>
+      <!-- Taula amb els productes que tenen stock crític -->
       <table class="table">
         <thead>
           <tr>
@@ -58,6 +68,7 @@ include __DIR__ . '/../app/views/layout/header.php';
               <td><?= htmlspecialchars($p['stock']) ?></td>
               <td><?= htmlspecialchars($p['stock_baix']) ?></td>
               <td style="text-align:right">
+                <!-- Etiqueta vermella per indicar estat crític -->
                 <span class="badge" style="background:#fee2e2; color:#991b1b;">Crític</span>
               </td>
             </tr>
@@ -67,6 +78,7 @@ include __DIR__ . '/../app/views/layout/header.php';
     <?php endif; ?>
   </div>
 
+  <!-- ===== Targeta: Plans fora de termini ===== -->
   <div class="card span6">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
       <span style="font-size:24px;">⚠️</span>
@@ -74,10 +86,12 @@ include __DIR__ . '/../app/views/layout/header.php';
     </div>
 
     <?php if (!$plans_retard): ?>
+      <!-- Si no hi ha plans endarrerits, tot va bé -->
       <div class="status-empty">
         <p>No hi ha plans pendents amb data passada. Bona feina!</p>
       </div>
     <?php else: ?>
+      <!-- Taula amb els plans que ja haurien d'estar fets -->
       <table class="table">
         <thead>
           <tr>
@@ -90,15 +104,19 @@ include __DIR__ . '/../app/views/layout/header.php';
         <tbody>
           <?php foreach ($plans_retard as $pt): ?>
             <tr>
+              <!-- Data en vermell per destacar que està fora de termini -->
               <td><span style="color:#991b1b; font-weight:600;"><?= date('d/m/Y', strtotime($pt['planned_on'])) ?></span></td>
               <td><strong><?= htmlspecialchars($pt['title']) ?></strong></td>
               <td>
+                <!-- Nom de la parcel·la -->
                 <small><?= htmlspecialchars($pt['parcela_name'] ?? '—') ?></small>
                 <?php if (!empty($pt['sector_name'])): ?>
+                  <!-- Nom del sector (si n'hi ha) -->
                   <div class="small text-muted">Sec: <?= htmlspecialchars($pt['sector_name']) ?></div>
                 <?php endif; ?>
               </td>
               <td style="text-align:right">
+                <!-- Botó per anar a gestionar el pla -->
                 <a href="plagues.php" class="btn btn-small">Gestionar</a>
               </td>
             </tr>

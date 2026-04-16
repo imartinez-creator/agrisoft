@@ -1,10 +1,16 @@
 <?php
+/* ===== Capçalera HTML comuna a totes les pàgines ===== */
+// Aquest fitxer genera el <head>, la barra lateral i la barra superior
+
+// Carreguem la configuració i les funcions de missatges flash
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../helpers/flash.php';
 
+// Detectem quina pàgina estem mostrant (per marcar-la activa al menú)
 $current = basename($_SERVER['PHP_SELF'] ?? '');
-$title = $title ?? APP_NAME;
+$title = $title ?? APP_NAME; // Si no s'ha definit $title, usem el nom de l'app
 
+// Retorna la classe CSS 'active' si la pàgina actual coincideix amb l'enllaç del menú
 function nav_active(string $file, string $current): string {
   return $file === $current ? ' active' : '';
 }
@@ -16,17 +22,21 @@ function nav_active(string $file, string $current): string {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title><?= htmlspecialchars($title) ?></title>
 
+  <!-- Fulls d'estil principals -->
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/vendor/leaflet.min.css">
 </head>
 
 <body>
 
+<!-- Contenidor principal del layout (sidebar + contingut) -->
 <div class="layout">
 
+  <!-- ===== Barra lateral de navegació (només si ha iniciat sessió) ===== -->
   <?php if (!empty($_SESSION['user'])): ?>
     <aside class="sidebar">
       <nav class="nav-vertical">
+        <!-- Enllaços del menú principal -->
         <a class="nav-item<?= nav_active('index.php', $current) ?>" href="index.php">Tauler</a>
         <a class="nav-item<?= nav_active('parcelles.php', $current) ?>" href="parcelles.php">Parcel·les</a>
         <a class="nav-item<?= nav_active('sectors.php', $current) ?>" href="sectors.php">Sectors</a>
@@ -44,21 +54,23 @@ function nav_active(string $file, string $current): string {
         <a class="nav-item<?= nav_active('alertes.php', $current) ?>" href="alertes.php">Alertes</a>
         <a class="nav-item<?= nav_active('reporting.php', $current) ?>" href="reporting.php">Reporting</a>
 
+        <!-- Enllaç d'administració d'usuaris (només visible per admins) -->
         <?php if (($_SESSION['user']['role'] ?? '') === 'admin'): ?>
           <div class="nav-sep"></div>
           <a class="nav-item<?= nav_active('usuaris.php', $current) ?>" href="usuaris.php">Usuaris</a>
         <?php endif; ?>
 
+        <!-- Separador i botó de sortir -->
         <div class="nav-sep"></div>
-
         <a class="nav-item" href="logout.php">Sortir</a>
       </nav>
     </aside>
   <?php endif; ?>
 
+  <!-- ===== Contingut principal ===== -->
   <main class="content">
 
-    <!-- HEADER HORITZONTAL (AGRISOFT + Usuari a dalt dreta) -->
+    <!-- Barra superior amb el nom de l'app i les dades de l'usuari -->
     <header class="topbar">
       <div class="topbar-left">
         <a class="topbar-brand" href="index.php">
@@ -69,6 +81,7 @@ function nav_active(string $file, string $current): string {
 
       <div class="topbar-right">
         <?php if (!empty($_SESSION['user'])): ?>
+          <!-- Nom i rol de l'usuari connectat -->
           <div class="topbar-user">
             <div class="topbar-user-name"><?= htmlspecialchars($_SESSION['user']['name'] ?? 'Usuari') ?></div>
             <div class="topbar-user-meta">Rol: <?= htmlspecialchars($_SESSION['user']['role']) ?></div>
@@ -77,8 +90,10 @@ function nav_active(string $file, string $current): string {
       </div>
     </header>
 
+    <!-- Zona de contingut (on van les pàgines) -->
     <div class="wrap">
 
+      <!-- Mostrem el missatge flash si n'hi ha algun pendent -->
       <?php if ($f = flash_get()): ?>
         <div class="flash <?= $f['type'] === 'bad' ? 'bad' : '' ?>">
           <?= htmlspecialchars($f['msg']) ?>

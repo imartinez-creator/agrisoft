@@ -1,13 +1,17 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
-require_once __DIR__ . '/../app/helpers/flash.php';
+/* ===== Càrrega de fitxers necessaris ===== */
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
 
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
+// Funció auxiliar per escapar text HTML de forma segura
 function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 
-// Eliminar màquina
+
+/* ===== Eliminar una màquina ===== */
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     db()->prepare("DELETE FROM maquinaria WHERE idMaquina = ?")->execute([$id]);
@@ -16,31 +20,32 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// Crear o Editar màquina
+
+/* ===== Crear o Editar una màquina (formulari POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $action = $_POST['action'] ?? '';
   $id = (int)($_POST['id'] ?? 0);
-
-  $nom = trim($_POST['nom'] ?? '');
+  $nom = trim($_POST['nom'] ?? '');  // Nom de la màquina (obligatori)
 
   if ($nom === '') {
     flash_set("El nom és obligatori.", "bad");
   } else {
     if ($action === 'create') {
+      // Inserim una nova màquina a la BD
       $st = db()->prepare("
         INSERT INTO maquinaria (nom, tipus, matricula, tipusCombustible, cavalls)
         VALUES (?, ?, ?, ?, ?)
       ");
-
       $st->execute([
         $nom,
-        trim($_POST['tipus'] ?? '') ?: null,
-        trim($_POST['matricula'] ?? '') ?: null,
-        trim($_POST['tipusCombustible'] ?? '') ?: null,
-        ($_POST['cavalls'] ?? '') !== '' ? (int)$_POST['cavalls'] : null
+        trim($_POST['tipus'] ?? '') ?: null,             // Tipus (tractor, segadora, etc.)
+        trim($_POST['matricula'] ?? '') ?: null,         // Matrícula
+        trim($_POST['tipusCombustible'] ?? '') ?: null,  // Combustible
+        ($_POST['cavalls'] ?? '') !== '' ? (int)$_POST['cavalls'] : null  // Potència (CV)
       ]);
       flash_set("Maquinària creada correctament.", "ok");
     } elseif ($action === 'edit' && $id > 0) {
+      // Actualitzem una màquina existent
       $st = db()->prepare("
         UPDATE maquinaria SET nom=?, tipus=?, matricula=?, tipusCombustible=?, cavalls=?
         WHERE idMaquina=?
@@ -61,7 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-// Detectar edició
+
+/* ===== Carregar dades per editar una màquina ===== */
 $edit_item = null;
 if (isset($_GET['edit'])) {
     $st = db()->prepare("SELECT * FROM maquinaria WHERE idMaquina = ?");
@@ -69,18 +75,21 @@ if (isset($_GET['edit'])) {
     $edit_item = $st->fetch(PDO::FETCH_ASSOC);
 }
 
-// Llistar maquinària
+
+/* ===== Obtenir tota la maquinària ===== */
 $maquinaria = db()->query("
   SELECT * FROM maquinaria
   ORDER BY idMaquina DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
+/* ===== Títol de la pàgina i capçalera HTML ===== */
 $titol = "Maquinària · AGRISOFT";
 include __DIR__ . '/../app/views/layout/header.php';
 ?>
 
 <div class="grid">
 
+  <!-- ===== Formulari per crear o editar una màquina ===== -->
   <div class="card span6">
     <h2><?= $edit_item ? 'Editar màquina' : 'Nova màquina' ?></h2>
 
@@ -90,18 +99,23 @@ include __DIR__ . '/../app/views/layout/header.php';
         <input type="hidden" name="id" value="<?= (int)$edit_item['idMaquina'] ?>">
       <?php endif; ?>
 
+      <!-- Nom de la màquina (obligatori) -->
       <label>Nom *</label>
       <input name="nom" required placeholder="Ex: Tractor John Deere" value="<?= $edit_item ? h($edit_item['nom']) : '' ?>">
 
+      <!-- Tipus de maquinària -->
       <label>Tipus</label>
       <input name="tipus" placeholder="Ex: Tractor, Segadora, Polvoritzador" value="<?= $edit_item ? h($edit_item['tipus'] ?? '') : '' ?>">
 
+      <!-- Matrícula -->
       <label>Matrícula</label>
       <input name="matricula" value="<?= $edit_item ? h($edit_item['matricula'] ?? '') : '' ?>">
 
+      <!-- Tipus de combustible -->
       <label>Tipus de combustible</label>
       <input name="tipusCombustible" placeholder="Ex: Dièsel, Gasolina, Elèctric" value="<?= $edit_item ? h($edit_item['tipusCombustible'] ?? '') : '' ?>">
 
+      <!-- Potència en cavalls -->
       <label>Cavalls (CV)</label>
       <input type="number" name="cavalls" min="0" value="<?= $edit_item ? (int)$edit_item['cavalls'] : '' ?>">
 
@@ -112,6 +126,7 @@ include __DIR__ . '/../app/views/layout/header.php';
     </form>
   </div>
 
+  <!-- ===== Taula amb tota la maquinària ===== -->
   <div class="card span6">
     <h2>Maquinària</h2>
 
@@ -140,7 +155,9 @@ include __DIR__ . '/../app/views/layout/header.php';
                <td><?= h($m['tipusCombustible'] ?? '') ?></td>
                <td><?= h($m['cavalls'] ?? '') ?></td>
                <td style="white-space:nowrap">
+                 <!-- Botó editar -->
                  <a href="maquinaria.php?edit=<?= $m['idMaquina'] ?>" class="btn btn-small">✏️</a>
+                 <!-- Botó eliminar -->
                  <a href="maquinaria.php?delete=<?= $m['idMaquina'] ?>" class="btn btn-small" onclick="return confirm('Segur?')">🗑️</a>
                </td>
              </tr>
