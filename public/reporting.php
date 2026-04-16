@@ -1,7 +1,11 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
+/* ===== Mòdul de Reporting i Estadístiques ===== */
+// Genera resums visuals i taules de producció acumulada per any, cultiu i parcel·la
 
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
 // Totals globals (usant collites)

@@ -129,23 +129,23 @@ if (isset($_GET['edit_obs'])) {
 
 /* ===== Dades per als selectors del formulari ===== */
 $parceles = db()->query("SELECT id, name FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$sectors  = db()->query("SELECT id, nom_sector AS name, parcela_id FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
+$sectors  = db()->query("SELECT id, nom AS name, parcela_id FROM sectors ORDER BY nom")->fetchAll(PDO::FETCH_ASSOC);
 
 /* ===== Obtenir tots els plans de tractament ===== */
 $plans = db()->query("
-  SELECT pt.*, p.name AS parcela_name, s.nom_sector AS sector_name
+  SELECT pt.*, p.name AS parcela_name, s.nom AS sector_name
   FROM plans_tractament pt
   LEFT JOIN parcela p ON p.id = pt.parcela_id
-  LEFT JOIN sector_cultiu s ON s.id = pt.sector_id
+  LEFT JOIN sectors s ON s.id = pt.sector_id
   ORDER BY pt.planned_on DESC, pt.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 /* ===== Obtenir totes les observacions de plagues ===== */
 $observacions = db()->query("
-  SELECT o.*, p.name AS parcela_name, s.nom_sector AS sector_name
+  SELECT o.*, p.name AS parcela_name, s.nom AS sector_name
   FROM observacio_plagues o
   LEFT JOIN parcela p ON p.id = o.parcela_id
-  LEFT JOIN sector_cultiu s ON s.id = o.sector_id
+  LEFT JOIN sectors s ON s.id = o.sector_id
   ORDER BY o.observat DESC, o.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 

@@ -27,6 +27,8 @@
   const $name = $('name');
   const $notes = $('notes');
   const $formMode = $('form_mode');
+  const $lat = $('lat'); // Nou camp lat
+  const $lng = $('lng'); // Nou camp lng
 
   // Si l'usuari és "treballador" (lectura), amaguem els controls d'edició
   if (!CAN_MANAGE) {
@@ -200,10 +202,13 @@
     $polygon.value = '';
     $areaHa.value = '0';
     $areaHaView.value = '0';
-    $btnSave.disabled = true;
+    // No disable save button anymore automatically, just let HTML validation and JS submit handler do it
+    $btnSave.disabled = false;
     if (!keepFields) {
       $name.value = '';
       $notes.value = '';
+      if ($lat) $lat.value = '';
+      if ($lng) $lng.value = '';
       setModeCreate();
     }
   }
@@ -226,6 +231,13 @@
     $areaHa.value = areaHa.toFixed(6);
     $areaHaView.value = areaHa.toFixed(6);
     $btnSave.disabled = false;
+    
+    // Auto-fill marcadores si estan buits al dibuixar
+    if ($lat && !$lat.value) {
+       const center = layer.getBounds().getCenter();
+       $lat.value = center.lat.toFixed(6);
+       $lng.value = center.lng.toFixed(6);
+    }
   }
 
   map.on(L.Draw.Event.CREATED, (e) => {
@@ -242,7 +254,6 @@
     $polygon.value = '';
     $areaHa.value = '0';
     $areaHaView.value = '0';
-    $btnSave.disabled = true;
   });
 
   $btnClear && $btnClear.addEventListener('click', () => clearDrawing(true));
@@ -252,27 +263,49 @@
   });
 
   window.editParcela = function (id) {
-    const layer = layersById[id];
-    if (!layer) return;
+    const rawParcels = window.AGRISOFT_RAW_PARCELLES || [];
+    const pData = rawParcels.find(p => String(p.id) === String(id));
+    
+    if (!pData) return;
 
     // Omple formulari amb dades existents
-    const f = layer.feature || {};
-    const p = (f.properties || {});
-    $name.value = p.name || '';
-    $notes.value = p.notes || '';
+    $name.value = pData.name || '';
+    $notes.value = pData.notes || '';
+    if ($lat) $lat.value = pData.lat || '';
+    if ($lng) $lng.value = pData.lng || '';
+    $areaHa.value = pData.area_ha || '0';
+    $areaHaView.value = pData.area_ha || '0';
+    $btnSave.disabled = false;
+    
     setModeEdit(id);
 
-    // Copia el polygon a la capa editable
+    // Copia el polygon a la capa editable si existeix
+    const layer = layersById[id];
     let editable;
     try {
-      if (layer.getLatLngs) {
+      if (layer && layer.getLatLngs) {
         editable = L.polygon(layer.getLatLngs(), { weight: 2, fillOpacity: 0.18 });
       }
     } catch (e) {}
 
     if (editable) {
-      setFormFromLayer(editable);
+      drawnItems.clearLayers();
+      drawnItems.addLayer(editable);
+      
+      const latlngs = editable.getLatLngs();
+      if (latlngs && latlngs[0] && latlngs[0].length >= 3) {
+         const pts = latlngs[0].map((ll) => [Number(ll.lat.toFixed(7)), Number(ll.lng.toFixed(7))]);
+         $polygon.value = JSON.stringify(pts);
+      }
+      
       try { map.fitBounds(editable.getBounds().pad(0.25)); } catch (e) {}
+    } else {
+       // Nomes te lat lng manual
+       drawnItems.clearLayers();
+       $polygon.value = '';
+       if (pData.lat && pData.lng) {
+          map.setView([pData.lat, pData.lng], 16);
+       }
     }
   };
 
@@ -370,11 +403,15 @@
     );
   }
 
-  // Safety: require a polygon before submit
+  // Safety: enable save by default so users can fill just lat/lng
+  if ($btnSave) $btnSave.disabled = false;
+  
   $form.addEventListener('submit', (e) => {
-    if (!$polygon.value || $polygon.value.length < 10) {
+    const hasPoly = ($polygon.value && $polygon.value.length >= 10);
+    const hasLatLng = ($lat && $lat.value && $lng && $lng.value);
+    if (!hasPoly && !hasLatLng) {
       e.preventDefault();
-      alert('Dibuixa o selecciona una parcel·la (polígon) abans de guardar.');
+      alert('Dibuixa un polígon, O BÉ introdueix una Latitud / Longitud manual abans de guardar.');
     }
   });
 })();

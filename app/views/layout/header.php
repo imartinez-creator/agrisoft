@@ -24,7 +24,6 @@ function nav_active(string $file, string $current): string {
 
   <!-- Fulls d'estil principals -->
   <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/vendor/leaflet.min.css">
 </head>
 
 <body>
@@ -39,6 +38,7 @@ function nav_active(string $file, string $current): string {
         <!-- Enllaços del menú principal -->
         <a class="nav-item<?= nav_active('index.php', $current) ?>" href="index.php">Tauler</a>
         <a class="nav-item<?= nav_active('parcelles.php', $current) ?>" href="parcelles.php">Parcel·les</a>
+        <a class="nav-item<?= nav_active('mapa.php', $current) ?>" href="mapa.php">Mapa de Parcel·les</a>
         <a class="nav-item<?= nav_active('sectors.php', $current) ?>" href="sectors.php">Sectors</a>
         <a class="nav-item<?= nav_active('cultius.php', $current) ?>" href="cultius.php">Cultius</a>
         <a class="nav-item<?= nav_active('productes.php', $current) ?>" href="productes.php">Productes</a>
@@ -47,6 +47,7 @@ function nav_active(string $file, string $current): string {
         <a class="nav-item<?= nav_active('plagues.php', $current) ?>" href="plagues.php">Plagues</a>
         <a class="nav-item<?= nav_active('analisi.php', $current) ?>" href="analisi.php">Anàlisi</a>
         <a class="nav-item<?= nav_active('collites.php', $current) ?>" href="collites.php">Collites</a>
+        <a class="nav-item<?= nav_active('lots.php', $current) ?>" href="lots.php">Traçabilitat (Lots)</a>
         <a class="nav-item<?= nav_active('maquinaria.php', $current) ?>" href="maquinaria.php">Maquinària</a>
         <a class="nav-item<?= nav_active('personal.php', $current) ?>" href="personal.php">Personal</a>
         <a class="nav-item<?= nav_active('registre_hores.php', $current) ?>" href="registre_hores.php">Registre d'hores</a>

@@ -1,8 +1,12 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
-require_once __DIR__ . '/../app/helpers/flash.php';
+/* ===== Gestió de Sectors i Unitats de Cultiu ===== */
+// Permet subdividir les parcel·les en sectors més petits per a una gestió més precisa
 
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
+
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
 $can_manage = can_manage();
@@ -25,132 +29,142 @@ function post_int(string $key): ?int {
 
 $action = $_POST['action'] ?? '';
 
-// CREATE
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'create_sector') {
-  if (!$can_manage) {
-    http_response_code(403);
-    flash_set("No tens permisos per crear sectors.", "bad");
-    header('Location: sectors.php');
-    exit;
-  }
-  $parcela_id        = post_int('parcela_id');
-  $nom_sector        = trim((string)($_POST['nom_sector'] ?? ''));
-  $data_plantacio    = ($_POST['data_plantacio'] ?? '') ?: null;
-  $marc_plantacio    = trim((string)($_POST['marc_plantacio'] ?? '')) ?: null;
-  $num_arbres        = post_int('num_arbres');
-  $origen_material   = trim((string)($_POST['origen_material'] ?? '')) ?: null;
-  $superficie        = post_float('superficie');
-  $previsio_prod     = post_float('previsio_produccio');
-  $sistema_formacio  = trim((string)($_POST['sistema_formacio'] ?? '')) ?: null;
-  $cultiu_id         = post_int('cultiu_id');
-  $estat_actual      = trim((string)($_POST['estat_actual'] ?? '')) ?: null;
-  $inversio_inicial  = post_float('inversio_inicial');
-
-  if (!$parcela_id || $nom_sector === '') {
-    flash_set("Cal indicar la parcel·la i el nom del sector.", 'bad');
-  } else {
-    $st = db()->prepare(
-      "INSERT INTO sector_cultiu (
-        parcela_id, nom_sector, data_plantacio, marc_plantacio, num_arbres,
-        origen_material, superficie, previsio_produccio, sistema_formacio,
-        cultiu_id, estat_actual, inversio_inicial
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
-    );
-    $st->execute([
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  
+  // ============================================
+  // CREATE SECTOR
+  // ============================================
+  if ($action === 'create_sector') {
+    if (!$can_manage) {
+      http_response_code(403);
+      flash_set("No tens permisos per crear sectors.", "bad");
+      header('Location: sectors.php');
+      exit;
+    }
+    
+    $parcela_id        = post_int('parcela_id');
+    $name              = trim((string)($_POST['name'] ?? ''));
+    
+    if (!$parcela_id || $name === '') {
+      flash_set("Falten camps obligatoris (parcel·la o nom).", 'bad');
+      header('Location: sectors.php');
+      exit;
+    }
+    
+    $params = [
       $parcela_id,
-      $nom_sector,
-      $data_plantacio,
-      $marc_plantacio,
-      $num_arbres,
-      $origen_material,
-      $superficie,
-      $previsio_prod,
-      $sistema_formacio,
-      $cultiu_id,
-      $estat_actual,
-      $inversio_inicial,
-    ]);
+      $name,
+      ($_POST['data_plantacio'] ?? '') ?: null,
+      trim((string)($_POST['marc_plantacio'] ?? '')) ?: null,
+      post_int('num_arbres'),
+      trim((string)($_POST['origen_material'] ?? '')) ?: null,
+      post_float('superficie'),
+      post_float('previsio_produccio'),
+      trim((string)($_POST['sistema_formacio'] ?? '')) ?: null,
+      post_int('cultiu_id'),
+      trim((string)($_POST['varietat'] ?? '')) ?: null,
+      trim((string)($_POST['estat_actual'] ?? '')) ?: null,
+      post_float('inversio_inicial'),
+      trim((string)($_POST['observacions'] ?? '')) ?: null
+    ];
+
+    $st = db()->prepare("
+      INSERT INTO sectors (
+        parcela_id, nom, data_plantacio, marc_plantacio, num_arbres,
+        origen_material, superficie, previsio_produccio, sistema_formacio,
+        cultiu_id, varietat, estat_actual, inversio_inicial, observacions
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $st->execute($params);
+    
     flash_set('✅ Sector creat correctament.', 'ok');
     header('Location: sectors.php');
     exit;
   }
-}
 
-// UPDATE
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'update_sector') {
-  if (!$can_manage) {
-    http_response_code(403);
-    flash_set("No tens permisos per editar sectors.", "bad");
-    header('Location: sectors.php');
-    exit;
-  }
-  if (!$can_manage) {
-    http_response_code(403);
-    flash_set("No tens permisos per editar sectors.", "bad");
-    header('Location: sectors.php');
-    exit;
-  }
-  $id               = post_int('id');
-  $parcela_id       = post_int('parcela_id');
-  $nom_sector       = trim((string)($_POST['nom_sector'] ?? ''));
-  $data_plantacio   = ($_POST['data_plantacio'] ?? '') ?: null;
-  $marc_plantacio   = trim((string)($_POST['marc_plantacio'] ?? '')) ?: null;
-  $num_arbres       = post_int('num_arbres');
-  $origen_material  = trim((string)($_POST['origen_material'] ?? '')) ?: null;
-  $superficie       = post_float('superficie');
-  $previsio_prod    = post_float('previsio_produccio');
-  $sistema_formacio = trim((string)($_POST['sistema_formacio'] ?? '')) ?: null;
-  $cultiu_id        = post_int('cultiu_id');
-  $estat_actual     = trim((string)($_POST['estat_actual'] ?? '')) ?: null;
-  $inversio_inicial = post_float('inversio_inicial');
+  // ============================================
+  // UPDATE SECTOR
+  // ============================================
+  if ($action === 'update_sector') {
+    if (!$can_manage) {
+      http_response_code(403);
+      flash_set("No tens permisos per editar sectors.", "bad");
+      header('Location: sectors.php');
+      exit;
+    }
 
-  if (!$id || !$parcela_id || $nom_sector === '') {
-    flash_set("Falten camps obligatoris (ID, parcel·la o nom).", 'bad');
-  } else {
-    $st = db()->prepare(
-      "UPDATE sector_cultiu SET
-        parcela_id=?, nom_sector=?, data_plantacio=?, marc_plantacio=?, num_arbres=?,
-        origen_material=?, superficie=?, previsio_produccio=?, sistema_formacio=?,
-        cultiu_id=?, estat_actual=?, inversio_inicial=?
-       WHERE id=?"
-    );
-    $st->execute([
+    $id         = post_int('id');
+    $parcela_id = post_int('parcela_id');
+    $name       = trim((string)($_POST['name'] ?? ''));
+
+    if (!$id || !$parcela_id || $name === '') {
+      flash_set("Falten camps obligatoris (ID, parcel·la o nom).", 'bad');
+      header('Location: sectors.php');
+      exit;
+    }
+    
+    $params = [
       $parcela_id,
-      $nom_sector,
-      $data_plantacio,
-      $marc_plantacio,
-      $num_arbres,
-      $origen_material,
-      $superficie,
-      $previsio_prod,
-      $sistema_formacio,
-      $cultiu_id,
-      $estat_actual,
-      $inversio_inicial,
-      $id,
-    ]);
+      $name,
+      ($_POST['data_plantacio'] ?? '') ?: null,
+      trim((string)($_POST['marc_plantacio'] ?? '')) ?: null,
+      post_int('num_arbres'),
+      trim((string)($_POST['origen_material'] ?? '')) ?: null,
+      post_float('superficie'),
+      post_float('previsio_produccio'),
+      trim((string)($_POST['sistema_formacio'] ?? '')) ?: null,
+      post_int('cultiu_id'),
+      trim((string)($_POST['varietat'] ?? '')) ?: null,
+      trim((string)($_POST['estat_actual'] ?? '')) ?: null,
+      post_float('inversio_inicial'),
+      trim((string)($_POST['observacions'] ?? '')) ?: null,
+      $id
+    ];
+
+    $st = db()->prepare("
+      UPDATE sectors SET
+        parcela_id = ?,
+        nom = ?,
+        data_plantacio = ?,
+        marc_plantacio = ?,
+        num_arbres = ?,
+        origen_material = ?,
+        superficie = ?,
+        previsio_produccio = ?,
+        sistema_formacio = ?,
+        cultiu_id = ?,
+        varietat = ?,
+        estat_actual = ?,
+        inversio_inicial = ?,
+        observacions = ?
+      WHERE id = ?
+    ");
+    $st->execute($params);
+
     flash_set('✅ Sector actualitzat.', 'ok');
     header('Location: sectors.php');
     exit;
   }
-}
 
-// DELETE
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete_sector') {
-  if (!$can_manage) {
-    http_response_code(403);
-    flash_set("No tens permisos per eliminar sectors.", "bad");
+  // ============================================
+  // DELETE SECTOR
+  // ============================================
+  if ($action === 'delete_sector') {
+    if (!$can_manage) {
+      http_response_code(403);
+      flash_set("No tens permisos per eliminar sectors.", "bad");
+      header('Location: sectors.php');
+      exit;
+    }
+    $id = post_int('id');
+    if ($id) {
+      $st = db()->prepare('DELETE FROM sectors WHERE id=?');
+      $st->execute([$id]);
+      flash_set('🗑️ Sector eliminat.', 'ok');
+    }
     header('Location: sectors.php');
     exit;
   }
-  $id = post_int('id');
-  if ($id) {
-    $st = db()->prepare('DELETE FROM sector_cultiu WHERE id=?');
-    $st->execute([$id]);
-    flash_set('🗑️ Sector eliminat.', 'ok');
-  }
-  header('Location: sectors.php');
-  exit;
 }
 
 // Data for form
@@ -160,14 +174,14 @@ $cultius  = db()->query("SELECT id, name FROM cultius ORDER BY name ASC")->fetch
 $edit_id = isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
 $editing = null;
 if ($edit_id) {
-  $st = db()->prepare('SELECT * FROM sector_cultiu WHERE id=?');
+  $st = db()->prepare('SELECT * FROM sectors WHERE id=?');
   $st->execute([$edit_id]);
   $editing = $st->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
 $sectors = db()->query(
   "SELECT sc.*, p.name AS parcela_nom, c.name AS cultiu_nom
-   FROM sector_cultiu sc
+   FROM sectors sc
    LEFT JOIN parcela p ON p.id = sc.parcela_id
    LEFT JOIN cultius c ON c.id = sc.cultiu_id
    ORDER BY sc.id DESC"
@@ -200,7 +214,7 @@ include __DIR__ . '/../app/views/layout/header.php';
       </select>
 
       <label>Nom sector *</label>
-      <input name="nom_sector" required value="<?= htmlspecialchars($editing['nom_sector'] ?? '') ?>">
+      <input name="name" required value="<?= htmlspecialchars($editing['nom'] ?? '') ?>">
 
       <div class="grid" style="gap:12px">
         <div class="span3">
@@ -251,8 +265,14 @@ include __DIR__ . '/../app/views/layout/header.php';
         <?php endforeach; ?>
       </select>
 
+      <label>Varietat</label>
+      <input name="varietat" value="<?= htmlspecialchars($editing['varietat'] ?? '') ?>" placeholder="ex: Arbequina, Merlot...">
+
       <label>Estat actual</label>
       <input name="estat_actual" value="<?= htmlspecialchars($editing['estat_actual'] ?? '') ?>" placeholder="en producció, jove, replantació…">
+
+      <label>Observacions</label>
+      <textarea name="observacions" rows="2" placeholder="Anotacions sobre el sector..."><?= htmlspecialchars($editing['observacions'] ?? '') ?></textarea>
 
       <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
         <button class="btn" type="submit"><?= $editing ? '💾 Guardar canvis' : 'Crear sector' ?></button>
@@ -287,7 +307,7 @@ include __DIR__ . '/../app/views/layout/header.php';
           <?php foreach ($sectors as $s): ?>
             <tr>
               <td><?= (int)$s['id'] ?></td>
-              <td><?= htmlspecialchars($s['nom_sector']) ?></td>
+              <td><?= htmlspecialchars($s['nom']) ?></td>
               <td><?= htmlspecialchars($s['parcela_nom'] ?? '-') ?></td>
               <td><?= htmlspecialchars($s['cultiu_nom'] ?? '-') ?></td>
               <td><?= htmlspecialchars($s['superficie'] ?? '-') ?></td>

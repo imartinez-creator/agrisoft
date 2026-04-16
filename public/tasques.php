@@ -1,8 +1,12 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
-require_once __DIR__ . '/../app/helpers/flash.php';
+/* ===== Gestió de Tasques i Treballs Pendents ===== */
+// Permet crear, assignar i controlar el progrés de les tasques agrícoles
 
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
+
+// Comprova que l'usuari hagi iniciat sessió
 require_login();
 
 // Eliminar tasca
@@ -66,18 +70,18 @@ if (isset($_GET['edit'])) {
 // Dades per als selects
 $treballadors = db()->query("SELECT id, nom_complet FROM treballadors ORDER BY nom_complet")->fetchAll(PDO::FETCH_ASSOC);
 $parceles = db()->query("SELECT id, name FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$sectors  = db()->query("SELECT id, nom_sector AS name, parcela_id FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
+$sectors  = db()->query("SELECT id, nom AS name, parcela_id FROM sectors ORDER BY nom")->fetchAll(PDO::FETCH_ASSOC);
 
 // Llistar tasques
 $tasques = db()->query("
   SELECT rt.*,
          t.nom_complet,
          p.name AS parcela_name,
-         s.nom_sector AS sector_name
+         s.nom AS sector_name
   FROM resgistres_treball rt
   JOIN treballadors t ON t.id = rt.id_treballador
   LEFT JOIN parcela p ON p.id = rt.parcela_id
-  LEFT JOIN sector_cultiu s ON s.id = rt.sector_id
+  LEFT JOIN sectors s ON s.id = rt.sector_id
   ORDER BY rt.work_date DESC, rt.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 

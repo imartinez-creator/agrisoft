@@ -1,5 +1,7 @@
 <?php
-/* ===== Càrrega de fitxers necessaris ===== */
+/* ===== Gestió de Cultius i Varietats ===== */
+// Permet registrar i organitzar els diversos cultius i les seves varietats específiques
+
 require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
 require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés (autenticació)
 require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash (avisos a l'usuari)

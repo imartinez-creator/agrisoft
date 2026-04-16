@@ -1,5 +1,7 @@
 <?php
-/* ===== Càrrega de fitxers necessaris ===== */
+/* ===== Gestió de Parcel·les i Mapes ===== */
+// Permet dibuixar, editar i llistar les parcel·les de l'explotació sobre un mapa interactiu
+
 require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
 require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés (autenticació)
 require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash (avisos a l'usuari)
@@ -101,6 +103,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
   $pendent_pct = null;
   $infraestructures = '';
 
+  $lat = post_float('lat'); // A simple helper we can reuse, or just manually format
+  $lat = trim($_POST['lat'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lat']));
+  $lng = trim($_POST['lng'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lng']));
+
   // Inserim la parcel·la dins una transacció (si falla, es desfà tot)
   $pdo = db();
   $pdo->beginTransaction();
@@ -109,12 +115,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
     // Inserim la parcel·la a la taula 'parcela'
     $st = $pdo->prepare("
       INSERT INTO `parcela`
-        (`name`, `gps_lat`, `gps_lng`, `area_ha`, `tipus_sòl`, `pendent_pct`, `infraestructures`, `notes`, `polygon_geojson`)
+        (`name`, `lat`, `lng`, `gps_lat`, `gps_lng`, `area_ha`, `tipus_sòl`, `pendent_pct`, `infraestructures`, `notes`, `polygon_geojson`)
       VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     $st->execute([
-      $name, $gps_lat, $gps_lng, $area_ha, $tipus_sol, $pendent_pct, $infraestructures, $notes, $polygon_geojson
+      $name, $lat, $lng, $gps_lat, $gps_lng, $area_ha, $tipus_sol, $pendent_pct, $infraestructures, $notes, $polygon_geojson
     ]);
 
     // Obtenim l'ID de la parcel·la acabada de crear
@@ -149,12 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     header('Location: parcelles.php');
     exit;
   }
-  if (!$can_manage) {
-    http_response_code(403);
-    flash_set("No tens permisos per editar parcel·les.", "bad");
-    header('Location: parcelles.php');
-    exit;
-  }
 
   // Recollim les dades del formulari
   $id = (int)($_POST['parcela_id'] ?? 0);        // ID de la parcel·la a editar
@@ -162,6 +162,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
   $notes = trim($_POST['notes'] ?? '');            // Nova descripció
   $area_ha = (float)($_POST['area_ha'] ?? 0);     // Nova àrea
   $polygon_raw = $_POST['polygon'] ?? '';           // Nous punts del polígon
+
+  $lat = trim($_POST['lat'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lat']));
+  $lng = trim($_POST['lng'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lng']));
 
   // Validem que hi hagi ID i nom
   if ($id <= 0 || $name === '') {
@@ -172,31 +175,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
   // Validem el polígon
   $clean = sanitize_polygon_points($polygon_raw);
-  if (count($clean) < 3) {
-    flash_set("El polígon no és vàlid.", "err");
+  if (count($clean) > 0 && count($clean) < 3) { // Allow empty polygon if manual coords given
+    flash_set("El polígon no és vàlid (mínim 3 punts).", "err");
     header("Location: parcelles.php");
     exit;
   }
 
-  // Recalculem el centre i el GeoJSON
-  [$gps_lat, $gps_lng] = centroid_latlng($clean);
-  $polygon_geojson = build_geojson_polygon($clean);
+  // Recalculem el centre i el GeoJSON nomes si hi ha poligon
+  $gps_lat = null;
+  $gps_lng = null;
+  $polygon_geojson = '';
+  if (count($clean) >= 3) {
+      [$gps_lat, $gps_lng] = centroid_latlng($clean);
+      $polygon_geojson = build_geojson_polygon($clean);
+  }
 
   // Actualitzem dins una transacció
   $pdo = db();
   $pdo->beginTransaction();
   try {
     // Actualitzem les dades de la parcel·la
-    $st = $pdo->prepare("UPDATE `parcela` SET `name`=?, `gps_lat`=?, `gps_lng`=?, `area_ha`=?, `notes`=?, `polygon_geojson`=? WHERE `id`=?");
-    $st->execute([$name, $gps_lat, $gps_lng, $area_ha, $notes, $polygon_geojson, $id]);
+    $st = $pdo->prepare("UPDATE `parcela` SET `name`=?, `lat`=?, `lng`=?, `gps_lat`=?, `gps_lng`=?, `area_ha`=?, `notes`=?, `polygon_geojson`=? WHERE `id`=?");
+    $st->execute([$name, $lat, $lng, $gps_lat, $gps_lng, $area_ha, $notes, $polygon_geojson, $id]);
 
     // Esborrem els punts antics del polígon
     $pdo->prepare("DELETE FROM `parcela_punt` WHERE `parcela_id`=?")->execute([$id]);
 
-    // Inserim els nous punts del polígon
-    $stp = $pdo->prepare("INSERT INTO `parcela_punt` (`parcela_id`, `idx`, `lat`, `lng`) VALUES (?, ?, ?, ?)");
-    foreach ($clean as $i => $pt) {
-      $stp->execute([$id, $i, $pt[0], $pt[1]]);
+    // Inserim els nous punts del polígon (si n'hi ha)
+    if (count($clean) >= 3) {
+      $stp = $pdo->prepare("INSERT INTO `parcela_punt` (`parcela_id`, `idx`, `lat`, `lng`) VALUES (?, ?, ?, ?)");
+      foreach ($clean as $i => $pt) {
+        $stp->execute([$id, $i, $pt[0], $pt[1]]);
+      }
     }
 
     $pdo->commit(); // Confirmem
@@ -213,18 +223,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 /* ===== Eliminar una parcel·la (formulari POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_parcela') {
   // Comprovem permisos
-  if (!$can_manage) {
-    http_response_code(403);
-    flash_set("No tens permisos per eliminar parcel·les.", "bad");
-    header('Location: parcelles.php');
-    exit;
-  }
-  if (!$can_manage) {
-    http_response_code(403);
-    flash_set("No tens permisos per eliminar parcel·les.", "bad");
-    header('Location: parcelles.php');
-    exit;
-  }
   if (!$can_manage) {
     http_response_code(403);
     flash_set("No tens permisos per eliminar parcel·les.", "bad");
@@ -334,8 +332,18 @@ include __DIR__ . '/../app/views/layout/header.php';
           <input id="area_ha_view" type="number" step="0.0001" value="0" disabled>
         </div>
 
+        <!-- Coordenades manuals -->
+        <div class="parcela-field">
+          <label for="lat">Latitud</label>
+          <input name="lat" id="lat" placeholder="41.38506" <?= $can_manage ? '' : 'disabled' ?>>
+        </div>
+        <div class="parcela-field">
+          <label for="lng">Longitud</label>
+          <input name="lng" id="lng" placeholder="2.17340" <?= $can_manage ? '' : 'disabled' ?>>
+        </div>
+
         <!-- Camp de descripció -->
-        <div class="parcela-field parcela-field--notes">
+        <div class="parcela-field parcela-field--notes" style="grid-column: span 12;">
           <label for="notes">Descripció</label>
           <textarea name="notes" id="notes" placeholder="Descripció / notes..." <?= $can_manage ? '' : 'disabled' ?>></textarea>
         </div>
@@ -387,6 +395,8 @@ include __DIR__ . '/../app/views/layout/header.php';
               <td class="small"><?= htmlspecialchars($p['creat'] ?? '') ?></td>
               <td>
                 <?php if ($can_manage): ?>
+                  <!-- Botó veure detall -->
+                  <a class="btn btn-action" href="parcela_detall.php?id=<?= (int)$p['id'] ?>" onclick="event.stopPropagation();" title="Veure detall">👁️</a>
                   <!-- Botó editar -->
                   <button class="btn btn-action btn-action--edit" type="button" onclick="event.stopPropagation(); editParcela(<?= (int)$p['id'] ?>)">✏️</button>
                   <!-- Formulari per eliminar -->
@@ -396,7 +406,7 @@ include __DIR__ . '/../app/views/layout/header.php';
                     <button class="btn btn-action btn-action--delete" type="submit" onclick="event.stopPropagation();" title="Eliminar" aria-label="Eliminar">🗑️</button>
                   </form>
                 <?php else: ?>
-                  <span class="small">—</span>
+                  <a class="btn btn-action" href="parcela_detall.php?id=<?= (int)$p['id'] ?>" onclick="event.stopPropagation();" title="Veure detall">👁️</a>
                 <?php endif; ?>
               </td>
             </tr>
@@ -432,6 +442,7 @@ include __DIR__ . '/../app/views/layout/header.php';
 <!-- Passem les dades de parcel·les i permisos al JavaScript -->
 <script>
   window.AGRISOFT_PARCELLES = <?= json_encode($parcelles_fc, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+  window.AGRISOFT_RAW_PARCELLES = <?= json_encode($parcelles, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
   window.AGRISOFT_CAN_MANAGE = <?= $can_manage ? 'true' : 'false' ?>;
 </script>
 

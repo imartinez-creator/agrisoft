@@ -2,6 +2,7 @@
 /* ===== Càrrega de fitxers necessaris ===== */
 require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
 require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
 
 // Comprova que l'usuari hagi iniciat sessió
 require_login();
@@ -19,7 +20,7 @@ if (isset($_GET['delete'])) {
 
 
 /* ===== Crear o Editar una anàlisi (formulari POST) ===== */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create', 'edit'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create_analisi', 'update_analisi'])) {
     // Recollim les dades del formulari
     $analitzat      = $_POST['analitzat'] ?? date('Y-m-d');       // Data de l'anàlisi
     $parcela_id     = ($_POST['parcela_id'] ?? '') !== '' ? (int)$_POST['parcela_id'] : null;  // Parcel·la (opcional)
@@ -62,22 +63,22 @@ if (isset($_GET['edit'])) {
 
 /* ===== Obtenir llistes per als selectors ===== */
 $parceles = db()->query("SELECT id, name FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$sectors  = db()->query("SELECT id, nom_sector AS name, parcela_id FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
+$sectors  = db()->query("SELECT id, nom AS name, parcela_id FROM sectors ORDER BY nom")->fetchAll(PDO::FETCH_ASSOC);
 
 
 /* ===== Obtenir totes les anàlisis amb noms de parcel·la i sector ===== */
 $analisis_records = db()->query("
-  SELECT a.*, p.name AS parcela_name, s.nom_sector AS sector_name
+  SELECT a.*, p.name AS parcela_name, s.nom AS sector_name
   FROM analisis a
   LEFT JOIN parcela p ON p.id = a.parcela_id
-  LEFT JOIN sector_cultiu s ON s.id = a.sector_id
+  LEFT JOIN sectors s ON s.id = a.sector_id
   ORDER BY a.analitzat DESC, a.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 
 /* ===== Estadístiques generals per a la pestanya de KPIs ===== */
 $stats = [
   'parceles'      => (int)db()->query("SELECT COUNT(*) FROM parcela")->fetchColumn(),
-  'sectors'       => (int)db()->query("SELECT COUNT(*) FROM sector_cultiu")->fetchColumn(),
+  'sectors'       => (int)db()->query("SELECT COUNT(*) FROM sectors")->fetchColumn(),
   'cultius'       => (int)db()->query("SELECT COUNT(*) FROM cultius")->fetchColumn(),
   'tractaments'   => (int)db()->query("SELECT COUNT(*) FROM tractaments")->fetchColumn(),
   'treballadors'  => (int)db()->query("SELECT COUNT(*) FROM treballadors")->fetchColumn(),

@@ -1,14 +1,20 @@
 <?php
-require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/middleware/auth.php';
-require_once __DIR__ . '/../app/helpers/flash.php';
+/* 
+ * Fitxer: usuaris.php
+ * Descripció: Gestió d'usuaris i permisos del sistema.
+ * Funcionalitat: Permet crear, editar i llistar els usuaris que tenen accés al sistema.
+ */
 
-// Només administradors
+require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
+require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
+require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
+
+// Només els administradors poden accedir a aquesta pàgina
 require_role(['admin']);
 
 $edit_id = isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
 
-// Accions
+/* ===== Processar les accions del formulari (POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $action = $_POST['action'] ?? '';
 
@@ -28,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $role = 'manager';
     }
 
+    // Comprovació d'existència de correu
     $st = db()->prepare('SELECT id FROM usuaris WHERE email = ? LIMIT 1');
     $st->execute([$email]);
     if ($st->fetch()) {
@@ -122,7 +129,7 @@ if ($edit_id > 0) {
 
 $users = db()->query('SELECT id,name,email,role,creat FROM usuaris ORDER BY creat DESC')->fetchAll(PDO::FETCH_ASSOC);
 
-$titol = 'Usuaris · AGRISOFT';
+/* ===== Títol de la pàgina i capçalera HTML ===== */
 include __DIR__ . '/../app/views/layout/header.php';
 ?>
 

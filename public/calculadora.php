@@ -13,7 +13,7 @@ require_login();
 $parceles = db()->query("SELECT id, name, area_ha FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
 // Llista de sectors (subdivisions de cada parcel·la)
-$sectors  = db()->query("SELECT id, nom_sector AS name, parcela_id, superficie FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
+$sectors  = db()->query("SELECT id, nom AS name, parcela_id, superficie FROM sectors ORDER BY nom")->fetchAll(PDO::FETCH_ASSOC);
 
 // Llista de productes fitosanitaris (amb la seva unitat: litres, kg, etc.)
 $productes = db()->query("SELECT id, name, unitat FROM fito_productes ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);

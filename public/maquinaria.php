@@ -1,5 +1,7 @@
 <?php
-/* ===== Càrrega de fitxers necessaris ===== */
+/* ===== Gestió de Maquinària Agrícola ===== */
+// Permet registrar el parc de maquinària, tractors i eines de l'explotació
+
 require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
 require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
 require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash

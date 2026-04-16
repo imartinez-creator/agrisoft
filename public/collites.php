@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $grau_qualitat  = trim($_POST['qualitat'] ?? '');              // Grau de qualitat
   $protocol_notes = trim($_POST['notes'] ?? '');                 // Notes addicionals
   $humitat        = ($_POST['humitat_pct'] ?? '') !== '' ? (float)$_POST['humitat_pct'] : null; // Humitat (%)
+  $codi_lot       = trim($_POST['codi_lot'] ?? ''); // Codi lot manual (opcional)
 
 
   if ($action === 'create') {
@@ -49,7 +50,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $grau_qualitat !== '' ? $grau_qualitat : null,
       $protocol_notes !== '' ? $protocol_notes : null
     ]);
-    flash_set("Collita registrada correctament.", "ok");
+    
+    $collita_id = db()->lastInsertId();
+    
+    // Generar lot per efecte cascada
+    if ($codi_lot === '') {
+        $codi_lot = "LOT-" . date('Ymd', strtotime($recollit)) . "-" . str_pad($collita_id, 4, "0", STR_PAD_LEFT);
+    }
+    $st_lot = db()->prepare("
+      INSERT INTO lots (codi_lot, parcela_id, sector_id, collita_id, data_collita, quantitat, qualitat, observacions)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $st_lot->execute([
+      $codi_lot, $parcela_id, $sector_id, $collita_id, $recollit, $kg,
+      $grau_qualitat !== '' ? $grau_qualitat : null,
+      "Lot creat automàticament des del registre de collita."
+    ]);
+
+    flash_set("Collita i Lot ($codi_lot) registrats correctament.", "ok");
   } elseif ($action === 'edit' && $id > 0) {
     // Actualitzem una collita existent
     $st = db()->prepare("
@@ -85,7 +103,7 @@ if (isset($_GET['edit'])) {
 
 /* ===== Obtenir llistes per als selectors ===== */
 $parceles  = db()->query("SELECT id, name FROM parcela ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-$sectors   = db()->query("SELECT id, nom_sector AS name, parcela_id FROM sector_cultiu ORDER BY nom_sector")->fetchAll(PDO::FETCH_ASSOC);
+$sectors   = db()->query("SELECT id, nom AS name, parcela_id FROM sectors ORDER BY nom")->fetchAll(PDO::FETCH_ASSOC);
 $cultius   = db()->query("SELECT id, name FROM cultius ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
 
 
@@ -93,12 +111,12 @@ $cultius   = db()->query("SELECT id, name FROM cultius ORDER BY name")->fetchAll
 $collites = db()->query("
   SELECT co.*,
          p.name  AS parcela_name,
-         s.nom_sector  AS sector_name,
+         s.nom  AS sector_name,
          cu.name AS cultiu_name,
          v.name  AS varietat_name
   FROM collites co
   LEFT JOIN parcela p   ON p.id = co.parcela_id
-  LEFT JOIN sector_cultiu s   ON s.id = co.sector_id
+  LEFT JOIN sectors s   ON s.id = co.sector_id
   LEFT JOIN varietats v ON v.id = co.varietat_id
   LEFT JOIN cultius cu  ON cu.id = v.cultiu_id
   ORDER BY co.recollit DESC, co.id DESC
@@ -119,6 +137,11 @@ include __DIR__ . '/../app/views/layout/header.php';
       <input type="hidden" name="action" value="<?= $edit_item ? 'edit' : 'create' ?>">
       <?php if ($edit_item): ?>
         <input type="hidden" name="id" value="<?= $edit_item['id'] ?>">
+      <?php else: ?>
+        <!-- Codi de Lot (Només creació) -->
+        <label>Codi Lot (Traçabilitat)</label>
+        <input type="text" name="codi_lot" placeholder="Deixa en blanc per autogenerar..." value="">
+        <p class="small" style="margin-top:-5px; margin-bottom:15px; color:#6b7280;">Es crearà automàticament a la taula de Lots.</p>
       <?php endif; ?>
 
       <!-- Selector de parcel·la -->
@@ -214,6 +237,7 @@ include __DIR__ . '/../app/views/layout/header.php';
               <td><?= htmlspecialchars($c['kg']) ?></td>
               <td><?= htmlspecialchars($c['grau_qualitat'] ?? '') ?></td>
               <td style="white-space:nowrap">
+                <a href="lots.php?collita_id=<?= $c['id'] ?>" class="btn btn-small secondary" title="Veure Lot">📦</a>
                 <a href="collites.php?edit=<?= $c['id'] ?>" class="btn btn-small">✏️</a>
                 <a href="collites.php?delete=<?= $c['id'] ?>" class="btn btn-small" onclick="return confirm('Segur?')">🗑️</a>
               </td>

@@ -1,4 +1,7 @@
+/* ===== Estils específics per al mapa interactiu de parcel·les ===== */
+
 .parcelles-map{
+
   height:520px;
   border-radius:12px;
   overflow:hidden;
