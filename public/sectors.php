@@ -5,27 +5,12 @@
 require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
 require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
 require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
+require_once __DIR__ . '/../app/helpers/forms.php';    // Helpers per a formularis (post_float, post_int...)
 
 // Comprova que l'usuari hagi iniciat sessió
 require_login();
 
 $can_manage = can_manage();
-
-
-// Helpers
-function post_float(string $key): ?float {
-  $v = trim((string)($_POST[$key] ?? ''));
-  if ($v === '') return null;
-  // Permet 1,23
-  $v = str_replace(',', '.', $v);
-  return is_numeric($v) ? (float)$v : null;
-}
-
-function post_int(string $key): ?int {
-  $v = trim((string)($_POST[$key] ?? ''));
-  if ($v === '') return null;
-  return is_numeric($v) ? (int)$v : null;
-}
 
 $action = $_POST['action'] ?? '';
 
