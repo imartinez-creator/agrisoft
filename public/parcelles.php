@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
 require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés (autenticació)
 require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash (avisos a l'usuari)
+require_once __DIR__ . '/../app/helpers/forms.php';    // Helpers per a formularis (post_float, post_int...)
 
 // Comprova que l'usuari hagi iniciat sessió
 require_login();
@@ -103,9 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'creat
   $pendent_pct = null;
   $infraestructures = '';
 
-  $lat = post_float('lat'); // A simple helper we can reuse, or just manually format
-  $lat = trim($_POST['lat'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lat']));
-  $lng = trim($_POST['lng'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lng']));
+  $lat = post_float('lat');
+  $lng = post_float('lng');
 
   // Inserim la parcel·la dins una transacció (si falla, es desfà tot)
   $pdo = db();
@@ -163,8 +163,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
   $area_ha = (float)($_POST['area_ha'] ?? 0);     // Nova àrea
   $polygon_raw = $_POST['polygon'] ?? '';           // Nous punts del polígon
 
-  $lat = trim($_POST['lat'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lat']));
-  $lng = trim($_POST['lng'] ?? '') === '' ? null : (float)str_replace(',', '.', trim($_POST['lng']));
+  $lat = post_float('lat');
+  $lng = post_float('lng');
 
   // Validem que hi hagi ID i nom
   if ($id <= 0 || $name === '') {
