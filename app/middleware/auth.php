@@ -5,6 +5,17 @@
 // Obliga a estar autenticat. Si no ho està, redirigeix al login
 function require_login(): void {
   if (empty($_SESSION['user'])) { header('Location: login.php'); exit; }
+  
+  // Mantenir actiu el rol real en temps de petició (Sync amb l'admin)
+  static $role_synced = false;
+  if (!$role_synced) {
+      $st = db()->prepare("SELECT role FROM usuaris WHERE id = ?");
+      $st->execute([$_SESSION['user']['id']]);
+      if ($u = $st->fetch(PDO::FETCH_ASSOC)) {
+          $_SESSION['user']['role'] = $u['role'];
+      }
+      $role_synced = true;
+  }
 }
 
 // Retorna el rol de l'usuari actual (ex: 'admin', 'manager', 'treballador')

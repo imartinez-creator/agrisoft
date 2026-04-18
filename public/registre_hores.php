@@ -32,6 +32,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($idTreballador > 0) {
 
+    // ===== SEGURETAT (RBAC BACKEND) =====
+    // Un treballador no pot enviar un POST modificant el idTreballador extern
+    $my_role = $_SESSION['user']['role'] ?? '';
+    $my_user_id = $_SESSION['user']['id'] ?? 0;
+    
+    if ($my_role === 'treballador') {
+        $st_rbac = db()->prepare("SELECT id FROM treballadors WHERE id = ? AND user_id = ?");
+        $st_rbac->execute([$idTreballador, $my_user_id]);
+        if (!$st_rbac->fetch()) {
+            die("Error de Seguretat Crític: No tens permisos per alterar els registres d'hores d'altres companys.");
+        }
+    }
+
     // INICIAR: crear un nou torn si no n'hi ha cap actiu
     if ($acc === 'inici') {
       $actiu = get_active_shift_today($idTreballador, $avui);
@@ -87,8 +100,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 /* ===== Obtenir la llista de treballadors amb el seu torn d'avui ===== */
-// Una fila per treballador, amb l'últim torn del dia (si existeix)
-$rows = db()->query("
+// Filtre inicial per Rol RBAC (Frontend restriction)
+$my_role = $_SESSION['user']['role'] ?? 'treballador';
+$my_user_id = $_SESSION['user']['id'] ?? 0;
+
+$where_clause = "";
+$params = [];
+
+// Els administradors o mànagers ho veuran tot intacte. Els treballadors només a si mateixos.
+if ($my_role === 'treballador') {
+    $where_clause = "WHERE t.user_id = ?";
+    $params[] = $my_user_id;
+}
+
+$sql_rows = "
   SELECT
     t.id,
     t.nom_complet,
@@ -109,8 +134,13 @@ $rows = db()->query("
       ORDER BY r2.id_registre DESC
       LIMIT 1
     )
+  $where_clause
   ORDER BY t.nom_complet
-")->fetchAll(PDO::FETCH_ASSOC);
+";
+
+$st_rows = db()->prepare($sql_rows);
+$st_rows->execute($params);
+$rows = $st_rows->fetchAll(PDO::FETCH_ASSOC);
 
 /* ===== Títol de la pàgina i capçalera HTML ===== */
 $titol = "Registre d'hores · AGRISOFT";

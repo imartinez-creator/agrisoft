@@ -10,6 +10,7 @@ require_login();
 
 /* ===== Eliminar un producte ===== */
 if (isset($_GET['delete'])) {
+    if (!can_manage()) die("Error: No tens permisos per eliminar productes.");
     $id = (int)$_GET['delete'];
     db()->prepare("DELETE FROM fito_productes WHERE id = ?")->execute([$id]);
     flash_set("Producte eliminat correctament.", "ok");
@@ -17,9 +18,24 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
+/* ===== Gastar/Consumir Estoc (Treballadors inclosos) ===== */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'consume_producte') {
+    $id = (int)$_POST['id'];
+    $amount = (float)$_POST['amount'];
+    if ($amount > 0) {
+        $st = db()->prepare("UPDATE fito_productes SET stock = GREATEST(0, stock - ?) WHERE id = ?");
+        $st->execute([$amount, $id]);
+        flash_set("S'han restat $amount del producte correctament.", "ok");
+    } else {
+        flash_set("La quantitat a restar a de ser superior a 0.", "bad");
+    }
+    header("Location: productes.php");
+    exit;
+}
 
 /* ===== Crear o Editar un producte fitosanitari (formulari POST) ===== */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(($_POST['action'] ?? ''), ['create_producte', 'edit_producte'])) {
+    if (!can_manage()) die("Error: No tens permisos per modificar productes.");
     $action = $_POST['action'] ?? '';
     $id = (int)($_POST['id'] ?? 0);
     
@@ -78,6 +94,7 @@ include __DIR__ . '/../app/views/layout/header.php';
 <div class="grid">
 
   <!-- ===== Formulari per crear o editar un producte ===== -->
+  <?php if (can_manage()): ?>
   <div class="card span4">
     <h2><?= $edit_item ? "Editar producte" : "Nou producte" ?></h2>
     <form method="post">
@@ -122,9 +139,10 @@ include __DIR__ . '/../app/views/layout/header.php';
       </div>
     </form>
   </div>
+  <?php endif; ?>
 
   <!-- ===== Taula amb tots els productes ===== -->
-  <div class="card span8">
+  <div class="card <?= can_manage() ? 'span8' : 'span12' ?>">
     <h2>Productes</h2>
 
     <?php if (!$productes): ?>
@@ -137,7 +155,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <th>Nom</th>
             <th>Stock</th>
             <th>Caduca</th>
-            <th style="text-align:right">Accions</th>
+            <th style="text-align:right">Consumició / Accions</th>
           </tr>
         </thead>
         <tbody>
@@ -153,6 +171,16 @@ include __DIR__ . '/../app/views/layout/header.php';
               <td><?= htmlspecialchars($p['stock']) ?> <?= htmlspecialchars($p['unitat']) ?></td>
               <td><?= $p['expiry_date'] ? date('d/m/Y', strtotime($p['expiry_date'])) : '-' ?></td>
               <td style="text-align:right; white-space: nowrap;">
+                
+                <!-- Formulari Gastar Producte (Access per a tots) -->
+                <form method="post" style="display:inline; margin-right: 15px;">
+                    <input type="hidden" name="action" value="consume_producte">
+                    <input type="hidden" name="id" value="<?= $p['id'] ?>">
+                    <input type="number" step="0.01" name="amount" required style="width: 70px; padding: 4px; font-size:12px; margin:0;" placeholder="Quant.">
+                    <button class="btn btn-small" type="submit" style="padding: 4px 8px; font-size:12px; margin-left:2px; vertical-align: top;">Gastar</button>
+                </form>
+
+                <?php if (can_manage()): ?>
                 <!-- Botó editar -->
                 <a href="productes.php?edit=<?= $p['id'] ?>" class="btn btn-small">
                   <span class="icon">✏️</span>
@@ -163,6 +191,7 @@ include __DIR__ . '/../app/views/layout/header.php';
                    onclick="return confirm('Segur que vols eliminar aquest producte?')">
                   <span class="icon">🗑️</span>
                 </a>
+                <?php endif; ?>
               </td>
             </tr>
           <?php endforeach; ?>

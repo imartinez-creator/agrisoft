@@ -9,6 +9,7 @@ require_login();
 
 /* ===== Eliminar un pla de tractament ===== */
 if (isset($_GET['delete_plan'])) {
+    if (!can_manage()) die("Error: No tens permisos per eliminar plans.");
     $id = (int)$_GET['delete_plan'];
     db()->prepare("DELETE FROM plans_tractament WHERE id = ?")->execute([$id]);
     flash_set("Pla eliminat.", "ok");
@@ -18,6 +19,7 @@ if (isset($_GET['delete_plan'])) {
 
 /* ===== Eliminar una observació de plaga ===== */
 if (isset($_GET['delete_obs'])) {
+    if (!can_manage()) die("Error: No tens permisos per eliminar observacions.");
     $id = (int)$_GET['delete_obs'];
     db()->prepare("DELETE FROM observacio_plagues WHERE id = ?")->execute([$id]);
     flash_set("Observació eliminada.", "ok");
@@ -27,6 +29,7 @@ if (isset($_GET['delete_obs'])) {
 
 /* ===== Crear o Editar un pla de tractament (formulari POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create_plan', 'edit_plan'])) {
+    if (!can_manage()) die("Error: No tens permisos per editar plans.");
     // Recollim les dades del formulari
     $title = trim($_POST['title'] ?? '');                                      // Títol del pla
     $planned_on = $_POST['planned_on'] ?? '';                                   // Data planificada
@@ -63,6 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
 
 /* ===== Crear o Editar una observació de plaga (formulari POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create_obs', 'edit_obs'])) {
+    if ($_POST['action'] === 'edit_obs' && !can_manage()) {
+        die("Error: No tens permisos per editar observacions.");
+    }
     // Recollim les dades del formulari
     $nom_plaga  = trim($_POST['nom_plaga'] ?? '');       // Nom de la plaga detectada
     $observat   = $_POST['observat'] ?? date('Y-m-d');   // Data de detecció
@@ -100,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
 
 /* ===== Canviar l'estat d'un pla ràpidament (pendent/fet/cancelat) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'set_status') {
+    if (!can_manage()) die("Error: No tens permisos per canviar estats.");
     $id = (int)($_POST['id'] ?? 0);
     $status = $_POST['status'] ?? 'pendent';
     if ($id > 0) {
@@ -166,6 +173,7 @@ include __DIR__ . '/../app/views/layout/header.php';
     <div class="grid">
 
       <!-- Formulari per crear o editar un pla -->
+      <?php if (can_manage()): ?>
       <div class="card span4">
         <h2><?= $edit_plan ? "Editar pla" : "Nou pla" ?></h2>
         <form method="post">
@@ -216,9 +224,10 @@ include __DIR__ . '/../app/views/layout/header.php';
           </div>
         </form>
       </div>
+      <?php endif; ?>
 
       <!-- Taula amb els plans de tractament -->
-      <div class="card span8">
+      <div class="card <?= can_manage() ? 'span8' : 'span12' ?>">
         <h2>Plans pendents</h2>
         <?php if (!$plans): ?>
           <p class="small">No hi ha plans pendents.</p>
@@ -229,7 +238,9 @@ include __DIR__ . '/../app/views/layout/header.php';
                 <th>Data/Títol</th>
                 <th>Ubicació</th>
                 <th>Estat</th>
+                <?php if (can_manage()): ?>
                 <th style="text-align:right">Accions</th>
+                <?php endif; ?>
               </tr>
             </thead>
             <tbody>
@@ -246,8 +257,7 @@ include __DIR__ . '/../app/views/layout/header.php';
                       <div class="small text-muted">Sec: <?= htmlspecialchars($pt['sector_name']) ?></div>
                     <?php endif; ?>
                   </td>
-                  <td>
-                    <!-- Selector d'estat ràpid (canvia l'estat al seleccionar) -->
+                    <?php if (can_manage()): ?>
                     <form method="post" style="display:flex;gap:4px;">
                       <input type="hidden" name="action" value="set_status">
                       <input type="hidden" name="id" value="<?= (int)$pt['id'] ?>">
@@ -257,11 +267,18 @@ include __DIR__ . '/../app/views/layout/header.php';
                         <option value="cancelat" <?= $pt['status']==='cancel·lat'||$pt['status']==='cancelat'?'selected':'' ?>>Cancel·lat</option>
                       </select>
                     </form>
+                    <?php else: ?>
+                    <span class="badge" style="background:<?= $pt['status']==='pendent'?'#fef3c7':($pt['status']==='fet'?'#dcfce7':'#fee2e2') ?>; color:<?= $pt['status']==='pendent'?'#92400e':($pt['status']==='fet'?'#166534':'#991b1b') ?>">
+                      <?= ucfirst($pt['status']) ?>
+                    </span>
+                    <?php endif; ?>
                   </td>
+                  <?php if (can_manage()): ?>
                   <td style="text-align:right; white-space:nowrap;">
                     <a href="plagues.php?edit_plan=<?= $pt['id'] ?>" class="btn btn-small">✏️</a>
                     <a href="plagues.php?delete_plan=<?= $pt['id'] ?>" class="btn btn-small" onclick="return confirm('Eliminar?')">🗑️</a>
                   </td>
+                  <?php endif; ?>
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -278,6 +295,9 @@ include __DIR__ . '/../app/views/layout/header.php';
       <!-- Formulari per crear o editar una observació -->
       <div class="card span4">
         <h2><?= $edit_obs ? "Editar observació" : "Nova observació" ?></h2>
+        <?php if ($edit_obs && !can_manage()): ?>
+          <p class="small text-danger">No tens permisos per editar aquesta observació.</p>
+        <?php else: ?>
         <form method="post">
           <input type="hidden" name="action" value="<?= $edit_obs ? 'edit_obs' : 'create_obs' ?>">
           <?php if ($edit_obs): ?>
@@ -333,6 +353,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <?php endif; ?>
           </div>
         </form>
+        <?php endif; ?>
       </div>
 
       <!-- Taula amb l'historial d'observacions -->
@@ -351,27 +372,31 @@ include __DIR__ . '/../app/views/layout/header.php';
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($observacions as $o): ?>
-                <tr style="<?= ($edit_obs && $edit_obs['id'] == $o['id']) ? 'background: rgba(var(--primary-color-rgb), 0.1);' : '' ?>">
+              <?php foreach ($observacions as $r): ?>
+                <?php $color = $r['gravetat']==='alta'?'red':($r['gravetat']==='mitjana'?'yellow':'green'); ?>
+                <tr style="<?= ($edit_obs && $edit_obs['id'] == $r['id']) ? 'background: rgba(var(--primary-color-rgb), 0.1);' : '' ?>">
                   <td>
-                    <strong><?= date('d/m/Y', strtotime($o['observat'])) ?></strong><br>
-                    <?= htmlspecialchars($o['nom_plaga']) ?>
+                    <strong><?= date('d/m/Y', strtotime($r['observat'])) ?></strong><br>
+                    <?= htmlspecialchars($r['nom_plaga']) ?>
                   </td>
                   <td>
-                    <small><?= htmlspecialchars($o['parcela_name'] ?? '—') ?></small>
-                    <?php if (!empty($o['sector_name'])): ?>
-                      <div class="small">Sec: <?= htmlspecialchars($o['sector_name']) ?></div>
+                    <small><?= htmlspecialchars($r['parcela_name'] ?? '—') ?></small>
+                    <?php if (!empty($r['sector_name'])): ?>
+                      <div class="small">Sec: <?= htmlspecialchars($r['sector_name']) ?></div>
                     <?php endif; ?>
                   </td>
                   <td>
-                    <!-- Color de la gravetat: vermell=alta, groc=mitjana, verd=baixa -->
-                    <span class="badge" style="background:<?= $o['gravetat']==='alta'?'#fee2e2':($o['gravetat']==='mitjana'?'#fef3c7':'#f0fdf4') ?>; color:<?= $o['gravetat']==='alta'?'#991b1b':($o['gravetat']==='mitjana'?'#92400e':'#166534') ?>">
-                      <?= ucfirst($o['gravetat']) ?>
+                    <span class="badge border-<?= $color ?>">
+                      <?= ucfirst($r['gravetat']) ?>
                     </span>
                   </td>
-                  <td style="text-align:right">
-                    <a href="plagues.php?edit_obs=<?= $o['id'] ?>" class="btn btn-small">✏️</a>
-                    <a href="plagues.php?delete_obs=<?= $o['id'] ?>" class="btn btn-small" onclick="return confirm('Eliminar?')">🗑️</a>
+                  <td style="text-align:right; white-space:nowrap;">
+                    <?php if (can_manage() || $r['creat'] == $_SESSION['user']['id']): ?>
+                    <a href="plagues.php?edit_obs=<?= $r['id'] ?>#obs" class="btn btn-small">✏️</a>
+                    <?php endif; ?>
+                    <?php if (can_manage()): ?>
+                    <a href="plagues.php?delete_obs=<?= $r['id'] ?>" class="btn btn-small btn-red" onclick="return confirm('Segur?')">🗑️</a>
+                    <?php endif; ?>
                   </td>
                 </tr>
               <?php endforeach; ?>

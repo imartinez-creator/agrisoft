@@ -47,18 +47,21 @@ function nav_active(string $file, string $current): string {
         <a class="nav-item<?= nav_active('plagues.php', $current) ?>" href="plagues.php">Plagues</a>
         <a class="nav-item<?= nav_active('analisi.php', $current) ?>" href="analisi.php">Anàlisi</a>
         <a class="nav-item<?= nav_active('collites.php', $current) ?>" href="collites.php">Collites</a>
-        <a class="nav-item<?= nav_active('lots.php', $current) ?>" href="lots.php">Traçabilitat (Lots)</a>
-        <a class="nav-item<?= nav_active('maquinaria.php', $current) ?>" href="maquinaria.php">Maquinària</a>
-        <a class="nav-item<?= nav_active('personal.php', $current) ?>" href="personal.php">Personal</a>
         <a class="nav-item<?= nav_active('registre_hores.php', $current) ?>" href="registre_hores.php">Registre d'hores</a>
         <a class="nav-item<?= nav_active('tasques.php', $current) ?>" href="tasques.php">Tasques</a>
-        <a class="nav-item<?= nav_active('alertes.php', $current) ?>" href="alertes.php">Alertes</a>
-        <a class="nav-item<?= nav_active('reporting.php', $current) ?>" href="reporting.php">Reporting</a>
+        
+        <!-- Enllaços d'administració i gestió (visibles només per admin i manager) -->
+        <?php if (can_manage()): ?>
+          <a class="nav-item<?= nav_active('lots.php', $current) ?>" href="lots.php">Traçabilitat (Lots)</a>
+          <a class="nav-item<?= nav_active('maquinaria.php', $current) ?>" href="maquinaria.php">Maquinària</a>
+          <a class="nav-item<?= nav_active('alertes.php', $current) ?>" href="alertes.php">Alertes</a>
+          <a class="nav-item<?= nav_active('reporting.php', $current) ?>" href="reporting.php">Reporting</a>
+        <?php endif; ?>
 
         <!-- Enllaç d'administració d'usuaris (només visible per admins) -->
         <?php if (($_SESSION['user']['role'] ?? '') === 'admin'): ?>
           <div class="nav-sep"></div>
-          <a class="nav-item<?= nav_active('usuaris.php', $current) ?>" href="usuaris.php">Usuaris</a>
+          <a class="nav-item<?= nav_active('usuaris.php', $current) ?>" href="usuaris.php">Treballadors i Accés</a>
         <?php endif; ?>
 
         <!-- Separador i botó de sortir -->

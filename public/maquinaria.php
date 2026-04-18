@@ -8,6 +8,7 @@ require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
 
 // Comprova que l'usuari hagi iniciat sessió
 require_login();
+require_role(['admin', 'manager']);
 
 // Funció auxiliar per escapar text HTML de forma segura
 function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }

@@ -406,12 +406,14 @@
   // Safety: enable save by default so users can fill just lat/lng
   if ($btnSave) $btnSave.disabled = false;
   
-  $form.addEventListener('submit', (e) => {
-    const hasPoly = ($polygon.value && $polygon.value.length >= 10);
-    const hasLatLng = ($lat && $lat.value && $lng && $lng.value);
-    if (!hasPoly && !hasLatLng) {
-      e.preventDefault();
-      alert('Dibuixa un polígon, O BÉ introdueix una Latitud / Longitud manual abans de guardar.');
-    }
-  });
+  if ($form) {
+    $form.addEventListener('submit', (e) => {
+      const hasPoly = ($polygon.value && $polygon.value.length >= 10);
+      const hasLatLng = ($lat && $lat.value && $lng && $lng.value);
+      if (!hasPoly && !hasLatLng) {
+        e.preventDefault();
+        alert('Dibuixa un polígon, O BÉ introdueix una Latitud / Longitud manual abans de guardar.');
+      }
+    });
+  }
 })();

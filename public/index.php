@@ -103,7 +103,7 @@ include __DIR__ . '/../app/views/layout/header.php';
     </div>
     <hr>
     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-      <a class="btn" href="personal.php">Veure personal</a>
+      <a class="btn" href="usuaris.php">Veure personal</a>
       <a class="btn" href="registre_hores.php">+ Registre hores</a>
     </div>
   </div>

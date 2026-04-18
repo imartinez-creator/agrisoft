@@ -11,6 +11,7 @@ require_login();
 
 /* ===== Eliminar un tractament ===== */
 if (isset($_GET['delete'])) {
+    if (!can_manage()) die("Error: No tens permisos per eliminar tractaments.");
     $id = (int)$_GET['delete'];
     db()->prepare("DELETE FROM tractaments WHERE id = ?")->execute([$id]);
     flash_set("Tractament eliminat correctament.", "ok");
@@ -22,6 +23,11 @@ if (isset($_GET['delete'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $id = (int)($_POST['id'] ?? 0);
+    
+    // Treballadors poden crear, però només admin/manager poden editar (d'altres o qualsevol)
+    if ($action === 'edit_tractament' && !can_manage()) {
+        die("Error: No tens permisos per editar tractaments existents.");
+    }
 
     // Recollim i netegem totes les dades del formulari
     $parcela_id   = !empty($_POST['parcela_id'])  ? (int)$_POST['parcela_id']  : null;
@@ -175,6 +181,9 @@ include __DIR__ . '/../app/views/layout/header.php';
   <!-- ========== COLUMNA ESQUERRA: FORMULARI ========== -->
   <div class="card span6">
     <h2><?= $edit_item ? "Editar tractament" : "Nou tractament" ?></h2>
+    <?php if ($edit_item && !can_manage()): ?>
+      <p class="small text-danger">No tens permisos per editar aquest tractament.</p>
+    <?php else: ?>
     <p class="small" style="margin-bottom:14px">Registra l'aplicació de productes fitosanitaris o fertilitzants.</p>
 
     <form method="post" id="formTractament">
@@ -355,6 +364,7 @@ include __DIR__ . '/../app/views/layout/header.php';
         <?php endif; ?>
       </div>
     </form>
+    <?php endif; ?>
   </div>
 
   <!-- ========== COLUMNA DRETA: LLISTA + FILTRES ========== -->
@@ -425,7 +435,9 @@ include __DIR__ . '/../app/views/layout/header.php';
               <th>Dosi</th>
               <th>Operari</th>
               <th>Mètode</th>
+              <?php if (can_manage()): ?>
               <th style="text-align:right">Accions</th>
+              <?php endif; ?>
             </tr>
           </thead>
           <tbody>
@@ -468,15 +480,19 @@ include __DIR__ . '/../app/views/layout/header.php';
                 <td class="small"><?= htmlspecialchars($t['operari_name'] ?? '-') ?></td>
                 <td class="small"><?= htmlspecialchars($t['metode'] ?? '-') ?></td>
                 <td style="text-align:right; white-space:nowrap">
+                  <?php if (can_manage() || $t['created_by'] == $_SESSION['user']['id']): ?>
                   <a href="tractaments.php?id=<?= $t['id'] ?>" class="btn btn-small" title="Editar">
                     Editar
                   </a>
+                  <?php endif; ?>
+                  <?php if (can_manage()): ?>
                   <a href="tractaments.php?delete=<?= $t['id'] ?>"
                      class="btn btn-small btn-red"
                      onclick="return confirm('Segur que vols eliminar aquest tractament?')"
                      title="Eliminar">
                     Eliminar
                   </a>
+                  <?php endif; ?>
                 </td>
               </tr>
             <?php endforeach; ?>

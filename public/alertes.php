@@ -3,8 +3,9 @@
 require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
 require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés (autenticació)
 
-// Comprova que l'usuari hagi iniciat sessió
+// Comprova que l'usuari hagi iniciat sessió i sigui admin o manager
 require_login();
+require_role(['admin', 'manager']);
 
 
 /* ===== Consulta 1: Productes amb stock baix ===== */

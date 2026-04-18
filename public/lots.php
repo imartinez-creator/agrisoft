@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/middleware/auth.php';
 require_once __DIR__ . '/../app/helpers/flash.php';
 
 require_login();
+require_role(['admin', 'manager']);
 $can_manage = can_manage();
 
 // Eliminar un lot (si tenim permisos)

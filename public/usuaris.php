@@ -1,89 +1,79 @@
 <?php
 /* 
- * Fitxer: usuaris.php
- * Descripció: Gestió d'usuaris i permisos del sistema.
- * Funcionalitat: Permet crear, editar i llistar els usuaris que tenen accés al sistema.
+ * Fitxer: usuaris.php (Treballadors i Accessos)
+ * Descripció: Gestió unificada d'usuaris del sistema i dades laborals.
  */
 
-require_once __DIR__ . '/../app/config/db.php';       // Connexió a la base de dades
-require_once __DIR__ . '/../app/middleware/auth.php';  // Control d'accés
-require_once __DIR__ . '/../app/helpers/flash.php';    // Missatges flash
+require_once __DIR__ . '/../app/config/db.php';
+require_once __DIR__ . '/../app/middleware/auth.php';
+require_once __DIR__ . '/../app/helpers/flash.php';
 
-// Només els administradors poden accedir a aquesta pàgina
+// Només administradors
 require_role(['admin']);
 
 $edit_id = isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
 
-/* ===== Processar les accions del formulari (POST) ===== */
+/* ===== Processar (POST) ===== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $action = $_POST['action'] ?? '';
 
-  // Crear usuari
-  if ($action === 'create') {
-    $name  = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $role  = $_POST['role'] ?? 'manager';
-    $pass  = $_POST['password'] ?? '';
+  $name       = trim($_POST['name'] ?? '');
+  $email      = trim($_POST['email'] ?? '');
+  $role       = $_POST['role'] ?? 'manager';
+  $pass       = $_POST['password'] ?? '';
+  $telefon    = trim($_POST['telefon'] ?? '');
+  $rol_feina  = trim($_POST['rol_de_treball'] ?? '');
+  $cost_hora  = $_POST['cost_hora'] !== '' ? (float)$_POST['cost_hora'] : null;
 
+  if ($action === 'create') {
     if ($name === '' || $email === '' || $pass === '') {
       flash_set('Nom, correu i contrasenya són obligatoris.', 'bad');
-      header('Location: usuaris.php');
-      exit;
+      header('Location: usuaris.php'); exit;
     }
-    if (!in_array($role, ['admin','manager','treballador'], true)) {
-      $role = 'manager';
-    }
+    if (!in_array($role, ['admin','manager','treballador'])) $role = 'manager';
 
-    // Comprovació d'existència de correu
     $st = db()->prepare('SELECT id FROM usuaris WHERE email = ? LIMIT 1');
     $st->execute([$email]);
     if ($st->fetch()) {
-      flash_set('Aquest correu ja està registrat.', 'bad');
-      header('Location: usuaris.php');
-      exit;
+      flash_set('Correu ja registrat.', 'bad');
+      header('Location: usuaris.php'); exit;
     }
 
+    // Insert to usuaris
     $hash = password_hash($pass, PASSWORD_DEFAULT);
     $st = db()->prepare('INSERT INTO usuaris (name,email,contrasenya_enciptada,role) VALUES (?,?,?,?)');
     $st->execute([$name,$email,$hash,$role]);
-    flash_set('Usuari creat correctament.', 'ok');
-    header('Location: usuaris.php');
-    exit;
+    $new_user_id = db()->lastInsertId();
+
+    // Insert to treballadors
+    $st_treballador = db()->prepare('INSERT INTO treballadors (nom_complet, telefon, rol_de_treball, cost_hora, user_id) VALUES (?, ?, ?, ?, ?)');
+    $st_treballador->execute([$name, $telefon, $rol_feina, $cost_hora, $new_user_id]);
+
+    flash_set('Treballador creat correctament.', 'ok');
+    header('Location: usuaris.php'); exit;
   }
 
-  // Actualitzar usuari
   if ($action === 'update') {
-    $id    = (int)($_POST['id'] ?? 0);
-    $name  = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $role  = $_POST['role'] ?? 'manager';
-    $pass  = $_POST['password'] ?? '';
-
+    $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0 || $name === '' || $email === '') {
       flash_set('Dades incompletes.', 'bad');
-      header('Location: usuaris.php');
-      exit;
+      header('Location: usuaris.php'); exit;
     }
-    if (!in_array($role, ['admin','manager','treballador'], true)) {
-      $role = 'manager';
-    }
+    if (!in_array($role, ['admin','manager','treballador'])) $role = 'manager';
 
-    // Evitar que l'admin es tregui el seu propi rol per error
     if ($id === (int)($_SESSION['user']['id'] ?? 0) && $role !== 'admin') {
-      flash_set('No pots baixar-te el rol a tu mateix. Crea un altre admin primer.', 'bad');
-      header('Location: usuaris.php?edit=' . $id);
-      exit;
+      flash_set('No pots baixar-te el rol a tu mateix.', 'bad');
+      header('Location: usuaris.php?edit=' . $id . '#form-box'); exit;
     }
 
-    // email únic
     $st = db()->prepare('SELECT id FROM usuaris WHERE email = ? AND id <> ? LIMIT 1');
     $st->execute([$email, $id]);
     if ($st->fetch()) {
       flash_set('Aquest correu ja està en ús.', 'bad');
-      header('Location: usuaris.php?edit=' . $id);
-      exit;
+      header('Location: usuaris.php?edit=' . $id . '#form-box'); exit;
     }
 
+    // Update usuaris
     if ($pass !== '') {
       $hash = password_hash($pass, PASSWORD_DEFAULT);
       $st = db()->prepare('UPDATE usuaris SET name=?, email=?, role=?, contrasenya_enciptada=? WHERE id=?');
@@ -93,82 +83,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $st->execute([$name,$email,$role,$id]);
     }
 
-    flash_set('Usuari actualitzat.', 'ok');
-    header('Location: usuaris.php');
-    exit;
+    // Update treballadors
+    $chk = db()->prepare("SELECT id FROM treballadors WHERE user_id = ?");
+    $chk->execute([$id]);
+    if ($chk->fetch()) {
+        $st_upd = db()->prepare("UPDATE treballadors SET nom_complet=?, telefon=?, rol_de_treball=?, cost_hora=? WHERE user_id=?");
+        $st_upd->execute([$name, $telefon, $rol_feina, $cost_hora, $id]);
+    } else {
+        $st_ins = db()->prepare("INSERT INTO treballadors (nom_complet, telefon, rol_de_treball, cost_hora, user_id) VALUES (?, ?, ?, ?, ?)");
+        $st_ins->execute([$name, $telefon, $rol_feina, $cost_hora, $id]);
+    }
+
+    flash_set('Treballador actualitzat.', 'ok');
+    header('Location: usuaris.php'); exit;
   }
 
-  // Eliminar usuari
   if ($action === 'delete') {
     $id = (int)($_POST['id'] ?? 0);
-    if ($id <= 0) {
-      header('Location: usuaris.php');
-      exit;
-    }
     if ($id === (int)($_SESSION['user']['id'] ?? 0)) {
-      flash_set('No pots eliminar el teu propi usuari.', 'bad');
-      header('Location: usuaris.php');
-      exit;
+        flash_set('No pots eliminar el teu compte actiu.', 'bad');
+        header('Location: usuaris.php'); exit;
     }
-
-    $st = db()->prepare('DELETE FROM usuaris WHERE id=?');
-    $st->execute([$id]);
-    flash_set('Usuari eliminat.', 'ok');
-    header('Location: usuaris.php');
-    exit;
+    
+    if ($id > 0) {
+        try {
+            db()->prepare('DELETE FROM treballadors WHERE user_id=?')->execute([$id]);
+            db()->prepare('DELETE FROM usuaris WHERE id=?')->execute([$id]);
+            flash_set('Usuari eliminat.', 'ok');
+        } catch (Exception $e) {
+            flash_set("No s'ha pogut eliminar l'usuari perquè té hores o tasques vinculades al sistema.", "bad");
+        }
+    }
+    header('Location: usuaris.php'); exit;
   }
 }
 
 // Dades per editar
 $edit_user = null;
 if ($edit_id > 0) {
-  $st = db()->prepare('SELECT id,name,email,role,creat FROM usuaris WHERE id=?');
+  $st = db()->prepare('
+    SELECT u.id, u.name, u.email, u.role, u.creat, t.telefon, t.rol_de_treball, t.cost_hora 
+    FROM usuaris u 
+    LEFT JOIN treballadors t ON u.id = t.user_id 
+    WHERE u.id=?
+  ');
   $st->execute([$edit_id]);
   $edit_user = $st->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
-$users = db()->query('SELECT id,name,email,role,creat FROM usuaris ORDER BY creat DESC')->fetchAll(PDO::FETCH_ASSOC);
+$users = db()->query('
+  SELECT u.id, u.name, u.email, u.role, u.creat, t.telefon, t.rol_de_treball, t.cost_hora 
+  FROM usuaris u 
+  LEFT JOIN treballadors t ON u.id = t.user_id 
+  ORDER BY u.creat DESC
+')->fetchAll(PDO::FETCH_ASSOC);
 
-/* ===== Títol de la pàgina i capçalera HTML ===== */
+/* ===== Títol ===== */
+$titol = "Treballadors · AGRISOFT";
 include __DIR__ . '/../app/views/layout/header.php';
 ?>
 
 <div class="card">
-  <h1>Usuaris</h1>
-  <p style="margin-top:6px;color:#666">Gestió de comptes i rols (admin/manager/worker).</p>
+  <h1>Treballadors i Accessos</h1>
+  <p style="margin-top:6px;color:#666">Gestió integral del personal: credencials i fitxa laboral.</p>
 
   <div style="display:grid;grid-template-columns: 420px 1fr;gap:18px;align-items:start;">
-    <div class="card" style="background:#fff;">
-      <h2 style="margin-top:0;"><?= $edit_user ? 'Editar usuari' : 'Crear usuari' ?></h2>
+    <div class="card" style="background:#fff;" id="form-box">
+      <h2 style="margin-top:0;"><?= $edit_user ? 'Editar persona' : 'Nou treballador' ?></h2>
 
       <form method="post">
         <input type="hidden" name="action" value="<?= $edit_user ? 'update' : 'create' ?>">
         <?php if ($edit_user): ?>
           <input type="hidden" name="id" value="<?= (int)$edit_user['id'] ?>">
         <?php endif; ?>
+        
+        <div style="background:#f4f7fa; padding:10px; border-radius:6px; margin-bottom:15px">
+            <h3 style="margin:0 0 10px 0; font-size:14px; border-bottom:1px solid #ddd; padding-bottom:5px">Dades d'Accés</h3>
+            <label>Nom</label>
+            <input name="name" required style="width:100%" value="<?= htmlspecialchars($edit_user['name'] ?? '') ?>">
 
-        <label>Nom</label>
-        <input name="name" required style="width:100%" value="<?= htmlspecialchars($edit_user['name'] ?? '') ?>">
+            <label>Correu electrònic</label>
+            <input name="email" type="email" required style="width:100%" value="<?= htmlspecialchars($edit_user['email'] ?? '') ?>">
 
-        <label>Correu</label>
-        <input name="email" type="email" required style="width:100%" value="<?= htmlspecialchars($edit_user['email'] ?? '') ?>">
+            <label>Rol al Sistema</label>
+            <select name="role" style="width:100%">
+              <?php
+                $r = $edit_user['role'] ?? 'treballador';
+                $roles = ['admin' => 'Admin (Tot)', 'manager' => 'Manager (Gestió)', 'treballador' => 'Treballador (Base)'];
+                foreach ($roles as $k=>$lbl):
+              ?>
+                <option value="<?= $k ?>" <?= $r === $k ? 'selected' : '' ?>><?= $lbl ?></option>
+              <?php endforeach; ?>
+            </select>
 
-        <label>Rol</label>
-        <select name="role" style="width:100%">
-          <?php
-            $r = $edit_user['role'] ?? 'manager';
-            $roles = ['admin' => 'admin', 'manager' => 'manager', 'treballador' => 'treballador'];
-            foreach ($roles as $k=>$lbl):
-          ?>
-            <option value="<?= $k ?>" <?= $r === $k ? 'selected' : '' ?>><?= $lbl ?></option>
-          <?php endforeach; ?>
-        </select>
+            <label><?= $edit_user ? 'Nova contrasenya (Opcional)' : 'Contrasenya' ?></label>
+            <input name="password" type="password" <?= $edit_user ? '' : 'required' ?> style="width:100%" placeholder="<?= $edit_user ? 'Si en poses una, la canviaràs' : '' ?>">
+        </div>
 
-        <label><?= $edit_user ? 'Nova contrasenya (opcional)' : 'Contrasenya' ?></label>
-        <input name="password" type="password" <?= $edit_user ? '' : 'required' ?> style="width:100%" placeholder="<?= $edit_user ? 'Deixa en blanc per no canviar-la' : '' ?>">
+        <div style="background:#fefefe; border: 1px solid #eee; padding:10px; border-radius:6px; margin-bottom:10px">
+            <h3 style="margin:0 0 10px 0; font-size:14px; border-bottom:1px solid #ddd; padding-bottom:5px">Fitxa Laboral</h3>
+            
+            <label>Telèfon</label>
+            <input name="telefon" style="width:100%" value="<?= htmlspecialchars($edit_user['telefon'] ?? '') ?>" placeholder="Opcional">
+
+            <label>Ocupació (Rol de feina)</label>
+            <input name="rol_de_treball" style="width:100%" value="<?= htmlspecialchars($edit_user['rol_de_treball'] ?? '') ?>" placeholder="Ex: Tractorista, Podador...">
+
+            <label>Cost / Hora (€)</label>
+            <input name="cost_hora" type="number" step="0.01" style="width:100%" value="<?= htmlspecialchars($edit_user['cost_hora'] ?? '') ?>">
+        </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-          <button type="submit" class="btn btn-login"><?= $edit_user ? 'Desar canvis' : 'Crear usuari' ?></button>
+          <button type="submit" class="btn btn-login"><?= $edit_user ? 'Desar canvis' : 'Donar d\'alta' ?></button>
           <?php if ($edit_user): ?>
             <a class="btn secondary" href="usuaris.php">Cancel·lar</a>
           <?php endif; ?>
@@ -177,33 +203,37 @@ include __DIR__ . '/../app/views/layout/header.php';
     </div>
 
     <div class="card" style="background:#fff;">
-      <h2 style="margin-top:0;">Llistat</h2>
+      <h2 style="margin-top:0;">Llistat de la Plantilla</h2>
       <div style="overflow:auto;">
         <table class="table" style="width:100%;min-width:720px;">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nom</th>
-              <th>Correu</th>
-              <th>Rol</th>
-              <th>Creat</th>
-              <th>Accions</th>
+              <th>C/T</th>
+              <th>Permisos</th>
+              <th>Rol / €/h</th>
+              <th style="min-width: 140px;">Accions</th>
             </tr>
           </thead>
           <tbody>
             <?php foreach ($users as $u): ?>
-              <tr>
-                <td><?= (int)$u['id'] ?></td>
-                <td><?= htmlspecialchars($u['name']) ?></td>
-                <td><?= htmlspecialchars($u['email']) ?></td>
-                <td><span class="badge"><?= htmlspecialchars($u['role']) ?></span></td>
-                <td><?= htmlspecialchars($u['creat']) ?></td>
+              <tr style="<?= ($edit_id == $u['id']) ? 'background:#f0f7ff' : '' ?>">
+                <td><strong><?= htmlspecialchars($u['name']) ?></strong></td>
+                <td>
+                    <?= htmlspecialchars($u['email']) ?><br>
+                    <small style="color:#666"><?= htmlspecialchars($u['telefon'] ?? '-') ?></small>
+                </td>
+                <td><span class="badge border-<?= $u['role']=='admin'?'red':($u['role']=='manager'?'yellow':'green') ?>"><?= htmlspecialchars($u['role']) ?></span></td>
+                <td>
+                    <?= htmlspecialchars($u['rol_de_treball'] ?? '-') ?><br>
+                    <small style="color:#666"><?= isset($u['cost_hora']) ? $u['cost_hora'].' €/h' : '-' ?></small>
+                </td>
                 <td style="white-space:nowrap;">
-                  <a class="btn secondary" href="usuaris.php?edit=<?= (int)$u['id'] ?>">Editar</a>
-                  <form method="post" style="display:inline" onsubmit="return confirm('Eliminar aquest usuari?');">
+                  <a class="btn secondary btn-small" href="usuaris.php?edit=<?= (int)$u['id'] ?>#form-box">Editar</a>
+                  <form method="post" style="display:inline" onsubmit="return confirm('ATENCIÓ: Esborrarà l\'usuari i el seu registre de personal. Segur?');">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
-                    <button type="submit" class="btn" style="background:#b01919;color:#fff;">Eliminar</button>
+                    <button type="submit" class="btn btn-red btn-small">Eliminar</button>
                   </form>
                 </td>
               </tr>

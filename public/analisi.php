@@ -11,6 +11,7 @@ require_login();
 /* ===== Eliminar una anàlisi ===== */
 // Si rebem el paràmetre 'delete' per GET, esborrem l'anàlisi de la BD
 if (isset($_GET['delete'])) {
+    if (!can_manage()) die("Error: No tens permisos per eliminar anàlisis.");
     $id = (int)$_GET['delete'];
     db()->prepare("DELETE FROM analisis WHERE id = ?")->execute([$id]);
     flash_set("Anàlisi eliminat.", "ok");
@@ -39,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($_POST['action'], ['create
         $st->execute([$analitzat, $parcela_id, $sector_id, $tipus_analisi, $resum, $_SESSION['user']['id']]);
         flash_set("Anàlisi registrat.", "ok");
     } elseif ($action === 'update_analisi') {
+        if (!can_manage()) die("Error: No tens permisos per editar anàlisis.");
         // Actualitzem una anàlisi existent
         $st = db()->prepare("
             UPDATE analisis SET analitzat=?, parcela_id=?, sector_id=?, tipus_anàlisi=?, resum=?
@@ -105,6 +107,9 @@ include __DIR__ . '/../app/views/layout/header.php';
         <h2><?= $edit_item ? 'Editar anàlisi' : 'Nou anàlisi' ?></h2>
         <p class="small">Registra resultats de laboratori de sòl o fulla.</p>
 
+        <?php if ($edit_item && !can_manage()): ?>
+            <p class="small text-danger">No tens permisos per editar arxius d'anàlisi. Crea'n un de nou.</p>
+        <?php else: ?>
         <form method="post">
           <input type="hidden" name="action" value="<?= $edit_item ? 'update_analisi' : 'create_analisi' ?>">
           <?php if ($edit_item): ?>
@@ -151,6 +156,7 @@ include __DIR__ . '/../app/views/layout/header.php';
             <?php endif; ?>
           </div>
         </form>
+        <?php endif; ?>
       </div>
 
       <!-- Taula amb l'historial d'anàlisis -->
@@ -184,10 +190,12 @@ include __DIR__ . '/../app/views/layout/header.php';
                     <?php endif; ?>
                   </td>
                   <td style="text-align:right">
+                    <?php if (can_manage()): ?>
                     <!-- Botó editar -->
                     <a href="analisi.php?edit=<?= $ar['id'] ?>" class="btn btn-small">✏️</a>
                     <!-- Botó eliminar -->
-                    <a href="analisi.php?delete=<?= $ar['id'] ?>" class="btn btn-small" onclick="return confirm('Eliminar?')">🗑️</a>
+                    <a href="analisi.php?delete=<?= $ar['id'] ?>" class="btn btn-small btn-red" onclick="return confirm('Eliminar?')">🗑️</a>
+                    <?php endif; ?>
                   </td>
                 </tr>
               <?php endforeach; ?>

@@ -398,7 +398,8 @@ CREATE TABLE `treballadors` (
   `nom_complet` varchar(160) NOT NULL,
   `telefon` varchar(40) DEFAULT NULL,
   `rol_de_treball` varchar(80) DEFAULT NULL,
-  `cost_hora` decimal(10, 2) DEFAULT NULL
+  `cost_hora` decimal(10, 2) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 -- --------------------------------------------------------
 --
@@ -548,7 +549,8 @@ ADD PRIMARY KEY (`id`),
   ADD KEY `operari_id` (`operari_id`),
   ADD KEY `created_by` (`created_by`);
 ALTER TABLE `treballadors`
-ADD PRIMARY KEY (`id`);
+ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 ALTER TABLE `usuaris`
 ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
@@ -704,6 +706,8 @@ SET NULL,
 SET NULL;
 ALTER TABLE `varietats`
 ADD CONSTRAINT `varietats_ibfk_1` FOREIGN KEY (`cultiu_id`) REFERENCES `cultius` (`id`) ON DELETE CASCADE;
+ALTER TABLE `treballadors`
+ADD CONSTRAINT `fk_treballadors_usuaris` FOREIGN KEY (`user_id`) REFERENCES `usuaris` (`id`) ON DELETE SET NULL;
 SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */

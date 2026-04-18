@@ -310,6 +310,7 @@ include __DIR__ . '/../app/views/layout/header.php';
     <!-- Contenidor del mapa Leaflet -->
     <div id="map" class="parcelles-map"></div>
 
+    <?php if ($can_manage): ?>
     <!-- Formulari per crear/editar parcel·les -->
     <form method="post" id="parcelaForm" class="parcela-form">
       <!-- Camps ocults amb les dades del polígon -->
@@ -322,7 +323,7 @@ include __DIR__ . '/../app/views/layout/header.php';
         <!-- Camp del nom -->
         <div class="parcela-field parcela-field--name">
           <label for="name">Nom</label>
-          <input name="name" id="name" required placeholder="Ex: Parcela Nord" <?= $can_manage ? '' : 'disabled' ?>>
+          <input name="name" id="name" required placeholder="Ex: Parcela Nord">
           <div class="parcela-mode" id="form_mode">Mode: crear</div>
         </div>
 
@@ -335,32 +336,28 @@ include __DIR__ . '/../app/views/layout/header.php';
         <!-- Coordenades manuals -->
         <div class="parcela-field">
           <label for="lat">Latitud</label>
-          <input name="lat" id="lat" placeholder="41.38506" <?= $can_manage ? '' : 'disabled' ?>>
+          <input name="lat" id="lat" placeholder="41.38506">
         </div>
         <div class="parcela-field">
           <label for="lng">Longitud</label>
-          <input name="lng" id="lng" placeholder="2.17340" <?= $can_manage ? '' : 'disabled' ?>>
+          <input name="lng" id="lng" placeholder="2.17340">
         </div>
 
         <!-- Camp de descripció -->
         <div class="parcela-field parcela-field--notes" style="grid-column: span 12;">
           <label for="notes">Descripció</label>
-          <textarea name="notes" id="notes" placeholder="Descripció / notes..." <?= $can_manage ? '' : 'disabled' ?>></textarea>
+          <textarea name="notes" id="notes" placeholder="Descripció / notes..."></textarea>
         </div>
       </div>
 
-      <?php if ($can_manage): ?>
-        <!-- Botons d'acció (només si l'usuari té permisos) -->
-        <div class="parcela-form-actions">
-          <button class="btn" id="btnSave" type="submit" disabled>Guardar</button>
-          <button class="btn btn-secondary" id="btnCancel" type="button" style="display:none;">↩️ Cancel·lar</button>
-          <button class="btn btn-secondary" id="btnClear" type="button">Esborrar dibuix</button>
-        </div>
-      <?php else: ?>
-        <!-- Missatge si l'usuari només pot veure -->
-        <p class="small" style="margin-top:10px;">Mode lectura: no tens permisos per crear/editar/eliminar parcel·les.</p>
-      <?php endif; ?>
+      <!-- Botons d'acció (només si l'usuari té permisos) -->
+      <div class="parcela-form-actions">
+        <button class="btn" id="btnSave" type="submit" disabled>Guardar</button>
+        <button class="btn btn-secondary" id="btnCancel" type="button" style="display:none;">↩️ Cancel·lar</button>
+        <button class="btn btn-secondary" id="btnClear" type="button">Esborrar dibuix</button>
+      </div>
     </form>
+    <?php endif; ?>
   </div>
 
   <!-- ===== Taula amb la llista de totes les parcel·les ===== -->

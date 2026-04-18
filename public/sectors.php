@@ -178,11 +178,11 @@ include __DIR__ . '/../app/views/layout/header.php';
 
 <div class="grid">
 
+  <?php if ($can_manage): ?>
   <div class="card span6">
     <h2><?= $editing ? 'Editar sector' : 'Nou sector' ?></h2>
     <p class="small">Crea sectors de cultiu dins de cada parcel·la (marc, plantació, arbres, previsió…).</p>
 
-    <?php if ($can_manage): ?>
     <form method="post">
       <input type="hidden" name="action" value="<?= $editing ? 'update_sector' : 'create_sector' ?>">
       <?php if ($editing): ?>
@@ -266,12 +266,10 @@ include __DIR__ . '/../app/views/layout/header.php';
         <?php endif; ?>
       </div>
     </form>
-    <?php else: ?>
-      <p class="small">Mode lectura: no tens permisos per crear/editar/eliminar sectors.</p>
-    <?php endif; ?>
   </div>
+  <?php endif; ?>
 
-  <div class="card span6">
+  <div class="card <?= $can_manage ? 'span6' : 'span12' ?>">
     <h2>Sectors</h2>
     <?php if (!$sectors): ?>
       <p class="small">Encara no hi ha sectors creats.</p>
