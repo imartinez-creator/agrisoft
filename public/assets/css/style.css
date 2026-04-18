@@ -382,24 +382,89 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* ======================================================
-   RESPONSIVE
+   RESPONSIVE (MOBILE FIRST MILLORAT)
    ====================================================== */
 
-@media(max-width:900px){
-  .layout{flex-direction:column}
+/* Ocultem el botó hamburguesa en Desktop */
+.menu-toggle { display: none; }
 
-  .sidebar{
-    width:100%;
-    height:auto;
-    position:relative;
-    border-right:none;
-    border-bottom:1px solid rgba(0,0,0,.10);
+@media(max-width: 900px) {
+  /* 1. LAYOUT I NAVBAR */
+  .layout { flex-direction: column; }
+  
+  .topbar {
+    padding: 12px 14px;
+    z-index: 100;
   }
 
-  .nav-vertical{
-    flex-direction:row;
-    flex-wrap:wrap;
+  .topbar-left {
+    display: flex;
+    align-items: center;
   }
 
-  .nav-item{width:auto}
+  /* Botó Menú Mòbil */
+  .menu-toggle {
+    display: inline-flex;
+    background: rgba(22, 163, 74, 0.12); /* Verd suave com els teus botons */
+    color: #065f46;
+    border: 1px solid rgba(22, 163, 74, 0.4);
+    border-radius: 8px;
+    font-size: 1.4rem;
+    padding: 6px 10px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+
+  /* Menú Sidebar com a panell lateral off-canvas */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Ocult for de pantalla */
+    width: 260px;
+    height: 100vh;
+    z-index: 999;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 25px rgba(0,0,0,0.15);
+    border-right: none;
+    padding-top: 20px;
+  }
+
+  .sidebar.open {
+    left: 0; /* Apareix el menú quan s'afegeix la classe via JS */
+  }
+
+  /* Estils dels enllaços pel mòbil */
+  .nav-vertical { flex-direction: column; }
+  .nav-item { padding: 12px 16px; margin-bottom: 4px; font-size: 1.05rem; }
+
+  /* 2. GRID I CARD AL 100% */
+  .wrap { padding: 12px; }
+  .grid { gap: 12px; }
+  .span1, .span2, .span3, .span4, .span5, .span6, .span7, .span8, .span9, .span10, .span11 {
+    grid-column: span 12 !important; 
+  }
+
+  /* 3. TAULES RESPONSIVE */
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap; 
+    -webkit-overflow-scrolling: touch; /* Scroll suau iOS */
+    border: 0;
+  }
+
+  td, th { padding: 12px; }
+
+  /* 4. FORMULARIS TOUCH-FRIENDLY */
+  input, select, textarea, .btn {
+    min-height: 48px; /* Target mínim exigit per Google UI UX */
+    font-size: 16px !important; /* Prevé que iOS faci zoom incòmode */
+  }
+
+  .login-actions .btn {
+    min-height: 48px;
+  }
 }

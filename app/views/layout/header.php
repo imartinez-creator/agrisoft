@@ -73,8 +73,11 @@ function nav_active(string $file, string $current): string {
 
     <!-- Barra superior amb el nom de l'app i les dades de l'usuari -->
     <header class="topbar">
-      <div class="topbar-left">
-        <a class="topbar-brand" href="index.php">
+      <div class="topbar-left" style="display:flex; align-items:center;">
+        <?php if (!empty($_SESSION['user'])): ?>
+           <button class="menu-toggle" id="menuToggle" aria-label="Obrir/Tancar menú">☰</button>
+        <?php endif; ?>
+        <a class="topbar-brand" href="index.php" <?php if(!empty($_SESSION['user'])) echo 'style="margin-left: 10px;"'; ?>>
           <span class="dot"></span>
           <span><?= htmlspecialchars(APP_NAME) ?></span>
         </a>
